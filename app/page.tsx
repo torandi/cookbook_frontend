@@ -19,5 +19,4 @@ export default function Home() {
         <Button>Knapp</Button>
       </Box>
     </Container>
-  );
-}
+    );

@@ -1,5 +1,5 @@
 import '@/app/ui/global.css'
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from '@mui/material/styles';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,12 +7,16 @@ import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 
 import { roboto } from '@/app/ui/fonts';
 import { theme } from '@/app/ui/theme';
-
+import TopMenu from '@/app/ui/topmenu';
 
 export const metadata: Metadata = {
   title: "Kokbok",
   description: "Receptdatabas",
-  viewport: "width=device-width, initial-scale=1.0",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: "1.0",
 };
 
 export default function RootLayout(
@@ -25,6 +29,7 @@ export default function RootLayout(
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
+            <TopMenu/>
             {children}
           </ThemeProvider>
         </AppRouterCacheProvider>
