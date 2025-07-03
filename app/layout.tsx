@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from '@mui/material/styles';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 
 import { roboto } from '@/app/ui/fonts';
@@ -30,7 +31,9 @@ export default function RootLayout(
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <TopMenu/>
-            {children}
+            <Container maxWidth="lg">
+              {children}
+            </Container>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
