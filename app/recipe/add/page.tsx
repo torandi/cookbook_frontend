@@ -3,11 +3,13 @@ import { useIngredient, searchIngredient, useIngredients } from '@/app/backend/i
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper'; // maybe instead of card?
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -34,38 +36,33 @@ function Ingredients() {
 	)
 }
 
-const FlexCard = ({ children, sx, className } : { children : React.ReactNode, sx?: any, className?: string }) => (
-	<Card sx={{
-		py: 2,
-		px: 2,
-		my: 2,
-		...sx
-		}}
-		className={`flex-1 ${className ?? ""}`}
-	>
-		{children}
+const FullCard = (props) => (
+	<Card {...props}>
+		<CardContent>
+			{props.children}
+		</CardContent>
 	</Card>
 )
 
 export default function Page() {
 	return (
-		<FormControl className="flex flex-col" variant="outlined">
-			<FlexCard className="w-full">
-				<Typography variant="h4" component="h1" sx={{mb: 2}}>Nytt recept</Typography>
-				<TextField id='recipe-name' label="Titel" className="w-1/2"/>
-				<TextField id='recipe-portions' label="Portioner" defaultValue="4" sx={{mx: 2}}/>
-			</FlexCard>
-			<Box className="flex-1 flex w-full flex-row">
-				<FlexCard className="w-1/2 flex-1" sx={{mr: 2}}>
-					<Typography variant="h5" component="h1" sx={{mb: 2}}>Ingredienser</Typography>
-					<Stack>
-					</Stack>
-				</FlexCard>
+		<FormControl variant="outlined" className="w-full" sx={{my: 4}}>
+			<Stack direction="column" spacing={2}>
+				<FullCard className="w-full">
+					<Typography variant="h4" component="h1" sx={{mb: 2}}>Nytt recept</Typography>
+					<TextField id='recipe-name' label="Titel" className="w-1/2"/>
+					<TextField id='recipe-portions' label="Portioner" defaultValue="4" sx={{mx: 2}}/>
+				</FullCard>
+				<Stack direction="row" spacing={2}>
+					<FullCard className="w-1/2">
+							<Typography variant="h5" component="h1" sx={{mb: 2}}>Ingredienser</Typography>
+					</FullCard>
 
-				<FlexCard className="w-1/2 flex-1">
-					<Typography variant="h5" component="h1" sx={{mb: 2}}>Instruktioner</Typography>
-				</FlexCard>
-			</Box>
+					<FullCard className="w-1/2">
+						<Typography variant="h5" component="h1" sx={{mb: 2}}>Instruktioner</Typography>
+					</FullCard>
+				</Stack>
+			</Stack>
 		</FormControl>
 	)
 }
