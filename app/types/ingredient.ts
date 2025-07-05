@@ -1,13 +1,26 @@
 import { DbObject } from '@/app/types/dbobject';
 
 type UnitType = "count" | "volume" | "weight";
-type VolumeType = "ml" | "cl" | "dl" | "l" | "krm" | "tsk" | "msk"; // todo: cups etc
+const volumeTypes = ["ml", "cl", "dl", "liter", "krm", "tsk", "msk"] as const; // todo: cups etc
+type VolumeType = typeof volumeTypes[number];
+
+const unitOptions = {
+	"volume": "Volym",
+	"count": "Styck",
+	"weight": "Vikt"
+}
 
 interface IngredientType extends DbObject {
 	name : string;
 	unit : UnitType;
 	defaultVolumeType? : VolumeType;
 	weightPerUnit?: number; // weight in grams per unit (piece or ml)
+}
+
+interface IngredientEntry extends DbObject {
+	ingredientType: IngredientType,
+	quantity: number,
+	volumeUnit?: VolumeType
 }
 
 function volumeInMl(volume : number, volumeType : VolumeType) : number | undefined {
@@ -46,8 +59,7 @@ function toWeight(value : number, ingredient : IngredientType, volumeType? : Vol
 			return undefined;
 
 		return ml * ingredient.weightPerUnit;
-	}
-	else if(ingredient.unit == "count") {
+	} else if(ingredient.unit == "count") {
 		return value * ingredient.weightPerUnit;
 	}
 
@@ -56,4 +68,4 @@ function toWeight(value : number, ingredient : IngredientType, volumeType? : Vol
 	return undefined;
 }
 
-export { IngredientType, UnitType, VolumeType, volumeInMl, toWeight };
+export { IngredientType, IngredientEntry, unitOptions, VolumeType, volumeTypes, UnitOptions, volumeInMl, toWeight };

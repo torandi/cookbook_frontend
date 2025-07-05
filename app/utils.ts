@@ -3,4 +3,9 @@ function containsIgnoreCase(src : string, search: string) : boolean {
 	return src.toLowerCase().search(search.toLowerCase()) != -1;
 }
 
-export { containsIgnoreCase };
+// generates range [min, max)
+function range(min : number, max : number) : number[] {
+	return Array.from(new Array(max - min).keys()).map( num => num + min );
+}
+
+export { containsIgnoreCase, range };

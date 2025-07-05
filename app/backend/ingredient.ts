@@ -85,7 +85,7 @@ function useIngredients() {
 
 async function addIngredient(ingredient : IngredientType) {
 	// todo: post to backend
-	ingredient.id = ingredients[-1].id + 1;
+	ingredient.id = ingredients.at(-1).id + 1;
 	ingredients.push(ingredient);
 	return ingredient;
 }
