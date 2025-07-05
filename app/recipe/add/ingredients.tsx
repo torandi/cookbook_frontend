@@ -5,8 +5,6 @@ import { useState, FormEvent, ChangeEvent } from 'react';
 import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes } from '@/app/types/ingredient'
 import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
 
-import { range } from '@/app/utils'
-
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -46,7 +44,7 @@ const defaultIngredientEntry = {
 // If this becomes to heavy on mobile devices, we could move the search to the backend
 function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 	id: number,
-	ingredientsState: IngredientsState,
+	ingredientsState: State,
 	setIngredientsState: Function
 }) {
 	const { ingredients, error, isLoading } = useIngredients();
@@ -93,7 +91,7 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 	return (
 		<>
 			<FormControl>
-				<Box className="w-full" className="flex flex-row">
+				<Box className="w-full flex flex-row">
 					<Autocomplete
 						id = {`ingredient-type-${id}`}
 						className = "flex-3"
@@ -236,6 +234,7 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 					<IconButton
 						className="flex-none self-center justify-self-end"
 						onClick={handleDelete}
+						tabIndex="-1"
 					>
 						<DeleteIcon/>
 					</IconButton>
@@ -398,13 +397,13 @@ function IngredientCreateDialog({
 	)
 }
 
-interface IngredientsState {
+interface State {
 	nextId: number,
 	activeIds: number[]
 }
 
 const IngredientsInput = () => {
-	const [ingredientsState, setIngredientsState] = useState<IngredientsState>({
+	const [ingredientsState, setIngredientsState] = useState<State>({
 		nextId: 1,
 		activeIds: [0]
 	});

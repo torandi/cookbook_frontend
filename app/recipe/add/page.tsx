@@ -1,4 +1,5 @@
 import { IngredientsInput } from '@/app/recipe/add/ingredients';
+import { InstructionsInput } from '@/app/recipe/add/instructions';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -47,6 +48,7 @@ export default function Page() {
 
 					<FullCard className="w-1/2">
 						<Typography variant="h5" component="h1" sx={{mb: 2}}>Instruktioner</Typography>
+						<InstructionsInput/>
 					</FullCard>
 				</Stack>
 			</Stack>
