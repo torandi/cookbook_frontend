@@ -31,7 +31,7 @@ export default function RootLayout(
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <TopMenu/>
-            <Container maxWidth="lg">
+            <Container maxWidth="xl">
               {children}
             </Container>
           </ThemeProvider>

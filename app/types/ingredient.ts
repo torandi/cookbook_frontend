@@ -1,9 +1,9 @@
 import { DbObject } from '@/app/types/dbobject';
 
 type UnitType = "count" | "volume" | "weight";
-type VolumeType = "ml" | "cl" | "dl" | "l" | "krm" | "tsk" | "msk";
+type VolumeType = "ml" | "cl" | "dl" | "l" | "krm" | "tsk" | "msk"; // todo: cups etc
 
-interface Ingredient extends DbObject {
+interface IngredientType extends DbObject {
 	name : string;
 	unit : UnitType;
 	defaultVolumeType? : VolumeType;
@@ -30,7 +30,7 @@ function volumeInMl(volume : number, volumeType : VolumeType) : number | undefin
 	return undefined;
 }
 
-function toWeight(value : number, ingredient : Ingredient, volumeType? : VolumeType) : number | undefined {
+function toWeight(value : number, ingredient : IngredientType, volumeType? : VolumeType) : number | undefined {
 	if (ingredient.unit == "weight")
 		return value;
 
@@ -56,4 +56,4 @@ function toWeight(value : number, ingredient : Ingredient, volumeType? : VolumeT
 	return undefined;
 }
 
-export { Ingredient, UnitType, VolumeType, volumeInMl, toWeight };
+export { IngredientType, UnitType, VolumeType, volumeInMl, toWeight };

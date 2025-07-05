@@ -1,8 +1,8 @@
-import { Ingredient } from '@/app/types/ingredient';
+import { IngredientType } from '@/app/types/ingredient';
 import { containsIgnoreCase } from '@/app/utils';
 
 // temp hack to have some data to test with
-const ingredients : Ingredient[] = [{
+const ingredients : IngredientType[] = [{
 	id: 0,
 	name: "Mjöl",
 	unit: "volume",
@@ -83,6 +83,13 @@ function useIngredients() {
 	}
 }
 
+async function addIngredient(ingredient : IngredientType) {
+	// todo: post to backend
+	ingredient.id = ingredients[-1].id + 1;
+	ingredients.push(ingredient);
+	return ingredient;
+}
+
 function searchIngredient(name : string) {
 	return {
 		ingredients: ingredients.filter(i => containsIgnoreCase(i.name, name)),
@@ -91,4 +98,4 @@ function searchIngredient(name : string) {
 	}
 }
 
-export { useIngredient, useIngredients, searchIngredient }
+export { useIngredient, useIngredients, searchIngredient, addIngredient }
