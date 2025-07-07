@@ -100,12 +100,11 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 						options={ ingredients }
 						getOptionLabel = { (option : IngredientType) => {
 							// Dynamically created option
-							if (option.inputValue)
-								{
-									return option.title;
-								}
+							if (option.inputValue) {
+								return option.title;
+							}
 
-								return option.name
+							return option.name
 						}}
 						isOptionEqualToValue = { (option, value) => option.name === value.name }
 						value={value?.ingredientType ?? null}
@@ -118,15 +117,13 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 									defaultVolumeType: '',
 									weightPerUnit: ''
 								})
+							} else {
+								setValue({
+									...defaultIngredientEntry,
+									ingredientType: newValue,
+									volumeUnit: newValue?.defaultVolumeType ?? "ml"
+								});
 							}
-							else
-								{
-									setValue({
-										...defaultIngredientEntry,
-										ingredientType: newValue,
-										volumeUnit: newValue.defaultVolumeType
-									});
-								}
 						}}
 						autoSelect
 						autoHighlight

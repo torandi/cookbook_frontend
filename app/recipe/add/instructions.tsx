@@ -95,7 +95,7 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 					</IconButton>
 				</Tooltip>
 				{
-					!isLastInstruction ? (
+					!isLastInstruction &&
 						<Tooltip title="Lägg till steg efter">
 							<IconButton
 								onClick={injectStep}
@@ -104,14 +104,11 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 								<PlaylistAddIcon/>
 							</IconButton>
 						</Tooltip>
-						) : (<></>)
 				}
 			</Stack>
 		</Box>
 	)
 }
-/*
-					*/
 
 const InstructionsInput = () => {
 	const [instructionsState, setInstructionsState] = useState<State>({
