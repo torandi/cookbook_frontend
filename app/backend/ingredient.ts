@@ -58,6 +58,12 @@ const ingredients : IngredientType[] = [{
 	unit: "volume",
 	defaultVolumeType: "tsk",
 	weightPerUnit: 0.6
+},
+{
+	id: 9,
+	name: "Rödlök",
+	unit: "count",
+	weightPerUnit: 60
 }
 ]
 

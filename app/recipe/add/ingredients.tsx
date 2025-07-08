@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, ChangeEvent } from 'react';
 
-import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes } from '@/app/types/ingredient'
+import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
 
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
@@ -31,15 +31,17 @@ interface IngredientInputEntry {
 	ingredientType: IngredientType | null,
 	quantity: string,
 	comment: string,
-	volumeUnit: VolumeType | "g" | null, // user can input in grams, will be converted
+	unit: VolumeType | "g" | "st" | null,
 }
 
 const defaultIngredientEntry = {
 	ingredientType: null,
 	quantity: '0',
 	comment: '',
-	volumeUnit: null,
+	unit: null,
 }
+
+const ingredientSpacing = 1;
 
 // At the moment, this loads all ingredients on first interaction.
 // If this becomes to heavy on mobile devices, we could move the search to the backend
@@ -48,9 +50,6 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 	ingredientsState: State,
 	setIngredientsState: Function
 }) {
-	const { ingredients, error, isLoading } = useIngredients();
-	const filter = createFilterOptions<IngredientType>();
-
 	const [value, setValueState] = useState<IngredientInputEntry | null>(null);
 	// wrapper to handle adding new ingredient rows
 	const setValue = (v) => {
@@ -67,157 +66,34 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 
 	const handleDelete = () => {
 		if(ingredientsState.activeIds.at(-1) == id)
-		{
-			// We're the last item, just clear our value
-			// (probably won't happen, but best to keep it anyway)
-			setValue(null);
-		}
-		else
-		{
-			setIngredientsState({
-				...ingredientsState,
-				activeIds: ingredientsState.activeIds.filter( x => x != id )
-			})
-		}
+			{
+				// We're the last item, just clear our value
+				// (probably won't happen, but best to keep it anyway)
+				setValue(null);
+			}
+			else
+				{
+					setIngredientsState({
+						...ingredientsState,
+						activeIds: ingredientsState.activeIds.filter( x => x != id )
+					})
+				}
 	}
-
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [dialogValue, setDialogValue] = useState({
-		name: '',
-		unit: "volume",
-		defaultVolumeType: '',
-		weightPerUnit: ''
-	})
 
 	return (
 		<>
 			<FormControl>
 				<Box className="w-full flex flex-row">
-					<Autocomplete
-						id = {`ingredient-type-${id}`}
-						className = "flex-3"
-						loading={ isLoading }
-						options={ ingredients }
-						getOptionLabel = { (option : IngredientType) => {
-							// Dynamically created option
-							if (option.inputValue) {
-								return option.title;
-							}
-
-							return option.name
-						}}
-						isOptionEqualToValue = { (option, value) => option.name === value.name }
-						value={value?.ingredientType ?? null}
-						onChange={(event, newValue) => {
-							if(newValue && newValue.inputValue) {
-								setDialogOpen(true);
-								setDialogValue({
-									name: newValue.inputValue,
-									unit: "volume",
-									defaultVolumeType: '',
-									weightPerUnit: ''
-								})
-							} else {
-								setValue({
-									...defaultIngredientEntry,
-									ingredientType: newValue,
-									volumeUnit: newValue?.defaultVolumeType ?? "ml"
-								});
-							}
-						}}
-						autoSelect
-						autoHighlight
-						selectOnFocus
-						handleHomeEndKeys
-						filterOptions={(options, params) => {
-							const filtered = filter(options, params);
-
-							const { inputValue } = params;
-
-							// Suggest the creation of a new value
-							const isExisting = options.some((option) => inputValue === option.title);
-							if (inputValue !== '' && !isExisting) {
-								filtered.push({
-									inputValue,
-									title: `Skapa ny ingrediens "${inputValue}"`,
-								});
-							}
-							return filtered;
-						}}
-						renderInput={(params) => (
-							<TextField
-								{...params}
-								label="Ingrediens"
-								slotProps={{
-									input: {
-										...params.InputProps,
-										endAdornment: (
-											<>
-												{isLoading ? <CircularProgress color="inherit" size={20} /> : null}
-												{params.InputProps.endAdornment}
-											</>
-										),
-								},
-								}}
-							/>
-						)}
+					<IngredientSelectBox
+						id={id}
+						value={value}
+						setValue={setValue}
 					/>
-					<TextField
-						label="Kvantitet"
-						value={value?.quantity ?? "0"}
-						onChange={ (event: ChangeEvent ) => {
-							setValue({
-								...value,
-								quantity: event.target.value
-							})
-						}}
-						className="flex-1"
-						slotProps={{
-							input: {
-								endAdornment: (
-									<InputAdornment position="end">
-										{ value?.ingredientType?.unit == "count" ? "st" :
-											(value?.ingredientType?.unit == "weight" ? "g" :
-												value?.volumeUnit ?? "dl"
-											)
-										}
-									</InputAdornment>
-								)
-							}
-						}}
+					<QuantityFields
+						id={id}
+						value={value}
+						setValue={setValue}
 					/>
-					<FormControl
-						className="flex-1"
-						sx={{
-							display: value?.ingredientType?.unit == "volume" ? 'flex' : 'none'
-						}}
-						>
-						<InputLabel id={`ingredient-entry-${id}-unit-label`}>Enhet</InputLabel>
-						<Select
-							id={`ingredient-entry-${id}-unit`}
-							labelId={`ingredient-entry-${id}-unit-label`}
-							label="Enhet"
-							value={value?.volumeUnit ?? ''}
-							onChange={(event : SelectChangeEvent) => {
-								setValue({
-									...value,
-									volumeUnit: event.target.value as string,
-								})
-							}}
-						>
-							{
-								(
-									/* include weight conversion as input if weight conversion value
-									 * is included in ingredient type */
-									value?.ingredientType?.weightPerUnit !== undefined ?
-										volumeTypes.concat("g")
-										: volumeTypes
-								).map( value => (
-									<MenuItem value={value}>{value}</MenuItem>
-								))
-							}
-						</Select>
-					</FormControl>
 					<TextField
 						label="Kommentar"
 						value={value?.comment ?? ""}
@@ -240,6 +116,104 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 					</Tooltip>
 				</Box>
 			</FormControl>
+		</>
+	)
+}
+
+function IngredientSelectBox({id, value, setValue} : {
+	id: number,
+	value: IngredientInputEntry | null,
+	setValue: Function
+}) {
+	const { ingredients, error, isLoading } = useIngredients();
+
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [dialogValue, setDialogValue] = useState({
+		name: '',
+		unit: "volume",
+		defaultVolumeType: '',
+		weightPerUnit: ''
+	})
+
+	const filter = createFilterOptions<IngredientType>();
+	// Add "Skapa ny" option to ingredient list
+	const generateOptions = (options, params) => {
+		const filtered = filter(options, params);
+
+		const { inputValue } = params;
+
+		// Suggest the creation of a new value
+		const isExisting = options.some((option) => inputValue === option.title);
+		if (inputValue !== '' && !isExisting) {
+			filtered.push({
+				inputValue,
+				title: `Skapa ny ingrediens "${inputValue}"`,
+			});
+		}
+		return filtered;
+	}
+
+	const handleOnChange = (event, newValue) => {
+		if(newValue && newValue.inputValue) {
+			setDialogOpen(true);
+			setDialogValue({
+				name: newValue.inputValue,
+				unit: "volume",
+				defaultVolumeType: '',
+				weightPerUnit: ''
+			})
+		} else {
+			setValue({
+				...defaultIngredientEntry,
+				ingredientType: newValue,
+				unit: defaultIngredientUnit(newValue),
+			});
+		}
+	}
+
+	return (
+		<>
+			<Autocomplete
+				id = {`ingredient-type-${id}`}
+				className = "flex-3"
+				sx={{mr: ingredientSpacing}}
+				loading={ isLoading }
+				options={ ingredients }
+				getOptionLabel = { (option : IngredientType) => {
+					// Dynamically created option
+					if (option.inputValue) {
+						return option.title;
+					}
+
+					return option.name
+				}}
+				isOptionEqualToValue = { (option, value) => option.name === value.name }
+				value={value?.ingredientType ?? null}
+				onChange={handleOnChange}
+				autoSelect
+				autoHighlight
+				selectOnFocus
+				handleHomeEndKeys
+				filterOptions={generateOptions}
+				renderInput={(params) => (
+					<TextField
+						{...params}
+						label="Ingrediens"
+						slotProps={{
+							input: {
+								...params.InputProps,
+								endAdornment: (
+									<>
+										{isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+										{params.InputProps.endAdornment}
+									</>
+								),
+						},
+						}}
+					/>
+				)}
+			/>
+
 			<IngredientCreateDialog
 				setValue={setValue}
 				setDialogValue={setDialogValue}
@@ -248,6 +222,84 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 				dialogValue={dialogValue}
 				open={dialogOpen}
 			/>
+		</>
+	)
+}
+
+function QuantityFields({ id, value, setValue } : {
+	id: number,
+	value: IngredientInputEntry | null,
+	setValue: Function
+})
+{
+	const unitType = value?.ingredientType?.unit ?? "volume";
+
+	const hasWeightOption = (value?.ingredientType?.weightPerUnit ?? 0) > 0;
+
+	let units = [];
+	const unit = value?.unit ?? "dl";
+
+	switch(unitType)
+	{
+		case "volume":
+			units = volumeTypes.concat(hasWeightOption ? ["g"] : []);
+			break;
+		case "count":
+			units = hasWeightOption ? ["st", "g"] : [];
+			break;
+		case "weight":
+			units = [];
+			break;
+	}
+
+	const hasUnitOptions = units.length > 0;
+
+	return (
+		<>
+			<TextField
+				label="#"
+				className={ hasUnitOptions ? "flex-1" : "flex-2" }
+				sx={{mr: ingredientSpacing}}
+				value={value?.quantity ?? ""}
+				onChange={ (event: ChangeEvent ) => {
+					setValue({
+						...value,
+						quantity: event.target.value
+					})
+				}}
+				slotProps={!hasUnitOptions && {
+					input: {
+						endAdornment: (
+							<InputAdornment position="end">
+								{ value?.ingredientType?.unit == "count" ? "st" :
+									(value?.ingredientType?.unit == "weight" ? "g" :
+									 value?.unit ?? "dl"
+									)
+								}
+							</InputAdornment>
+						)
+				}
+				}}
+			/>
+			{ hasUnitOptions && <FormControl className="flex-1" >
+				<InputLabel id={`ingredient-entry-${id}-unit-label`}>Enhet</InputLabel>
+				<Select
+					id={`ingredient-entry-${id}-unit`}
+					sx={{mr: ingredientSpacing}}
+					className="flex-1"
+					labelId={`ingredient-entry-${id}-unit-label`}
+					label="Enhet"
+					value={unit}
+					onChange={(event : SelectChangeEvent) => {
+						setValue({
+							...value,
+							unit: event.target.value as string,
+						})
+					}}
+				>
+					{ units.map( value => (<MenuItem value={value}>{value}</MenuItem> )) }
+				</Select>
+			</FormControl> }
 		</>
 	)
 }
@@ -297,7 +349,7 @@ function IngredientCreateDialog({
 		setValue({
 			...defaultIngredientEntry,
 			ingredientType: ingredient,
-			volumeUnit: ingredient.defaultVolumeType
+			unit: defaultIngredientUnit(ingredient),
 		});
 		handleClose();
 	}
@@ -317,9 +369,9 @@ function IngredientCreateDialog({
 								id="ingredient-create-name"
 								value={dialogValue.name}
 								onChange={(event) =>
-										setDialogValue({
-										...dialogValue,
-										name: event.target.value,
+									setDialogValue({
+									...dialogValue,
+									name: event.target.value,
 								})}
 								label="Namn"
 							/>
@@ -348,7 +400,7 @@ function IngredientCreateDialog({
 								</Select>
 							</FormControl>
 							<FormControl sx={{
-									display: isVolumeType ? 'flex' : 'none',
+								display: isVolumeType ? 'flex' : 'none',
 								}}>
 								<InputLabel id="ingredient-create-volume-default-type-label">Standardenhet</InputLabel>
 								<Select
@@ -374,9 +426,9 @@ function IngredientCreateDialog({
 								id="ingredient-create-weight-per-unit"
 								value={dialogValue.weightPerUnit}
 								onChange={(event) =>
-										setDialogValue({
-										...dialogValue,
-										weightPerUnit: event.target.value,
+									setDialogValue({
+									...dialogValue,
+									weightPerUnit: event.target.value,
 								})}
 								label={
 									dialogValue.unit == "count" ?  "Vikt per styck" : "Vikt per dl"

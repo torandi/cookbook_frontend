@@ -20,7 +20,19 @@ interface IngredientType extends DbObject {
 interface IngredientEntry extends DbObject {
 	ingredientType: IngredientType,
 	quantity: number,
-	volumeUnit?: VolumeType
+	unit: VolumeType | "g" | "st"
+}
+
+function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {
+	switch(ingredient.unit) {
+		case "volume":
+			return ingredient.defaultVolumeType ?? "dl";
+		case "count":
+			return "st";
+		case "weight":
+			return "g";
+	}
+	return null;
 }
 
 function volumeInMl(volume : number, volumeType : VolumeType) : number | undefined {
@@ -68,4 +80,4 @@ function toWeight(value : number, ingredient : IngredientType, volumeType? : Vol
 	return undefined;
 }
 
-export { IngredientType, IngredientEntry, unitOptions, VolumeType, volumeTypes, UnitOptions, volumeInMl, toWeight };
+export { IngredientType, IngredientEntry, unitOptions, VolumeType, volumeTypes, defaultIngredientUnit, UnitOptions, volumeInMl, toWeight };
