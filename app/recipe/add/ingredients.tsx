@@ -24,8 +24,8 @@ import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 import IconButton from '@mui/material/IconButton'
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
@@ -35,14 +35,14 @@ import {CSS} from '@dnd-kit/utilities';
 
 interface IngredientInputEntry {
 	ingredientType: IngredientType | null,
-	quantity: string,
+	quantity: string | null,
 	comment: string,
 	unit: VolumeType | "g" | "st" | null,
 }
 
 const defaultIngredientEntry = {
 	ingredientType: null,
-	quantity: '0',
+	quantity: null,
 	comment: '',
 	unit: null,
 }
@@ -135,7 +135,6 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 						{...listeners}
 						className="flex-none self-center justify-self-end"
 						tabIndex="-1"
-
 					>
 						<DragIndicatorIcon/>
 					</IconButton>
@@ -160,7 +159,9 @@ function IngredientSelectBox({id, value, setValue} : {
 		weightPerUnit: ''
 	})
 
-	const filter = createFilterOptions<IngredientType>();
+	const filter = createFilterOptions<IngredientType>({
+		limit: 100, /* only show 100 first items */
+	});
 	// Add "Skapa ny" option to ingredient list
 	const generateOptions = (options, params) => {
 		const filtered = filter(options, params);
@@ -215,6 +216,7 @@ function IngredientSelectBox({id, value, setValue} : {
 				isOptionEqualToValue = { (option, value) => option.name === value.name }
 				value={value?.ingredientType ?? null}
 				onChange={handleOnChange}
+				clearOnEscape
 				autoSelect
 				autoHighlight
 				selectOnFocus
@@ -286,6 +288,7 @@ function QuantityFields({ id, value, setValue } : {
 				className={ hasUnitOptions ? "flex-1" : "flex-2" }
 				sx={{mr: ingredientSpacing}}
 				value={value?.quantity ?? ""}
+				placeholder="-"
 				onChange={ (event: ChangeEvent ) => {
 					setValue({
 						...value,
@@ -307,23 +310,26 @@ function QuantityFields({ id, value, setValue } : {
 				}}
 							/>
 			{ hasUnitOptions && <FormControl className="flex-1" >
-				<InputLabel id={`ingredient-entry-${id}-unit-label`}>Enhet</InputLabel>
-				<Select
+				<Autocomplete
 					id={`ingredient-entry-${id}-unit`}
 					sx={{mr: ingredientSpacing}}
 					className="flex-1"
-					labelId={`ingredient-entry-${id}-unit-label`}
 					label="Enhet"
+					autoSelect
+					autoHighlight
+					selectOnFocus
+					handleHomeEndKeys
+					disableClearable
 					value={unit}
+					options={units}
 					onChange={(event : SelectChangeEvent) => {
 						setValue({
 							...value,
 							unit: event.target.value as string,
 						})
 					}}
-				>
-					{ units.map( value => (<MenuItem value={value}>{value}</MenuItem> )) }
-				</Select>
+					renderInput = { (params) => <TextField {...params} /> }
+				/>
 			</FormControl> }
 			</>
 	)
