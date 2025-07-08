@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
@@ -19,31 +19,43 @@ interface State {
 }
 
 function InstructionStepInput({ id, index, instructionsState, setInstructionsState } :
-	{
-		id : number,
-		index: number,
-		instructionsState : State,
-		setInstructionsState : Function
-	}) {
+															{
+	id : number,
+	index: number,
+	instructionsState : State,
+	setInstructionsState : Function
+}) {
 	const [value, setValue] = useState("");
 
 	const isLastInstruction = instructionsState.activeIds.at(-1) == id);
 
 	const handleDelete = () => {
 		if(isLastInstruction)
-		{
-			// We're the last item, just clear our value
-			// (probably won't happen, but best to keep it anyway)
-			setValue("");
-		}
-		else
-		{
+			{
+				// We're the last item, just clear our value
+				// (probably won't happen, but best to keep it anyway)
+				setValue("");
+			}
+			else
+				{
+					setInstructionsState({
+						...instructionsState,
+						activeIds: instructionsState.activeIds.filter( x => x != id )
+					})
+				}
+	}
+
+	useEffect(() => {
+		if(value && isLastInstruction) {
+			// We are the last item, add new
+			const newId = instructionsState.nextId;
 			setInstructionsState({
-				...instructionsState,
-				activeIds: instructionsState.activeIds.filter( x => x != id )
+				nextId: newId + 1,
+				activeIds: instructionsState.activeIds.concat(newId)
 			})
 		}
-	}
+
+	}, [isLastInstruction, value]);
 
 	const injectStep = () => {
 		const newId = instructionsState.nextId;
@@ -61,25 +73,15 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 			className="flex-3"
 			value={value}
 			onChange={ (event: ChangeEvent ) => {
-				if(event.target.value && isLastInstruction)
-				{
-					// We are the last item, add new
-					const newId = instructionsState.nextId;
-					setInstructionsState({
-						nextId: newId + 1,
-						activeIds: instructionsState.activeIds.concat(newId)
-					})
-				}
-
 				setValue(event.target.value)
 			}}
 			slotProps={{
 				input: {
-					startAdornment: (<InputAdornment
-						className="self-start"
-						position="start"
-					>{index+1}.</InputAdornment>)
-				}
+			startAdornment: (<InputAdornment
+				className="self-start"
+				position="start"
+				>{index+1}.</InputAdornment>)
+			}
 			}}
 			/>
 			<Stack
@@ -87,12 +89,12 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 				direction="column"
 			>
 				<Tooltip title="Ta bort steg">
-					<IconButton
-						onClick={handleDelete}
-						tabIndex="-1"
-						>
-						<DeleteIcon/>
-					</IconButton>
+				<IconButton
+					onClick={handleDelete}
+					tabIndex="-1"
+				>
+					<DeleteIcon/>
+				</IconButton>
 				</Tooltip>
 				{
 					!isLastInstruction &&
@@ -100,13 +102,13 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 							<IconButton
 								onClick={injectStep}
 								tabIndex="-1"
-								>
+							>
 								<PlaylistAddIcon/>
 							</IconButton>
 						</Tooltip>
 				}
 			</Stack>
-		</Box>
+			</Box>
 	)
 }
 

@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 
 import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
+
+import { SortableItem, SortableList } from '@/app/components/sortableList'
 
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
@@ -26,6 +28,10 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import IconButton from '@mui/material/IconButton'
 
 import DeleteIcon from '@mui/icons-material/Delete'
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+
+import { useSortable } from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 
 interface IngredientInputEntry {
 	ingredientType: IngredientType | null,
@@ -50,38 +56,49 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 	ingredientsState: State,
 	setIngredientsState: Function
 }) {
-	const [value, setValueState] = useState<IngredientInputEntry | null>(null);
-	// wrapper to handle adding new ingredient rows
-	const setValue = (v) => {
-		if(v && ingredientsState.activeIds.at(-1) == id) {
-			// We are the last item, add new
+	const [value, setValue] = useState<IngredientInputEntry | null>(null);
+
+	const isLastItem = ingredientsState.activeIds.at(-1) == id;
+
+	// If we are ever the last item, and value is set to non-null
+	// ad another item
+	useEffect(() => {
+		if(isLastItem && value != null) {
 			const newId = ingredientsState.nextId;
 			setIngredientsState({
 				nextId: newId + 1,
 				activeIds: ingredientsState.activeIds.concat(newId)
 			})
 		}
-		setValueState(v);
-	}
+	}, [isLastItem, value])
 
 	const handleDelete = () => {
-		if(ingredientsState.activeIds.at(-1) == id)
-			{
-				// We're the last item, just clear our value
-				// (probably won't happen, but best to keep it anyway)
-				setValue(null);
-			}
-			else
-				{
-					setIngredientsState({
-						...ingredientsState,
-						activeIds: ingredientsState.activeIds.filter( x => x != id )
-					})
-				}
+		if(isLastItem) {
+			// We're the last item, just clear our value
+			setValue(null);
+		} else {
+			setIngredientsState({
+				...ingredientsState,
+				activeIds: ingredientsState.activeIds.filter( x => x != id )
+			})
+		}
 	}
 
+	// sorting / drag & drop
+	const {
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+	} = useSortable({id: id});
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
+
 	return (
-		<>
+		<Box ref={setNodeRef} style={style} tabIndex={-1}>
 			<FormControl>
 				<Box className="w-full flex flex-row">
 					<IngredientSelectBox
@@ -94,29 +111,37 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 						value={value}
 						setValue={setValue}
 					/>
-					<TextField
-						label="Kommentar"
-						value={value?.comment ?? ""}
-						onChange={ (event: ChangeEvent ) => {
-							setValue({
-								...value,
-								comment: event.target.value
-							})
-						}}
-						className="flex-2"
-					/>
+				<TextField
+					label="Kommentar"
+					value={value?.comment ?? ""}
+					onChange={ (event: ChangeEvent ) => {
+						setValue({
+							...value,
+							comment: event.target.value
+						})
+					}}
+					className="flex-2"
+				/>
 					<Tooltip title="Ta bort ingrediens">
 						<IconButton
 							className="flex-none self-center justify-self-end"
 							onClick={handleDelete}
 							tabIndex="-1"
 						>
-							<DeleteIcon/>
+						<DeleteIcon/>
 						</IconButton>
 					</Tooltip>
-				</Box>
-			</FormControl>
-		</>
+					<IconButton
+						{...listeners}
+						className="flex-none self-center justify-self-end"
+						tabIndex="-1"
+
+					>
+						<DragIndicatorIcon/>
+					</IconButton>
+					</Box>
+				</FormControl>
+			</Box>
 	)
 }
 
@@ -243,13 +268,13 @@ function QuantityFields({ id, value, setValue } : {
 	{
 		case "volume":
 			units = volumeTypes.concat(hasWeightOption ? ["g"] : []);
-			break;
+		break;
 		case "count":
 			units = hasWeightOption ? ["st", "g"] : [];
-			break;
+		break;
 		case "weight":
 			units = [];
-			break;
+		break;
 	}
 
 	const hasUnitOptions = units.length > 0;
@@ -271,16 +296,16 @@ function QuantityFields({ id, value, setValue } : {
 					input: {
 						endAdornment: (
 							<InputAdornment position="end">
-								{ value?.ingredientType?.unit == "count" ? "st" :
-									(value?.ingredientType?.unit == "weight" ? "g" :
-									 value?.unit ?? "dl"
-									)
-								}
+							{ value?.ingredientType?.unit == "count" ? "st" :
+								(value?.ingredientType?.unit == "weight" ? "g" :
+								 value?.unit ?? "dl"
+								)
+							}
 							</InputAdornment>
 						)
-				}
+					}
 				}}
-			/>
+							/>
 			{ hasUnitOptions && <FormControl className="flex-1" >
 				<InputLabel id={`ingredient-entry-${id}-unit-label`}>Enhet</InputLabel>
 				<Select
@@ -300,7 +325,7 @@ function QuantityFields({ id, value, setValue } : {
 					{ units.map( value => (<MenuItem value={value}>{value}</MenuItem> )) }
 				</Select>
 			</FormControl> }
-		</>
+			</>
 	)
 }
 
@@ -361,12 +386,12 @@ function IngredientCreateDialog({
 		<Dialog open={open} onClose={handleClose}>
 			<form onSubmit={handleSubmit}>
 				<DialogTitle>Skapa ny ingrediens</DialogTitle>
-				<DialogContent>
-					<FormControl variant="standard" >
-						<Stack direction="column" spacing={2} sx={{pt: 2}}>
-							<TextField
-								autoFocus
-								id="ingredient-create-name"
+					<DialogContent>
+						<FormControl variant="standard" >
+							<Stack direction="column" spacing={2} sx={{pt: 2}}>
+								<TextField
+									autoFocus
+									id="ingredient-create-name"
 								value={dialogValue.name}
 								onChange={(event) =>
 									setDialogValue({
@@ -374,7 +399,7 @@ function IngredientCreateDialog({
 									name: event.target.value,
 								})}
 								label="Namn"
-							/>
+								/>
 							<FormControl>
 								<InputLabel id="ingredient-create-unit-label">Enhet</InputLabel>
 								<Select
@@ -414,7 +439,7 @@ function IngredientCreateDialog({
 											defaultVolumeType: event.target.value as string,
 										})
 									}}
-								>
+									>
 									{
 										volumeTypes.map((value) => (
 											<MenuItem value={value}>{value}</MenuItem>
@@ -422,24 +447,24 @@ function IngredientCreateDialog({
 									}
 								</Select>
 							</FormControl>
-							<TextField
-								id="ingredient-create-weight-per-unit"
-								value={dialogValue.weightPerUnit}
-								onChange={(event) =>
-									setDialogValue({
-									...dialogValue,
-									weightPerUnit: event.target.value,
-								})}
-								label={
-									dialogValue.unit == "count" ?  "Vikt per styck" : "Vikt per dl"
-								}
-								sx={{
-									display: isWeightType ? 'none' : 'flex'
-								}}
-							/>
-						</Stack>
-					</FormControl>
-				</DialogContent>
+								<TextField
+									id="ingredient-create-weight-per-unit"
+									value={dialogValue.weightPerUnit}
+									onChange={(event) =>
+										setDialogValue({
+										...dialogValue,
+										weightPerUnit: event.target.value,
+									})}
+									label={
+										dialogValue.unit == "count" ?  "Vikt per styck" : "Vikt per dl"
+									}
+									sx={{
+										display: isWeightType ? 'none' : 'flex'
+									}}
+								/>
+							</Stack>
+						</FormControl>
+					</DialogContent>
 				<DialogActions>
 					<Button onClick={handleClose}>Avbryt</Button>
 					<Button type="submit">Skapa</Button>
@@ -460,17 +485,29 @@ const IngredientsInput = () => {
 		activeIds: [0]
 	});
 
+	const onItemsUpdated = (newOrder : number[]) => {
+		setIngredientsState({
+			...ingredientsState,
+			activeIds: newOrder
+		})
+	}
+
 	return (
-		<Stack direction="column" spacing={2}>
-			{ ingredientsState.activeIds.map((id) => (
-				<IngredientEntryInput
-					id={id}
-					key={id}
-					ingredientsState={ingredientsState}
-					setIngredientsState={setIngredientsState}
-				/>
-			))}
-		</Stack>
+		<SortableList
+			onItemsUpdated={onItemsUpdated}
+			items={ingredientsState.activeIds}
+		>
+			<Stack direction="column" spacing={2}>
+				{ ingredientsState.activeIds.map((id) => (
+					<IngredientEntryInput
+						id={id}
+						key={id}
+						ingredientsState={ingredientsState}
+						setIngredientsState={setIngredientsState}
+					/>
+				))}
+			</Stack>
+		</SortableList>
 	)
 }
 

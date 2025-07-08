@@ -14,7 +14,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 const FullCard = (props) => (
-	<Card {...props}>
+	<Card {...props} >
 		<CardContent>
 			{props.children}
 		</CardContent>
