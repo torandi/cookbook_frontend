@@ -4,7 +4,6 @@ import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 
 import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
-
 import { SortableList } from '@/app/components/sortableList'
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -97,6 +96,8 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 		transition,
 	};
 
+	// end sorting
+
 	return (
 		<Box ref={setNodeRef} style={style} tabIndex={-1}>
 			<FormControl>
@@ -131,13 +132,15 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 						<DeleteIcon/>
 						</IconButton>
 					</Tooltip>
-					<IconButton
-						{...listeners}
-						className="flex-none self-center justify-self-end"
-						tabIndex="-1"
-					>
-						<DragIndicatorIcon/>
-					</IconButton>
+					<Tooltip title="Dra för att sortera">
+						<IconButton
+							{...listeners}
+							className="flex-none self-center justify-self-end"
+							tabIndex="-1"
+						>
+							<DragIndicatorIcon/>
+						</IconButton>
+					</Tooltip>
 					</Box>
 				</FormControl>
 			</Box>
@@ -269,7 +272,7 @@ function QuantityFields({ id, value, setValue } : {
 	switch(unitType)
 	{
 		case "volume":
-			units = volumeTypes.concat(hasWeightOption ? ["g"] : []);
+			units = (hasWeightOption ? ["g"] : []).concat(volumeTypes); // prepend grams
 		break;
 		case "count":
 			units = hasWeightOption ? ["st", "g"] : [];

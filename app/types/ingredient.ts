@@ -1,7 +1,7 @@
 import { DbObject } from '@/app/types/dbobject';
 
 type UnitType = "count" | "volume" | "weight";
-const volumeTypes = ["ml", "cl", "dl", "liter", "krm", "tsk", "msk"] as const; // todo: cups etc
+const volumeTypes = ["ml", "cl", "dl", "liter", "krm", "tsk", "msk", "cups"] as const; // todo: cups etc
 type VolumeType = typeof volumeTypes[number];
 
 const unitOptions = {
@@ -50,6 +50,8 @@ function volumeInMl(volume : number, volumeType : VolumeType) : number | undefin
 			return volume * 5;
 		case "msk":
 			return volume * 15;
+		case "cups":
+			return volume * 236.588;
 	}
 	console.log(`Unknown volume type ${volumeType}. Can't convert to ml`);
 	return undefined;
