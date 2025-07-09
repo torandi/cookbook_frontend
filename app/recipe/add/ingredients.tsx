@@ -5,7 +5,10 @@ import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
 
-import { SortableItem, SortableList } from '@/app/components/sortableList'
+import { SortableList } from '@/app/components/sortableList'
+
+import { useSortable } from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
@@ -29,9 +32,6 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-
-import { useSortable } from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
 
 interface IngredientInputEntry {
 	ingredientType: IngredientType | null,

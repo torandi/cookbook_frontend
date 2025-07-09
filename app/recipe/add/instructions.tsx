@@ -2,6 +2,11 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 
+import { SortableList } from '@/app/components/sortableList'
+
+import { useSortable } from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
+
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -12,6 +17,7 @@ import IconButton from '@mui/material/IconButton'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 interface State {
 	nextId: number,
@@ -65,39 +71,58 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 		})
 	}
 
+	// sorting / drag & drop
+	const {
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+	} = useSortable({id: id});
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
+
+	// end sorting
+
 	return (
-		<Box className="w-full flex flex-row">
-		<TextField
-			multiline
-			minRows={2}
-			className="flex-3"
-			value={value}
-			onChange={ (event: ChangeEvent ) => {
-				setValue(event.target.value)
-			}}
-			slotProps={{
-				input: {
-			startAdornment: (<InputAdornment
-				className="self-start"
-				position="start"
-				>{index+1}.</InputAdornment>)
-			}
-			}}
-			/>
-			<Stack
-				className="flex-none self-center justify-self-end"
-				direction="column"
-			>
-				<Tooltip title="Ta bort steg">
-				<IconButton
-					onClick={handleDelete}
-					tabIndex="-1"
+		<Box
+			ref={setNodeRef}
+			style={style}
+			tabIndex={-1}
+			className="w-full flex flex-row">
+			<TextField
+				multiline
+				minRows={2}
+				className="flex-3"
+				value={value}
+				onChange={ (event: ChangeEvent ) => {
+					setValue(event.target.value)
+				}}
+				slotProps={{
+					input: {
+				startAdornment: (<InputAdornment
+					className="self-start"
+					position="start"
+					>{index+1}.</InputAdornment>)
+				}
+				}}
+				/>
+				<Stack
+					className="flex-none self-center justify-self-end"
+					direction="row"
 				>
-					<DeleteIcon/>
-				</IconButton>
-				</Tooltip>
-				{
-					!isLastInstruction &&
+					<Stack direction="column" >
+						<Tooltip title="Ta bort steg">
+							<IconButton
+								onClick={handleDelete}
+								tabIndex="-1"
+							>
+								<DeleteIcon/>
+							</IconButton>
+						</Tooltip>
+						{ !isLastInstruction &&
 						<Tooltip title="Lägg till steg efter">
 							<IconButton
 								onClick={injectStep}
@@ -106,8 +131,17 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 								<PlaylistAddIcon/>
 							</IconButton>
 						</Tooltip>
-				}
-			</Stack>
+						}
+					</Stack>
+					<Tooltip title="Dra för att sortera">
+						<IconButton
+							{...listeners}
+							tabIndex="-1"
+						>
+							<DragIndicatorIcon/>
+						</IconButton>
+					</Tooltip>
+				</Stack>
 			</Box>
 	)
 }
@@ -118,18 +152,30 @@ const InstructionsInput = () => {
 		activeIds: [0]
 	});
 
+	const onItemsUpdated = (newOrder : number[]) => {
+		setInstructionsState({
+			...instructionsState,
+			activeIds: newOrder
+		})
+	}
+
 	return (
-		<Stack direction="column" spacing={2}>
-			{ instructionsState.activeIds.map((id, index) => (
-				<InstructionStepInput
-					id={id}
-					key={id}
-					index={index}
-					instructionsState={instructionsState}
-					setInstructionsState={setInstructionsState}
-				/>
-			))}
-		</Stack>
+		<SortableList
+			onItemsUpdated={onItemsUpdated}
+			items={instructionsState.activeIds}
+			>
+			<Stack direction="column" spacing={2}>
+				{ instructionsState.activeIds.map((id, index) => (
+					<InstructionStepInput
+						id={id}
+						key={id}
+						index={index}
+						instructionsState={instructionsState}
+						setInstructionsState={setInstructionsState}
+					/>
+				))}
+			</Stack>
+		</SortableList>
 	)
 }
 
