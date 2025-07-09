@@ -286,8 +286,8 @@ function QuantityFields({ id, value, setValue } : {
 			<TextField
 				label="#"
 				className={ hasUnitOptions ? "flex-1" : "flex-2" }
-				sx={{mr: ingredientSpacing}}
-				value={value?.quantity ?? ""}
+				sx={{ mr: ingredientSpacing }}
+				value={ value?.quantity ?? "" }
 				placeholder="-"
 				onChange={ (event: ChangeEvent ) => {
 					setValue({
@@ -300,9 +300,7 @@ function QuantityFields({ id, value, setValue } : {
 						endAdornment: (
 							<InputAdornment position="end">
 							{ value?.ingredientType?.unit == "count" ? "st" :
-								(value?.ingredientType?.unit == "weight" ? "g" :
-								 value?.unit ?? "dl"
-								)
+								(value?.ingredientType?.unit == "weight" ? "g" : unit)
 							}
 							</InputAdornment>
 						)
@@ -322,10 +320,10 @@ function QuantityFields({ id, value, setValue } : {
 					disableClearable
 					value={unit}
 					options={units}
-					onChange={(event : SelectChangeEvent) => {
+					onChange={(event, newValue) => {
 						setValue({
 							...value,
-							unit: event.target.value as string,
+							unit: newValue,
 						})
 					}}
 					renderInput = { (params) => <TextField {...params} /> }
