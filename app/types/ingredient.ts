@@ -20,6 +20,7 @@ interface IngredientType extends DbObject {
 interface IngredientEntry extends DbObject {
 	ingredientType: IngredientType,
 	quantity: number,
+	optional: boolean,
 	unit: VolumeType | "g" | "st"
 }
 
