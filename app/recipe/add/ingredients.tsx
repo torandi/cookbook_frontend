@@ -19,7 +19,9 @@ import DialogActions from '@mui/material/DialogActions';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -48,8 +50,6 @@ const defaultIngredientEntry = {
 
 const ingredientSpacing = 1;
 
-// At the moment, this loads all ingredients on first interaction.
-// If this becomes to heavy on mobile devices, we could move the search to the backend
 function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 	id: number,
 	ingredientsState: State,
@@ -112,17 +112,34 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 						value={value}
 						setValue={setValue}
 					/>
-				<TextField
-					label="Kommentar"
-					value={value?.comment ?? ""}
-					onChange={ (event: ChangeEvent ) => {
-						setValue({
-							...value,
-							comment: event.target.value
-						})
-					}}
-					className="flex-2"
-				/>
+					<TextField
+						label="Kommentar"
+						value={value?.comment ?? ""}
+						onChange={ (event: ChangeEvent ) => {
+							setValue({
+								...value,
+								comment: event.target.value
+							})
+						}}
+						className="flex-2"
+					/>
+					<FormControlLabel
+						label="Ev."
+						labelPlacement="top"
+						className="flex-none"
+						control={
+							<Switch
+								value={value?.optional ?? false}
+								tabIndex={-1}
+								onChange={ (event: ChangeEvent ) => {
+									setValue({
+										...value,
+										optional: event.target.value
+									})
+								}}
+							/>
+						}
+					/>
 					<Tooltip title="Ta bort ingrediens">
 						<IconButton
 							className="flex-none self-center justify-self-end"
@@ -141,12 +158,14 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 							<DragIndicatorIcon/>
 						</IconButton>
 					</Tooltip>
-					</Box>
-				</FormControl>
-			</Box>
+				</Box>
+			</FormControl>
+		</Box>
 	)
 }
 
+// At the moment, this loads all ingredients on first interaction.
+// If this becomes to heavy on mobile devices, we could move the search to the backend
 function IngredientSelectBox({id, value, setValue} : {
 	id: number,
 	value: IngredientInputEntry | null,
