@@ -26,6 +26,11 @@ const FullCard = (props) => (
 )
 
 export default function Page() {
+	// todo: this needs to be in a client component
+	const saveRecipe = () => {
+		// todo
+	}
+
 	return (
 		<FormControl variant="outlined" className="w-full" sx={{my: 4}}>
 			<Stack direction="column" spacing={2}>
@@ -49,7 +54,6 @@ export default function Page() {
 					<Button
 						className="flex-1"
 						variant="contained"
-						onClick={saveRecipie}
 					>
 						Spara
 					</Button>
