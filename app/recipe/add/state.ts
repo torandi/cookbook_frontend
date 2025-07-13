@@ -39,15 +39,14 @@ interface InstructionsSlice {
 	trimInstructions: () => void
 }
 
-interface RecipeInfo {
+interface RecipeSlice {
 	title: string
 	portions: number | null
+	portionName: string,
 	defaultWeight: boolean
-}
-
-interface RecipeSlice extends RecipeInfo {
 	setTitle: (title: string) => void
 	setPortions: (count: number) => void
+	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
 }
 
@@ -149,11 +148,15 @@ const createRecipeSlice : StateCreator<
 		title: "",
 		portions: 4,
 		defaultWeight: false,
+		portionName: "portioner",
 		setTitle: (title: string) => set( state => ({
 			title: title,
 		})),
 		setPortions: (count: number) => set( state => ({
 			portions: count,
+		})),
+		setPortionName: (name: string) => set( state => ({
+			portionName: name,
 		})),
 		setDefaultWeight: (value : boolean) => set( state => ({
 			defaultWeight: value,
@@ -170,6 +173,7 @@ const createReadSlice : StateCreator<
 		getAll: () => ({
 			title: get().title,
 			portions: get().portions,
+			portionName: get().portionName,
 			defaultWeight: get().defaultWeight,
 			ingredients: get().ingredientsOrder
 				.map(id => get().ingredients[id])

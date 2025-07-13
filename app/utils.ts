@@ -14,3 +14,6 @@ export function omit<KeyType, ValueType>(obj : { [KeyType]: ValueType }, key : K
 	return rest;
 }
 
+export function capitalize(str : string) : string {
+	return str[0].toUpperCase() + str.slice(1)
+}

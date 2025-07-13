@@ -5,6 +5,7 @@ export interface RecipeType extends DbObject {
 	title : string;
 	defaultWeight: boolean;
 	portions: number;
+	portionName: string;
 	ingredients : IngredientEntry[];
 	instructions : string[];
 }
