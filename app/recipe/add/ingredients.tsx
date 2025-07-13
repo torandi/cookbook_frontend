@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { useShallow } from 'zustand/react/shallow'
+
+import { IngredientInputEntry, defaultIngredientEntry, useRecipeAddStore } from './state';
 
 import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
@@ -34,40 +37,23 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
-interface IngredientInputEntry {
-	ingredientType: IngredientType | null,
-	quantity: string | null,
-	comment: string,
-	unit: VolumeType | "g" | "st" | null,
-}
-
-const defaultIngredientEntry = {
-	ingredientType: null,
-	quantity: null,
-	comment: '',
-	unit: null,
-}
-
 const ingredientSpacing = 1;
 
-function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
+function IngredientEntryInput({ id, isLastItem } : {
 	id: number,
-	ingredientsState: State,
-	setIngredientsState: Function
+	isLastItem: boolean,
 }) {
-	const [value, setValue] = useState<IngredientInputEntry | null>(null);
-
-	const isLastItem = ingredientsState.activeIds.at(-1) == id;
+	const value = useRecipeAddStore( state => state.ingredients[id] )
+	const setIngredient = useRecipeAddStore( state => state.setIngredient )
+	const setValue = (value : IngredientInputEntry) => setIngredient(id, value)
+	const addIngredient = useRecipeAddStore( state => state.addIngredient )
+	const removeIngredient = useRecipeAddStore( state => state.removeIngredient )
 
 	// If we are ever the last item, and value is set to non-null
 	// ad another item
 	useEffect(() => {
 		if(isLastItem && value != null) {
-			const newId = ingredientsState.nextId;
-			setIngredientsState({
-				nextId: newId + 1,
-				activeIds: ingredientsState.activeIds.concat(newId)
-			})
+			addIngredient()
 		}
 	}, [isLastItem, value])
 
@@ -76,10 +62,7 @@ function IngredientEntryInput({ id, ingredientsState, setIngredientsState } : {
 			// We're the last item, just clear our value
 			setValue(null);
 		} else {
-			setIngredientsState({
-				...ingredientsState,
-				activeIds: ingredientsState.activeIds.filter( x => x != id )
-			})
+			removeIngredient(id)
 		}
 	}
 
@@ -500,41 +483,24 @@ function IngredientCreateDialog({
 	)
 }
 
-interface State {
-	nextId: number,
-	activeIds: number[]
-}
-
-const IngredientsInput = () => {
-	const [ingredientsState, setIngredientsState] = useState<State>({
-		nextId: 1,
-		activeIds: [0]
-	});
-
-	const onItemsUpdated = (newOrder : number[]) => {
-		setIngredientsState({
-			...ingredientsState,
-			activeIds: newOrder
-		})
-	}
+export const IngredientsInput = () => {
+	const ingredientsOrder = useRecipeAddStore( state => state.ingredientsOrder )
+	const setIngredientsOrder = useRecipeAddStore( state => state.setIngredientsOrder )
 
 	return (
 		<SortableList
-			onItemsUpdated={onItemsUpdated}
-			items={ingredientsState.activeIds}
+			onItemsUpdated={setIngredientsOrder}
+			items={ingredientsOrder}
 		>
 			<Stack direction="column" spacing={2}>
-				{ ingredientsState.activeIds.map((id) => (
+				{ ingredientsOrder.map((id) => (
 					<IngredientEntryInput
-						id={id}
-						key={id}
-						ingredientsState={ingredientsState}
-						setIngredientsState={setIngredientsState}
+						id = { id }
+						key = { id }
+						isLastItem = { ingredientsOrder.at(-1) == id }
 					/>
 				))}
 			</Stack>
 		</SortableList>
 	)
 }
-
-export { IngredientsInput }

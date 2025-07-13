@@ -5,6 +5,7 @@ Cookbook frontend
 * Next.js
 * Material UI (Mui) for ui components
 * Tailwind css for css classes
+* zustand for complex state management
 
 ## Getting Started
 

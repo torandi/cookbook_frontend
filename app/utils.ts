@@ -1,11 +1,16 @@
 // Returns true if src contains search ignoring case
-function containsIgnoreCase(src : string, search: string) : boolean {
+export function containsIgnoreCase(src : string, search: string) : boolean {
 	return src.toLowerCase().search(search.toLowerCase()) != -1;
 }
 
 // generates range [min, max)
-function range(min : number, max : number) : number[] {
+export function range(min : number, max : number) : number[] {
 	return Array.from(new Array(max - min).keys()).map( num => num + min );
 }
 
-export { containsIgnoreCase, range };
+// Returns copy of object with key removed
+export function omit<KeyType, ValueType>(obj : { [KeyType]: ValueType }, key : KeyType) : { [KeyType] : ValueType } {
+	const { [key]: _, ...rest } = obj;
+	return rest;
+}
+
