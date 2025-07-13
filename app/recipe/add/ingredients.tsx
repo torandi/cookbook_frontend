@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
-import { useShallow } from 'zustand/react/shallow'
 
 import { IngredientInputEntry, defaultIngredientEntry, useRecipeAddStore } from './state';
 

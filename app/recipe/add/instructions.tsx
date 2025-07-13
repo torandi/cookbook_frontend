@@ -2,6 +2,8 @@
 
 import { useState, useEffect, ChangeEvent } from 'react';
 
+import { useRecipeAddStore } from './state';
+
 import { SortableList } from '@/app/components/sortableList'
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -19,56 +21,39 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
-interface State {
-	nextId: number,
-	activeIds: number[]
-}
-
-function InstructionStepInput({ id, index, instructionsState, setInstructionsState } :
+function InstructionStepInput({ id, index, isLastItem } :
 															{
 	id : number,
 	index: number,
-	instructionsState : State,
-	setInstructionsState : Function
+	isLastItem: boolean,
 }) {
-	const [value, setValue] = useState("");
-
-	const isLastInstruction = instructionsState.activeIds.at(-1) == id);
+	const value = useRecipeAddStore( state => state.instructions[id] )
+	const setInstruction = useRecipeAddStore( state => state.setInstruction )
+	const setValue = (value : string) => setInstruction(id, value)
+	const addInstruction = useRecipeAddStore( state => state.addInstruction )
+	const removeInstruction = useRecipeAddStore( state => state.removeInstruction )
+	const insertInstruction = useRecipeAddStore( state => state.insertInstruction )
+	const trimInstructions = useRecipeAddStore( state => state.trimInstructions )
 
 	const handleDelete = () => {
-		if(isLastInstruction)
-			{
-				// We're the last item, just clear our value
-				// (probably won't happen, but best to keep it anyway)
-				setValue("");
-			}
-			else
-				{
-					setInstructionsState({
-						...instructionsState,
-						activeIds: instructionsState.activeIds.filter( x => x != id )
-					})
-				}
+		if(isLastItem) {
+			// We're the last item, just clear our value
+			setValue("");
+		} else {
+			removeInstruction(id);
+		}
 	}
 
 	useEffect(() => {
-		if(value && isLastInstruction) {
-			// We are the last item, add new
-			const newId = instructionsState.nextId;
-			setInstructionsState({
-				nextId: newId + 1,
-				activeIds: instructionsState.activeIds.concat(newId)
-			})
+		if(value && isLastItem) {
+			addInstruction()
+		} else if(!value && !isLastItem) {
+			trimInstructions()
 		}
-
-	}, [isLastInstruction, value]);
+	}, [isLastItem, value]);
 
 	const injectStep = () => {
-		const newId = instructionsState.nextId;
-		setInstructionsState({
-			nextId: newId + 1,
-			activeIds: instructionsState.activeIds.toSpliced(index+1, 0, newId)
-		})
+		insertInstruction(index + 1)
 	}
 
 	// sorting / drag & drop
@@ -122,7 +107,7 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 								<DeleteIcon/>
 							</IconButton>
 						</Tooltip>
-						{ !isLastInstruction &&
+						{ !isLastItem &&
 						<Tooltip title="Lägg till steg efter">
 							<IconButton
 								onClick={injectStep}
@@ -147,31 +132,21 @@ function InstructionStepInput({ id, index, instructionsState, setInstructionsSta
 }
 
 const InstructionsInput = () => {
-	const [instructionsState, setInstructionsState] = useState<State>({
-		nextId: 1,
-		activeIds: [0]
-	});
-
-	const onItemsUpdated = (newOrder : number[]) => {
-		setInstructionsState({
-			...instructionsState,
-			activeIds: newOrder
-		})
-	}
+	const instructionsOrder = useRecipeAddStore( state => state.instructionsOrder )
+	const setInstructionsOrder = useRecipeAddStore( state => state.setInstructionsOrder )
 
 	return (
 		<SortableList
-			onItemsUpdated={onItemsUpdated}
-			items={instructionsState.activeIds}
+			onItemsUpdated={setInstructionsOrder}
+			items={instructionsOrder}
 			>
 			<Stack direction="column" spacing={2}>
-				{ instructionsState.activeIds.map((id, index) => (
+				{ instructionsOrder.map((id, index) => (
 					<InstructionStepInput
 						id={id}
 						key={id}
 						index={index}
-						instructionsState={instructionsState}
-						setInstructionsState={setInstructionsState}
+						isLastItem = { instructionsOrder.at(-1) == id }
 					/>
 				))}
 			</Stack>

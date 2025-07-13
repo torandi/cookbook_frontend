@@ -25,7 +25,7 @@ interface IngredientEntry extends DbObject {
 }
 
 function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {
-	switch(ingredient.unit) {
+	switch(ingredient?.unit) {
 		case "volume":
 			return ingredient.defaultVolumeType ?? "dl";
 		case "count":
