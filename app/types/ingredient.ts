@@ -1,30 +1,30 @@
 import { DbObject } from '@/app/types/dbobject';
 
-type UnitType = "count" | "volume" | "weight";
-const volumeTypes = ["ml", "cl", "dl", "liter", "krm", "tsk", "msk", "cups"] as const; // todo: cups etc
-type VolumeType = typeof volumeTypes[number];
+export type UnitType = "count" | "volume" | "weight";
+export const volumeTypes = ["ml", "cl", "dl", "liter", "krm", "tsk", "msk", "cups"] as const; // todo: cups etc
+export type VolumeType = typeof volumeTypes[number];
 
-const unitOptions = {
+export const unitOptions = {
 	"volume": "Volym",
 	"count": "Styck",
 	"weight": "Vikt"
 }
 
-interface IngredientType extends DbObject {
+export interface IngredientType extends DbObject {
 	name : string;
 	unit : UnitType;
 	defaultVolumeType? : VolumeType;
 	weightPerUnit?: number; // weight in grams per unit (piece or ml)
 }
 
-interface IngredientEntry extends DbObject {
-	ingredientType: IngredientType,
-	quantity: number,
-	optional: boolean,
-	unit: VolumeType | "g" | "st"
+export interface IngredientEntry extends DbObject {
+	ingredientType: IngredientType | null,
+	quantity: number | null,
+	optional: boolean | null,
+	unit: VolumeType | "g" | "st" | null
 }
 
-function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {
+export function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {
 	switch(ingredient?.unit) {
 		case "volume":
 			return ingredient.defaultVolumeType ?? "dl";
@@ -36,7 +36,7 @@ function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" |
 	return null;
 }
 
-function volumeInMl(volume : number, volumeType : VolumeType) : number | undefined {
+export function volumeInMl(volume : number, volumeType : VolumeType) : number | undefined {
 	switch(volumeType) {
 		case "ml":
 		case "krm":
@@ -58,7 +58,7 @@ function volumeInMl(volume : number, volumeType : VolumeType) : number | undefin
 	return undefined;
 }
 
-function toWeight(value : number, ingredient : IngredientType, volumeType? : VolumeType) : number | undefined {
+export function toWeight(value : number, ingredient : IngredientType, volumeType? : VolumeType) : number | undefined {
 	if (ingredient.unit == "weight")
 		return value;
 
@@ -82,5 +82,3 @@ function toWeight(value : number, ingredient : IngredientType, volumeType? : Vol
 
 	return undefined;
 }
-
-export { IngredientType, IngredientEntry, unitOptions, VolumeType, volumeTypes, defaultIngredientUnit, UnitOptions, volumeInMl, toWeight };

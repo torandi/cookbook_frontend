@@ -1,5 +1,6 @@
 import { IngredientType } from '@/app/types/ingredient';
-import { containsIgnoreCase } from '@/app/utils';
+
+import { useBackend } from './backend'
 
 // temp hack to have some data to test with
 const ingredients : IngredientType[] = [{
@@ -69,7 +70,7 @@ const ingredients : IngredientType[] = [{
 
 // https://wellobe.aftonbladet.se/inspiration/kost/EW64qK/vad-vager-1-dl-av
 
-function useIngredient(id : number) {
+export function useIngredient(id : number) {
 	const ingr = ingredients.find(i => i.id == id);
 
 	// conform to useBackend api
@@ -80,7 +81,7 @@ function useIngredient(id : number) {
 	}
 }
 
-function useIngredients() {
+export function useIngredients() {
 	// conform to useBackend api
 	return {
 		ingredients,
@@ -89,19 +90,9 @@ function useIngredients() {
 	}
 }
 
-async function addIngredient(ingredient : IngredientType) {
+export async function addIngredient(ingredient : IngredientType) {
 	// todo: post to backend
 	ingredient.id = ingredients.at(-1).id + 1;
 	ingredients.push(ingredient);
 	return ingredient;
 }
-
-function searchIngredient(name : string) {
-	return {
-		ingredients: ingredients.filter(i => containsIgnoreCase(i.name, name)),
-		error: undefined,
-		isLoading: false
-	}
-}
-
-export { useIngredient, useIngredients, searchIngredient, addIngredient }

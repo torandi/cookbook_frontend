@@ -1,17 +1,14 @@
+import { IngredientType, IngredientEntry, VolumeType } from '@/app/types/ingredient'
+
+import { RecipeType } from '@/app/types/recipe'
+
 import { create, StateCreator } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type {} from '@redux-devtools/extension' // required for devtools typing
 
 import { omit } from '@/app/utils'
 
-export interface IngredientInputEntry {
-	ingredientType: IngredientType | null
-	quantity: string | null
-	comment: string
-	unit: VolumeType | "g" | "st" | null
-}
-
-export const defaultIngredientEntry : IngredientInputEntry = {
+export const defaultIngredientEntry : IngredientEntry = {
 	ingredientType: null,
 	quantity: null,
 	comment: '',
@@ -21,33 +18,45 @@ export const defaultIngredientEntry : IngredientInputEntry = {
 // State slices
 
 interface IngredientsSlice {
-	ingredients : { [number]: IngredientInputEntry | null }
+	ingredients : { [number]: IngredientEntry | null }
 	nextIngredientId: number
 	ingredientsOrder: number[]
 	addIngredient: () => void
 	removeIngredient: (id: number) => void
-	setIngredient: (id: number, value: IngredientInputEntry | null ) => void,
+	setIngredient: (id: number, value: IngredientEntry | null ) => void,
 	setIngredientsOrder: (newOrder: number[]) => void,
 }
 
 interface InstructionsSlice {
-	instructions: { [number] : string },
-	nextInstructionId: number,
-	instructionsOrder: [number],
+	instructions: { [number] : string }
+	nextInstructionId: number
+	instructionsOrder: [number]
 	addInstruction: () => void
 	removeInstruction: (id: number) => void
-	insertInstruction: (index: number) => void,
-	setInstruction: (id: number, value: string ) => void,
-	setInstructionsOrder: (newOrder: number[]) => void,
-	trimInstructions: () => void,
+	insertInstruction: (index: number) => void
+	setInstruction: (id: number, value: string ) => void
+	setInstructionsOrder: (newOrder: number[]) => void
+	trimInstructions: () => void
+}
+
+interface RecipeInfo {
+	title: string
+	portions: number | null
+	defaultWeight: boolean
+}
+
+interface RecipeSlice extends RecipeInfo {
+	setTitle: (title: string) => void
+	setPortions: (count: number) => void
+	setDefaultWeight: (value : boolean) => void
 }
 
 interface ReadSlice {
-	getAll: () => { ingredients: { [number] : IngredientInputEntry } },
+	getAll: () => RecipeType
 }
 
 const createIngredientsSlice : StateCreator<
-	IngredientsSlice & IngredientSlice & ReadSlice,
+	RecipeSlice & IngredientsSlice & IngredientSlice & ReadSlice,
 	[["zustand/devtools", never]],
 	[],
 	IngredientsSlice
@@ -81,7 +90,7 @@ const createIngredientsSlice : StateCreator<
 	})
 
 const createInstructionsSlice : StateCreator<
-	InstructionsSlice & IngredientSlice & ReadSlice,
+	RecipeSlice & InstructionsSlice & IngredientSlice & ReadSlice,
 	[["zustand/devtools", never]],
 	[],
 	InstructionsSlice
@@ -131,23 +140,53 @@ const createInstructionsSlice : StateCreator<
 		},
 	})
 
+const createRecipeSlice : StateCreator<
+	RecipeSlice & IngredientsSlice & IngredientSlice & ReadSlice,
+	[["zustand/devtools", never]],
+	[],
+	RecipeSlice
+	> = (set) => ({
+		title: "",
+		portions: 4,
+		defaultWeight: false,
+		setTitle: (title: string) => set( state => ({
+			title: title,
+		})),
+		setPortions: (count: number) => set( state => ({
+			portions: count,
+		})),
+		setDefaultWeight: (value : boolean) => set( state => ({
+			defaultWeight: value,
+		})),
+	})
+
+
 const createReadSlice : StateCreator<
-	IngredientsSlice & IngredientSlice & ReadSlice,
+	RecipeSlice & IngredientsSlice & IngredientSlice & ReadSlice,
 	[["zustand/devtools", never]],
 	[],
 	ReadSlice
 	> = (set, get) => ({
 		getAll: () => ({
+			title: get().title,
+			portions: get().portions,
+			defaultWeight: get().defaultWeight,
 			ingredients: get().ingredientsOrder
 				.map(id => get().ingredients[id])
 				.filter(i => i != null),
 			instructions: get().instructionsOrder
 				.map(id => get().instructions[id].trim())
-				.filter(i => i != "")
+				.filter(i => i != ""),
 		})
 	})
 
-export const useRecipeAddStore = create<IngredientsSlice & IngredientSlice & ReadSlice>()((...a) => ({
+export const useRecipeAddStore = create<
+	RecipeSlice &
+	IngredientsSlice &
+	IngredientSlice &
+	ReadSlice
+>()((...a) => ({
+	...createRecipeSlice(...a),
 	...createIngredientsSlice(...a),
 	...createInstructionsSlice(...a),
 	...createReadSlice(...a),
