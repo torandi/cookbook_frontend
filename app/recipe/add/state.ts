@@ -40,14 +40,13 @@ interface InstructionsSlice {
 }
 
 interface RecipeSlice {
-	title: string
-	portions: number | null
-	portionName: string,
-	defaultWeight: boolean
+	recipe: RecipeType // ignoring instruction/ingredients fields
 	setTitle: (title: string) => void
 	setPortions: (count: number) => void
 	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
+	setActiveTime: (time : string) => void
+	setTotalTime: (time : string) => void
 }
 
 interface ReadSlice {
@@ -145,18 +144,45 @@ const createRecipeSlice : StateCreator<
 	[],
 	RecipeSlice
 	> = (set) => ({
-		title: "",
-		portions: 4,
-		defaultWeight: false,
-		portionName: "portioner",
+		recipe: {
+			title: "",
+			portions: 4,
+			defaultWeight: false,
+			portionName: "portioner",
+			totalTime: null,
+			activeTime: null,
+			ingredients: [], // not actually used in state
+			instructions: [], // not actually used in state
+		},
 		setTitle: (title: string) => set( state => ({
-			title: title,
+			recipe: {
+				...state.recipe,
+				title: title,
+			}
 		})),
 		setPortions: (count: number) => set( state => ({
-			portions: count,
+			recipe: {
+				...state.recipe,
+				portions: count,
+			}
 		})),
 		setPortionName: (name: string) => set( state => ({
-			portionName: name,
+			recipe: {
+				...state.recipe,
+				portionName: name,
+			}
+		})),
+		setActiveTime: (time : string) => set( state => ({
+			recipe: {
+				...state.recipe,
+				activeTime: time,
+			}
+		})),
+		setTotalTime: (time : string) => set( state => ({
+			recipe: {
+				...state.recipe,
+				totalTime: time,
+			}
 		})),
 		setDefaultWeight: (value : boolean) => set( state => ({
 			defaultWeight: value,
@@ -171,10 +197,7 @@ const createReadSlice : StateCreator<
 	ReadSlice
 	> = (set, get) => ({
 		getAll: () => ({
-			title: get().title,
-			portions: get().portions,
-			portionName: get().portionName,
-			defaultWeight: get().defaultWeight,
+			...get().recipe,
 			ingredients: get().ingredientsOrder
 				.map(id => get().ingredients[id])
 				.filter(i => i != null),

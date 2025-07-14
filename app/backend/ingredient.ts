@@ -2,10 +2,38 @@ import { IngredientType } from '@/app/types/ingredient';
 
 import { useBackend } from './backend'
 
+export function useIngredient(id : number) {
+	const ingr = ingredients.find(i => i.id == id);
+
+	// conform to useBackend api
+	return {
+		ingredient: ingr,
+		error: ingr === undefined ? `Ogiltlig ingrediens-id ${id}` : undefined,
+		isLoading: false
+	}
+}
+
+export function useIngredients() {
+	// conform to useBackend api
+	return {
+		ingredients,
+		error: undefined,
+		isLoading: false
+	}
+}
+
+export async function addIngredient(ingredient : IngredientType) {
+	// todo: post to backend
+	ingredient.id = ingredients.at(-1).id + 1;
+	ingredients.push(ingredient);
+	return ingredient;
+}
+
 // temp hack to have some data to test with
-const ingredients : IngredientType[] = [{
+export const ingredients : IngredientType[] = [
+{
 	id: 0,
-	name: "Mjöl",
+	name: "Vetemjöl",
 	unit: "volume",
 	defaultVolumeType: "dl",
 	weightPerUnit: 0.6
@@ -70,29 +98,3 @@ const ingredients : IngredientType[] = [{
 
 // https://wellobe.aftonbladet.se/inspiration/kost/EW64qK/vad-vager-1-dl-av
 
-export function useIngredient(id : number) {
-	const ingr = ingredients.find(i => i.id == id);
-
-	// conform to useBackend api
-	return {
-		ingredient: ingr,
-		error: ingr === undefined ? `Ogiltlig ingrediens-id ${id}` : undefined,
-		isLoading: false
-	}
-}
-
-export function useIngredients() {
-	// conform to useBackend api
-	return {
-		ingredients,
-		error: undefined,
-		isLoading: false
-	}
-}
-
-export async function addIngredient(ingredient : IngredientType) {
-	// todo: post to backend
-	ingredient.id = ingredients.at(-1).id + 1;
-	ingredients.push(ingredient);
-	return ingredient;
-}
