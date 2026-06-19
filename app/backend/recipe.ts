@@ -6,6 +6,17 @@ import { RecipeType } from '@/app/types/recipe'
 // composite the recipe data for us
 import { useIngredient } from '@/app/backend/ingredient'
 
+export function useRecipe(id : number) {
+	const item = recipes.find(i => i.id == id);
+
+	// conform to useBackend api
+	return {
+		recipe: item,
+		error: item === undefined ? `Ogiltlig recept-id ${id}` : undefined,
+		isLoading: false
+	}
+}
+
 // temp hack, mocking backend data
 
 const recipes : RecipeType[] = [

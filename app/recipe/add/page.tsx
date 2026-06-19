@@ -3,25 +3,18 @@ import { InstructionsInput } from './instructions';
 import { RecipeInfoInput } from './recipeInfo';
 import { SaveButton } from './save';
 
+import FullCard from '@/app/components/fullcard';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 //import Chip from '@mui/material/Chip';
 import FormControl from '@mui/material/FormControl';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-const FullCard = (props) => (
-	<Card {...props} >
-		<CardContent>
-			{props.children}
-		</CardContent>
-	</Card>
-)
-
 export default function Page() {
 	return (
-		<FormControl variant="outlined" className="w-full" sx={{my: 4}}>
+		<FormControl variant="outlined" className="w-full">
 			<Stack direction="column" spacing={2}>
 				<FullCard className="w-full">
 					<SaveButton/>

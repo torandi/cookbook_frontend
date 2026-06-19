@@ -42,7 +42,7 @@ export default function RootLayout(
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
 						<TopMenu/>
-						<Container maxWidth="xl">
+						<Container maxWidth="xl" sx={{my: 4}}>
 							{children}
 						</Container>
 						<AddMenuButton/>
