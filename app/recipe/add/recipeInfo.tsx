@@ -63,7 +63,7 @@ export const RecipeInfoInput = () => {
 				<Tooltip title="Ställer in om receptet ska visas som gram eller volymmått som standard">
 					<FormControlLabel control={
 						<Switch
-							checked={ recipeInfo.defaultWeight }
+							value={ recipeInfo.defaultWeight ?? false }
 							onChange={ (event) => setDefaultWeight(event.target.checked) }
 						/>} label="Föredra gram" labelPlacement="bottom"/>
 				</Tooltip>
