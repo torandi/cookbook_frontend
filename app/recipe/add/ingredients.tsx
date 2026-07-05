@@ -38,13 +38,15 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 const ingredientSpacing = 1;
 
+type IngredientOrNewType = IngredientType | { inputValue: string, title: string };
+
 function IngredientEntryInput({ id, isLastItem } : {
 	id: number,
 	isLastItem: boolean,
 }) {
 	const value = useRecipeAddStore( state => state.ingredients[id] )
 	const setIngredient = useRecipeAddStore( state => state.setIngredient )
-	const setValue = (value : IngredientEntry) => setIngredient(id, value)
+	const setValue = (value : IngredientEntry | null) => setIngredient(id, value)
 	const addIngredient = useRecipeAddStore( state => state.addIngredient )
 	const removeIngredient = useRecipeAddStore( state => state.removeIngredient )
 
@@ -97,7 +99,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 					<TextField
 						label="Kommentar"
 						value={value?.comment ?? ""}
-						onChange={ (event: ChangeEvent ) => {
+						onChange={ (event: ChangeEvent<{value: unknown}>) => {
 							setValue({
 								...value,
 								comment: event.target.value
@@ -113,7 +115,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 							<Switch
 								value={value?.optional ?? false}
 								tabIndex={-1}
-								onChange={ (event: ChangeEvent ) => {
+								onChange={ (event: ChangeEvent<{value: unknown}> ) => {
 									setValue({
 										...value,
 										optional: event.target.value
@@ -126,7 +128,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 						<IconButton
 							className="flex-none self-center justify-self-end"
 							onClick={handleDelete}
-							tabIndex="-1"
+							tabIndex={-1}
 						>
 						<DeleteIcon/>
 						</IconButton>
@@ -135,7 +137,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 						<IconButton
 							{...listeners}
 							className="flex-none self-center justify-self-end"
-							tabIndex="-1"
+							tabIndex={-1}
 						>
 							<DragIndicatorIcon/>
 						</IconButton>
@@ -163,11 +165,11 @@ function IngredientSelectBox({id, value, setValue} : {
 		weightPerUnit: ''
 	})
 
-	const filter = createFilterOptions<IngredientType>({
+	const filter = createFilterOptions<IngredientOrNewType>({
 		limit: 100, /* only show 100 first items */
 	});
 	// Add "Skapa ny" option to ingredient list
-	const generateOptions = (options, params) => {
+	const generateOptions = (options : IngredientOrNewType[], params : any) => {
 		const filtered = filter(options, params);
 
 		const { inputValue } = params;
@@ -183,7 +185,7 @@ function IngredientSelectBox({id, value, setValue} : {
 		return filtered;
 	}
 
-	const handleOnChange = (event, newValue) => {
+	const handleOnChange = (event : ChangeEvent<{value: unknown}>, newValue : IngredientOrNewType | null) => {
 		if(newValue && newValue.inputValue) {
 			setDialogOpen(true);
 			setDialogValue({
@@ -209,7 +211,7 @@ function IngredientSelectBox({id, value, setValue} : {
 				sx={{mr: ingredientSpacing}}
 				loading={ isLoading }
 				options={ ingredients }
-				getOptionLabel = { (option : IngredientType) => {
+				getOptionLabel = { (option : any ) => {
 					// Dynamically created option
 					if (option.inputValue) {
 						return option.title;
@@ -231,12 +233,13 @@ function IngredientSelectBox({id, value, setValue} : {
 						{...params}
 						label="Ingrediens"
 						slotProps={{
+							...params.slotProps,
 							input: {
-								...params.InputProps,
+								...params.slotProps.input,
 								endAdornment: (
 									<>
 										{isLoading ? <CircularProgress color="inherit" size={20} /> : null}
-										{params.InputProps.endAdornment}
+										{params.slotProps.input.endAdornment}
 									</>
 								),
 						},
@@ -267,7 +270,7 @@ function QuantityFields({ id, value, setValue } : {
 
 	const hasWeightOption = (value?.ingredientType?.weightPerUnit ?? 0) > 0;
 
-	let units = [];
+	let units : string[] = [];
 	const unit = value?.unit ?? "dl";
 
 	switch(unitType)
@@ -293,15 +296,15 @@ function QuantityFields({ id, value, setValue } : {
 				sx={{ mr: ingredientSpacing }}
 				value={ value?.quantity ?? "" }
 				placeholder="-"
-				onChange={ (event: ChangeEvent ) => {
+				onChange={ (event: ChangeEvent<{ value: string }> ) => {
 					setValue({
 						...value,
 						quantity: event.target.value
 					})
 				}}
-				slotProps={!hasUnitOptions && {
+				slotProps={{
 					input: {
-						endAdornment: (
+						endAdornment: !hasUnitOptions && (
 							<InputAdornment position="end">
 							{ value?.ingredientType?.unit == "count" ? "st" :
 								(value?.ingredientType?.unit == "weight" ? "g" : unit)
@@ -316,7 +319,6 @@ function QuantityFields({ id, value, setValue } : {
 					id={`ingredient-entry-${id}-unit`}
 					sx={{mr: ingredientSpacing}}
 					className="flex-1"
-					label="Enhet"
 					autoSelect
 					autoHighlight
 					selectOnFocus
@@ -330,7 +332,12 @@ function QuantityFields({ id, value, setValue } : {
 							unit: newValue,
 						})
 					}}
-					renderInput = { (params) => <TextField {...params} /> }
+					renderInput = { (params) => (
+						<TextField
+							{...params}
+							label="Enhet"
+							/>
+					)}
 				/>
 			</FormControl> }
 			</>
@@ -343,7 +350,7 @@ function IngredientCreateDialog({
 	setValue : Function,
 	setDialogValue: Function,
 	setOpen: Function,
-	value: InstructionType,
+	value: IngredientEntry | null,
 	dialogValue: any,
 	open: boolean
 }) {
@@ -358,10 +365,10 @@ function IngredientCreateDialog({
 		setOpen(false);
 	}
 
-	const handleSubmit = async (event : FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event : ChangeEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		let weightPerUnit = dialogValue.weightPerUnit != '' ? parseFloat(dialogValue.weightPerUnit) : undefined;
-		if(isNaN(weightPerUnit) === true) {
+		if(weightPerUnit != undefined && isNaN(weightPerUnit) === true) {
 			weightPerUnit= undefined
 		}
 
@@ -492,7 +499,7 @@ export const IngredientsInput = () => {
 			items={ingredientsOrder}
 		>
 			<Stack direction="column" spacing={2}>
-				{ ingredientsOrder.map((id) => (
+				{ ingredientsOrder.map((id : number) => (
 					<IngredientEntryInput
 						id = { id }
 						key = { id }

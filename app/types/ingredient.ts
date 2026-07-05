@@ -45,7 +45,7 @@ export function volumeInMl(volume : number, volumeType : VolumeType) : number | 
 			return volume * 100
 		case "dl":
 			return volume * 100;
-		case "l":
+		case "liter":
 			return volume * 1000;
 		case "tsk":
 			return volume * 5;
