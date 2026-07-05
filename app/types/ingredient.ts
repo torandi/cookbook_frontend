@@ -20,6 +20,7 @@ export interface IngredientType extends DbObject {
 export interface IngredientEntry extends DbObject {
 	ingredientType: IngredientType | null,
 	quantity: number | null,
+	comment: string,
 	optional: boolean | null,
 	unit: VolumeType | "g" | "st" | null
 }

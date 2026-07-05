@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, SyntheticEvent } from 'react';
 
 import { defaultIngredientEntry, useRecipeAddStore } from './state';
 
@@ -175,7 +175,7 @@ function IngredientSelectBox({id, value, setValue} : {
 		const { inputValue } = params;
 
 		// Suggest the creation of a new value
-		const isExisting = options.some((option) => inputValue === option.title);
+		const isExisting = options.some((option) => "title" in option && inputValue === option.title);
 		if (inputValue !== '' && !isExisting) {
 			filtered.push({
 				inputValue,
@@ -185,8 +185,8 @@ function IngredientSelectBox({id, value, setValue} : {
 		return filtered;
 	}
 
-	const handleOnChange = (event : ChangeEvent<{value: unknown}>, newValue : IngredientOrNewType | null) => {
-		if(newValue && newValue.inputValue) {
+	const handleOnChange = (event : SyntheticEvent, newValue : IngredientOrNewType | null) => {
+		if(newValue && "inputValue" in newValue && newValue.inputValue) {
 			setDialogOpen(true);
 			setDialogValue({
 				name: newValue.inputValue,
@@ -198,7 +198,7 @@ function IngredientSelectBox({id, value, setValue} : {
 			setValue({
 				...defaultIngredientEntry,
 				ingredientType: newValue,
-				unit: defaultIngredientUnit(newValue),
+				unit: defaultIngredientUnit(newValue as IngredientType),
 			});
 		}
 	}
@@ -211,15 +211,16 @@ function IngredientSelectBox({id, value, setValue} : {
 				sx={{mr: ingredientSpacing}}
 				loading={ isLoading }
 				options={ ingredients }
-				getOptionLabel = { (option : any ) => {
+				getOptionLabel = { (option : IngredientOrNewType ) => {
 					// Dynamically created option
-					if (option.inputValue) {
+					if ("inputValue" in option && option.inputValue) {
 						return option.title;
+					} else if ("name" in option) {
+						return option.name
 					}
-
-					return option.name
+					return ""
 				}}
-				isOptionEqualToValue = { (option, value) => option.name === value.name }
+				isOptionEqualToValue = { (option, value) => (option as IngredientType).name === (value as IngredientType).name }
 				value={value?.ingredientType ?? null}
 				onChange={handleOnChange}
 				clearOnEscape

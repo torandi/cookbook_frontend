@@ -34,3 +34,5 @@ https://nextjs.org/docs/15/app/getting-started/project-structure
 layout.ts is the root layout and main entrypoint. Wraps all other pages
 
 
+### Zustand
+Zustand is used for state management https://zustand.docs.pmnd.rs/learn/getting-started/introduction

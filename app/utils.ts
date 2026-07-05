@@ -9,7 +9,7 @@ export function range(min : number, max : number) : number[] {
 }
 
 // Returns copy of object with key removed
-export function omit<KeyType, ValueType>(obj : { [KeyType]: ValueType }, key : KeyType) : { [KeyType] : ValueType } {
+export function omit<ValueType>(obj : { [key: number]: ValueType }, key : number) : { [key: number] : ValueType } {
 	const { [key]: _, ...rest } = obj;
 	return rest;
 }

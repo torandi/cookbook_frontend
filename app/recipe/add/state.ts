@@ -4,21 +4,24 @@ import { RecipeType } from '@/app/types/recipe'
 
 import { create, StateCreator } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import type {} from '@redux-devtools/extension' // required for devtools typing
+// import type {} from '@redux-devtools/extension' // required for devtools typing
 
 import { omit } from '@/app/utils'
+import { stat } from 'node:fs'
 
 export const defaultIngredientEntry : IngredientEntry = {
+	id: null,
 	ingredientType: null,
 	quantity: null,
 	comment: '',
 	unit: null,
+	optional: false,
 }
 
 // State slices
 
 interface IngredientsSlice {
-	ingredients : { [number]: IngredientEntry | null }
+	ingredients : { [id: number]: IngredientEntry | null }
 	nextIngredientId: number
 	ingredientsOrder: number[]
 	addIngredient: () => void
@@ -28,9 +31,9 @@ interface IngredientsSlice {
 }
 
 interface InstructionsSlice {
-	instructions: { [number] : string }
+	instructions: { [id: number]: string }
 	nextInstructionId: number
-	instructionsOrder: [number]
+	instructionsOrder: number[]
 	addInstruction: () => void
 	removeInstruction: (id: number) => void
 	insertInstruction: (index: number) => void
@@ -53,16 +56,18 @@ interface ReadSlice {
 	getAll: () => RecipeType
 }
 
+type RecipieAddStore = RecipeSlice & IngredientsSlice & InstructionsSlice & ReadSlice
+
 const createIngredientsSlice : StateCreator<
-	RecipeSlice & IngredientsSlice & IngredientSlice & ReadSlice,
-	[["zustand/devtools", never]],
+	RecipieAddStore,
+	[],
 	[],
 	IngredientsSlice
 	> = (set) => ({
 		ingredients: { 0: null },
 		nextIngredientId: 1,
 		ingredientsOrder: [0],
-		addIngredient: () => set((state) => ({
+		addIngredient: () => set((state : any) => ({
 			nextIngredientId: state.nextIngredientId + 1,
 			ingredientsOrder: state.ingredientsOrder.concat(state.nextIngredientId),
 			ingredients: {
@@ -70,26 +75,26 @@ const createIngredientsSlice : StateCreator<
 				[state.nextIngredientId]: null,
 			}
 		})),
-		removeIngredient: (id) => set((state) => {
+		removeIngredient: (id) => set((state : any) => {
 			return {
-				ingredientsOrder: state.ingredientsOrder.filter(x => x != id),
-				ingredients: omit<number, IngredientsInputEntry | null>(state.ingredients, id)
+				ingredientsOrder: state.ingredientsOrder.filter((x : number) => x != id),
+				ingredients: omit<IngredientEntry | null>(state.ingredients, id)
 			}
 		}),
-		setIngredient: (id, value) => set((state) => ({
+		setIngredient: (id, value) => set((state : any) => ({
 			ingredients: {
 				...state.ingredients,
 				[id]: value
 			}
 		})),
-		setIngredientsOrder: (newOrder) => set((state) => ({
+		setIngredientsOrder: (newOrder) => set((state : any) => ({
 			ingredientsOrder: newOrder,
 		})),
 	})
 
 const createInstructionsSlice : StateCreator<
-	RecipeSlice & InstructionsSlice & IngredientSlice & ReadSlice,
-	[["zustand/devtools", never]],
+	RecipieAddStore,
+	[],
 	[],
 	InstructionsSlice
 	> = (set, get) => ({
@@ -107,12 +112,12 @@ const createInstructionsSlice : StateCreator<
 		removeInstruction: (id) => set((state) => {
 			return {
 				instructionsOrder: state.instructionsOrder.filter(x => x != id),
-				instructions: omit<number, string | null>(state.instructions, id)
+				instructions: omit<string>(state.instructions, id)
 			}
 		}),
 		insertInstruction: (index) => set((state) => ({
 			nextInstructionId: state.nextInstructionId + 1,
-			instructionsOrder: state.instructionsOrder.toSliced(index, 0, state.nextInstructionId),
+			instructionsOrder: state.instructionsOrder.toSpliced(index, 0, state.nextInstructionId),
 			instructions: {
 				...state.instructions,
 				[state.nextInstructionId]: "",
@@ -131,20 +136,21 @@ const createInstructionsSlice : StateCreator<
 			const order = get().instructionsOrder;
 			const values = get().instructions;
 			if (order.length > 1
-						&& values[order.at(-1)].trim() == ""
-						&& values[order.at(-2)].trim() == "") {
-				get().removeInstruction(order.at(-1));
+						&& values[order.at(-1) ?? 0].trim() == ""
+						&& values[order.at(-2) ?? 0].trim() == "") {
+				get().removeInstruction(order.at(-1) ?? 0);
 			}
 		},
 	})
 
 const createRecipeSlice : StateCreator<
-	RecipeSlice & IngredientsSlice & IngredientSlice & ReadSlice,
-	[["zustand/devtools", never]],
+	RecipieAddStore,
+	[],
 	[],
 	RecipeSlice
 	> = (set) => ({
 		recipe: {
+			id: null,
 			title: "",
 			portions: 4,
 			defaultWeight: false,
@@ -185,14 +191,17 @@ const createRecipeSlice : StateCreator<
 			}
 		})),
 		setDefaultWeight: (value : boolean) => set( state => ({
-			defaultWeight: value,
+			recipe: {
+				...state.recipe,
+				defaultWeight: value,
+			}
 		})),
 	})
 
 
 const createReadSlice : StateCreator<
-	RecipeSlice & IngredientsSlice & IngredientSlice & ReadSlice,
-	[["zustand/devtools", never]],
+	RecipieAddStore,
+	[],
 	[],
 	ReadSlice
 	> = (set, get) => ({
@@ -208,10 +217,7 @@ const createReadSlice : StateCreator<
 	})
 
 export const useRecipeAddStore = create<
-	RecipeSlice &
-	IngredientsSlice &
-	IngredientSlice &
-	ReadSlice
+	RecipieAddStore
 >()((...a) => ({
 	...createRecipeSlice(...a),
 	...createIngredientsSlice(...a),
