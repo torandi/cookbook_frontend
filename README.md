@@ -29,6 +29,8 @@ Create .env to setup configuration, see config.ts for available environment vari
 ## Structure / Code overview
 
 Using the "app router" version of next.js, see
-https://nextjs.org/docs/app/getting-started/project-structure
+https://nextjs.org/docs/15/app/getting-started/project-structure
+
+layout.ts is the root layout and main entrypoint. Wraps all other pages
 
 
