@@ -23,3 +23,12 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Config
+Create .env to setup configuration, see config.ts for available environment variables
+
+## Structure / Code overview
+
+Using the "app router" version of next.js, see
+https://nextjs.org/docs/app/getting-started/project-structure
+
+
