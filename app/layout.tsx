@@ -12,6 +12,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { roboto } from '@/app/ui/fonts';
 import { theme } from '@/app/ui/theme';
 import TopMenu from '@/app/ui/topmenu';
+import AuthGuard from '@/app/auth-guard';
 
 export const metadata: Metadata = {
 	title: "Kokbok",
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
 	width: "device-width",
-	initialScale: "1.0",
+	initialScale: 1,
 };
 
 const AddMenuButton = () => {
@@ -41,11 +42,13 @@ export default function RootLayout(
 				<AppRouterCacheProvider options={{ enableCssLayer: true }}>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
-						<TopMenu/>
-						<Container maxWidth="xl" sx={{my: 4}}>
-							{children}
-						</Container>
-						<AddMenuButton/>
+						<AuthGuard>
+							<TopMenu/>
+							<Container maxWidth="xl" sx={{my: 4}}>
+								{children}
+							</Container>
+							<AddMenuButton/>
+						</AuthGuard>
 					</ThemeProvider>
 				</AppRouterCacheProvider>
 			</body>
