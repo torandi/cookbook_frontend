@@ -99,7 +99,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 					<TextField
 						label="Kommentar"
 						value={value?.comment ?? ""}
-						onChange={ (event: ChangeEvent<{value: unknown}>) => {
+						onChange={ (event: ChangeEvent<HTMLInputElement>) => {
 							setValue({
 								...value,
 								comment: event.target.value
@@ -113,12 +113,12 @@ function IngredientEntryInput({ id, isLastItem } : {
 						className="flex-none"
 						control={
 							<Switch
-								value={value?.optional ?? false}
+								checked={value?.optional ?? false}
 								tabIndex={-1}
-								onChange={ (event: ChangeEvent<{value: unknown}> ) => {
+								onChange={ (event: ChangeEvent<HTMLInputElement>) => {
 									setValue({
 										...value,
-										optional: event.target.value
+										optional: event.target.checked
 									})
 								}}
 							/>

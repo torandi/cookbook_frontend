@@ -46,7 +46,7 @@ export const RecipeInfoInput = () => {
 					value={ recipeInfo.portions ?? "" }
 					onChange={ (event) => {
 						const num = parseInt(event.target.value)
-						setPortions(isNaN(num) ? null : event.target.value)
+						setPortions(isNaN(num) ? 1 : 4)
 					}}
 					sx={{mx: 2}}
 					slotProps={{
