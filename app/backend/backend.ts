@@ -1,15 +1,15 @@
 'use client'
 
 import { config } from '@/app/config'
-import useSWR from 'swr'
 
 import { getAuthHeaders } from './auth'
 
-// useBackend is cached and should be used for fetching data.
+import useSWR from 'swr'
+
 // backendCall is the authenticated uncached fetch helper.
 // unauthorizedBackendCall is for public endpoints such as login.
 
-type BackendError = Error & {
+export type BackendError = Error & {
 	status?: number
 	statusText?: string
 }
@@ -33,7 +33,8 @@ async function requestBackend<Type>(url: string, options: RequestInit = {}, incl
 	})
 
 	if (!response.ok) {
-		const error = new Error(await response.text() || response.statusText) as BackendError
+		const json = await response.json()
+		const error = new Error(json.details || response.statusText) as BackendError
 		error.status = response.status
 		error.statusText = response.statusText
 		throw error
@@ -48,16 +49,26 @@ const backendCall = <Type>(url: string, options: RequestInit = {}) =>
 const unauthorizedBackendCall = <Type>(url: string, options: RequestInit = {}) =>
 	requestBackend<Type>(url, options, false)
 
-function useBackend<Type>(endpoint: string)
+function useBackend<Type>(url: string)
 {
-	const { data, error, isLoading } = useSWR<Type>(endpoint, (url: string) => backendCall<Type>(url))
+	const { data, error, isLoading } = useSWR<Type>(url, backendCall)
 
-	if (error?.status === 403) {
-		// not authorized
+	return {
+		data,
+		isLoading,
+		error
 	}
-
-	return { data, error, isLoading }
 }
 
-export { backendCall, unauthorizedBackendCall, useBackend }
+async function postBackend<Type>(url: string, data: any, includeAuth: boolean = true) {
+	return requestBackend<Type>(url, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(data),
+	}, includeAuth)
+}
+
+export { backendCall, unauthorizedBackendCall, useBackend, postBackend }
 

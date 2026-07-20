@@ -1,5 +1,7 @@
 import { config } from '@/app/config'
 
+import { postBackend, backendCall } from './backend'
+
 const AUTH_STORAGE_KEY = 'cookbook-auth'
 const AUTH_COOKIE_NAME = 'cookbook-auth'
 
@@ -77,9 +79,17 @@ function setAuthToken(token: string | null, type: string = 'Bearer') {
 	persistAuth(token, type)
 }
 
-const storedAuth = readStoredAuth()
-if (storedAuth) {
-	setAuthToken(storedAuth.accessToken, storedAuth.tokenType ?? 'Bearer')
+async function refreshToken(): Promise<boolean>{
+    const response = await backendCall<LoginResponse>('users/refresh');
+    if (response?.accessToken) {
+        setAuthToken(response.accessToken, response.tokenType ?? 'Bearer')
+        return true
+    }
+    else
+    {
+        setAuthToken(null)
+    }
+    return false
 }
 
 export function getAuthHeaders() {
@@ -93,23 +103,29 @@ export function getAuthHeaders() {
 }
 
 export async function login(username: string, password: string) {
-	const response = await fetch(`${config.backend}/users/login/`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ username, password }),
-	})
-
-	if (!response.ok) {
-		throw new Error(await response.text() || response.statusText)
-	}
-
-	const data = await response.json() as LoginResponse
+	const data = await postBackend<LoginResponse>(`users/login/`, { username, password })
 	setAuthToken(data.accessToken, data.tokenType ?? 'Bearer')
 	return data
 }
 
 export function clearAuthToken() {
 	setAuthToken(null)
+}
+
+export async function validateAuth() {
+    const storedAuth = readStoredAuth()
+    if (storedAuth) {
+        setAuthToken(storedAuth.accessToken, storedAuth.tokenType ?? 'Bearer')
+        try
+        {
+            const valid = await refreshToken()
+            return valid
+        }
+        catch (error)
+        {
+            setAuthToken(null)
+            return false
+        }
+    }
+    return false
 }

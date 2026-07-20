@@ -1,34 +1,36 @@
+'use client'
+
 import { IngredientType } from '@/app/types/ingredient';
 
 import { useBackend } from './backend'
 
 export function useIngredient(id : number) {
-	const ingr = ingredients.find(i => i.id == id);
+	const { data, error, isLoading } = useBackend<IngredientType>( `ingredients/${id}` );
 
-	// conform to useBackend api
-	return {
-		ingredient: ingr,
-		error: ingr === undefined ? `Ogiltlig ingrediens-id ${id}` : undefined,
-		isLoading: false
-	}
+	return { 
+		ingredient: data,
+		isLoading,
+		error: error
+	};
 }
 
 export function useIngredients() {
-	// conform to useBackend api
+	const { data, error, isLoading } = useBackend<IngredientType[]>( `ingredients` );
 	return {
-		ingredients,
-		error: undefined,
-		isLoading: false
+		ingredients: data,
+		isLoading,
+		error: error
 	}
 }
 
 export async function addIngredient(ingredient : IngredientType) {
 	// todo: post to backend
-	ingredient.id = ingredients.at(-1).id + 1;
-	ingredients.push(ingredient);
+	//ingredient.id = ingredients.at(-1).id + 1;
+	//ingredients.push(ingredient);
 	return ingredient;
 }
 
+/*
 // temp hack to have some data to test with
 export const ingredients : IngredientType[] = [
 {
@@ -95,6 +97,7 @@ export const ingredients : IngredientType[] = [
 	weightPerUnit: 60
 }
 ]
+	*/
 
 // https://wellobe.aftonbladet.se/inspiration/kost/EW64qK/vad-vager-1-dl-av
 

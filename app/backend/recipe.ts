@@ -18,7 +18,7 @@ export function useRecipe(id : number) {
 }
 
 // temp hack, mocking backend data
-
+/*
 const recipes : RecipeType[] = [
 {
 	id: 0,
@@ -109,7 +109,7 @@ const recipes : RecipeType[] = [
 		"Pensla på smält smör. Kan tillsätta hackad vitlök till det smälta smöret för vitlöks-nan"
 	]
 },
-]
+]*/
 
 export function addRecipe(recipe : RecipeType ) {
 	// todo: convert to backend call

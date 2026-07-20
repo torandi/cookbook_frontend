@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { validateAuth } from './backend/auth'
+import error from 'next/dist/api/error'
 
 const publicRoutes = ['/signin']
 
@@ -18,13 +20,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       return
     }
 
-    const storedAuth = window.localStorage.getItem('cookbook-auth')
-    if (storedAuth) {
-      setAuthorized(true)
-      return
-    }
+    validateAuth().then((valid) => {
+      if (valid) {
+        setAuthorized(true)
+        return
+      }
 
-    router.replace('/signin')
+      router.replace('/signin')
+    })
+
+    // router.replace('/signin')
   }, [pathname, router])
 
   if (!authorized) {
