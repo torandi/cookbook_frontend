@@ -17,3 +17,4 @@ export default function Page() {
         <Button>Knapp</Button>
       </Box>
     );
+  }
