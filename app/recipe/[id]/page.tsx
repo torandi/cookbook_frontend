@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: number }>
 }) {
   const { id } = await params
 	const { recipe, error, isLoading } = useRecipe(id)

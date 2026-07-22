@@ -82,7 +82,7 @@ function InstructionStepInput({ id, index, isLastItem } :
 				minRows={2}
 				className="flex-3"
 				value={value}
-				onChange={ (event: ChangeEvent ) => {
+				onChange={ (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 					setValue(event.target.value)
 				}}
 				slotProps={{
@@ -102,7 +102,7 @@ function InstructionStepInput({ id, index, isLastItem } :
 						<Tooltip title="Ta bort steg">
 							<IconButton
 								onClick={handleDelete}
-								tabIndex="-1"
+								tabIndex={-1}
 							>
 								<DeleteIcon/>
 							</IconButton>
@@ -111,7 +111,7 @@ function InstructionStepInput({ id, index, isLastItem } :
 						<Tooltip title="Lägg till steg efter">
 							<IconButton
 								onClick={injectStep}
-								tabIndex="-1"
+								tabIndex={-1}
 							>
 								<PlaylistAddIcon/>
 							</IconButton>
@@ -121,7 +121,7 @@ function InstructionStepInput({ id, index, isLastItem } :
 					<Tooltip title="Dra för att sortera">
 						<IconButton
 							{...listeners}
-							tabIndex="-1"
+							tabIndex={-1}
 						>
 							<DragIndicatorIcon/>
 						</IconButton>

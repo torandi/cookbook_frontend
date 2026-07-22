@@ -4,8 +4,8 @@ import { useState, useEffect, ChangeEvent, SyntheticEvent } from 'react';
 
 import { defaultIngredientEntry, useRecipeAddStore } from './state';
 
-import { IngredientType, IngredientEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
-import { useIngredient, addIngredient, useIngredients } from '@/app/backend/ingredient'
+import { IngredientType, IngredientInputEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
+import { addIngredient, useIngredients } from '@/app/backend/ingredient'
 import { SortableList } from '@/app/components/sortableList'
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -46,7 +46,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 }) {
 	const value = useRecipeAddStore( state => state.ingredients[id] )
 	const setIngredient = useRecipeAddStore( state => state.setIngredient )
-	const setValue = (value : IngredientEntry | null) => setIngredient(id, value)
+	const setValue = (value : IngredientInputEntry | null) => setIngredient(id, value)
 	const addIngredient = useRecipeAddStore( state => state.addIngredient )
 	const removeIngredient = useRecipeAddStore( state => state.removeIngredient )
 
@@ -99,10 +99,11 @@ function IngredientEntryInput({ id, isLastItem } : {
 					<TextField
 						label="Kommentar"
 						value={value?.comment ?? ""}
-						onChange={ (event: ChangeEvent<{value: unknown}>) => {
+						onChange={ (event: ChangeEvent<HTMLInputElement>) => {
+							if (!value) return;
 							setValue({
 								...value,
-								comment: event.target.value
+								comment: event.currentTarget.value
 							})
 						}}
 						className="flex-2"
@@ -115,10 +116,11 @@ function IngredientEntryInput({ id, isLastItem } : {
 							<Switch
 								value={value?.optional ?? false}
 								tabIndex={-1}
-								onChange={ (event: ChangeEvent<{value: unknown}> ) => {
+								onChange={ (event: ChangeEvent<HTMLInputElement>) => {
+									if (!value) return;
 									setValue({
 										...value,
-										optional: event.target.value
+										optional: event.currentTarget.checked
 									})
 								}}
 							/>
@@ -152,7 +154,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 // If this becomes to heavy on mobile devices, we could move the search to the backend
 function IngredientSelectBox({id, value, setValue} : {
 	id: number,
-	value: IngredientEntry | null,
+	value: IngredientInputEntry | null,
 	setValue: Function
 }) {
 	const { ingredients, error, isLoading } = useIngredients();
@@ -210,7 +212,7 @@ function IngredientSelectBox({id, value, setValue} : {
 				className = "flex-3"
 				sx={{mr: ingredientSpacing}}
 				loading={ isLoading }
-				options={ ingredients }
+				options={ ingredients ?? [] }
 				getOptionLabel = { (option : IngredientOrNewType ) => {
 					// Dynamically created option
 					if ("inputValue" in option && option.inputValue) {
@@ -263,7 +265,7 @@ function IngredientSelectBox({id, value, setValue} : {
 
 function QuantityFields({ id, value, setValue } : {
 	id: number,
-	value: IngredientEntry | null,
+	value: IngredientInputEntry | null,
 	setValue: Function
 })
 {
@@ -351,7 +353,7 @@ function IngredientCreateDialog({
 	setValue : Function,
 	setDialogValue: Function,
 	setOpen: Function,
-	value: IngredientEntry | null,
+	value: IngredientInputEntry | null,
 	dialogValue: any,
 	open: boolean
 }) {

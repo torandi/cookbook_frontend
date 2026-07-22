@@ -1,4 +1,4 @@
-import { IngredientType, IngredientEntry, VolumeType } from '@/app/types/ingredient'
+import { IngredientType, IngredientInputEntry, VolumeType } from '@/app/types/ingredient'
 
 import { RecipeType } from '@/app/types/recipe'
 
@@ -9,7 +9,7 @@ import { devtools } from 'zustand/middleware'
 import { omit } from '@/app/utils'
 import { stat } from 'node:fs'
 
-export const defaultIngredientEntry : IngredientEntry = {
+export const defaultIngredientEntry : IngredientInputEntry = {
 	id: null,
 	ingredientType: null,
 	quantity: null,
@@ -21,12 +21,12 @@ export const defaultIngredientEntry : IngredientEntry = {
 // State slices
 
 interface IngredientsSlice {
-	ingredients : { [id: number]: IngredientEntry | null }
+	ingredients : { [id: number]: IngredientInputEntry | null }
 	nextIngredientId: number
 	ingredientsOrder: number[]
 	addIngredient: () => void
 	removeIngredient: (id: number) => void
-	setIngredient: (id: number, value: IngredientEntry | null ) => void,
+	setIngredient: (id: number, value: IngredientInputEntry | null ) => void,
 	setIngredientsOrder: (newOrder: number[]) => void,
 }
 
@@ -78,7 +78,7 @@ const createIngredientsSlice : StateCreator<
 		removeIngredient: (id) => set((state : any) => {
 			return {
 				ingredientsOrder: state.ingredientsOrder.filter((x : number) => x != id),
-				ingredients: omit<IngredientEntry | null>(state.ingredients, id)
+				ingredients: omit<IngredientInputEntry | null>(state.ingredients, id)
 			}
 		}),
 		setIngredient: (id, value) => set((state : any) => ({

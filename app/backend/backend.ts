@@ -9,11 +9,6 @@ import useSWR from 'swr'
 // backendCall is the authenticated uncached fetch helper.
 // unauthorizedBackendCall is for public endpoints such as login.
 
-export type BackendError = Error & {
-	status?: number
-	statusText?: string
-}
-
 const buildUrl = (url: string) => `${config.backend}/${url.replace(/^\/+/, '')}/`
 
 async function requestBackend<Type>(url: string, options: RequestInit = {}, includeAuth: boolean)

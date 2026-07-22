@@ -11,6 +11,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export const RecipeInfoInput = () => {
 	const recipeInfo = useRecipeAddStore(
@@ -27,7 +28,6 @@ export const RecipeInfoInput = () => {
 	const setTitle = useRecipeAddStore( state => state.setTitle )
 	const setPortions = useRecipeAddStore( state => state.setPortions )
 	const setPortionName = useRecipeAddStore( state => state.setPortionName )
-	const setDefaultWeight = useRecipeAddStore( state => state.setDefaultWeight )
 	const setActiveTime = useRecipeAddStore( state => state.setActiveTime );
 	const setTotalTime = useRecipeAddStore( state => state.setTotalTime );
 
@@ -60,26 +60,28 @@ export const RecipeInfoInput = () => {
 					value={ recipeInfo.portionName }
 					onChange={ (event) => setPortionName(event.target.value) }
 				/>
-				<Tooltip title="Ställer in om receptet ska visas som gram eller volymmått som standard">
-					<FormControlLabel control={
-						<Switch
-							value={ recipeInfo.defaultWeight ?? false }
-							onChange={ (event) => setDefaultWeight(event.target.checked) }
-						/>} label="Föredra gram" labelPlacement="bottom"/>
-				</Tooltip>
 			</Box>
 			<Box sx={{my: 2}}>
-				{/* todo: set these in proper time format */}
 				<TextField
 					label="Total tid"
 					value={ recipeInfo.totalTime ?? ""}
 					onChange={ (event) => setTotalTime(event.target.value) }
+					slotProps={{
+						input: {
+							endAdornment: <InputAdornment position="end">min</InputAdornment>
+						}
+					}}
 				/>
 				<TextField
 					label="Aktiv tid"
 					value={ recipeInfo.activeTime ?? ""}
 					onChange={ (event) => setActiveTime(event.target.value) }
 					sx={{mx: 2}}
+					slotProps={{
+						input: {
+							endAdornment: <InputAdornment position="end">min</InputAdornment>
+						}
+					}}
 				/>
 			</Box>
 		</>

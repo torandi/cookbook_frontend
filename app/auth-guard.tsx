@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { validateAuth } from './backend/auth'
-import error from 'next/dist/api/error'
 
 const publicRoutes = ['/signin']
 
