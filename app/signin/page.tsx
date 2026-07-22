@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -17,19 +17,20 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
     setIsSubmitting(true)
 
-    try {
-      await login(username, password)
-      router.replace('/')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Inloggning misslyckades')
-    } finally {
+    login(username, password).then(({ data, error }) => {
+      if (data) {
+        router.replace('/')
+      } else {
+        setError(error ?? 'Inloggning misslyckades')
+      }
+    }).finally(() => {
       setIsSubmitting(false)
-    }
+    })
   }
 
   return (

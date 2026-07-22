@@ -28,7 +28,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       router.replace('/signin')
     })
 
-    // router.replace('/signin')
   }, [pathname, router])
 
   if (!authorized) {

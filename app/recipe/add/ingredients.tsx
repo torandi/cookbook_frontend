@@ -163,7 +163,7 @@ function IngredientSelectBox({id, value, setValue} : {
 	const [dialogValue, setDialogValue] = useState({
 		name: '',
 		unit: "volume",
-		defaultVolumeType: '',
+		defaultVolumeInputType: null,
 		weightPerUnit: ''
 	})
 
@@ -193,7 +193,7 @@ function IngredientSelectBox({id, value, setValue} : {
 			setDialogValue({
 				name: newValue.inputValue,
 				unit: "volume",
-				defaultVolumeType: '',
+				defaultVolumeInputType: null,
 				weightPerUnit: ''
 			})
 		} else {
@@ -362,14 +362,18 @@ function IngredientCreateDialog({
 		setDialogValue({
 			name: '',
 			unit: "volume",
-			defaultVolumeType: '',
+			defaultVolumeInputType: '',
 			weightPerUnit: ''
 		})
 		setOpen(false);
 	}
 
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
 	const handleSubmit = async (event : ChangeEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		setIsSubmitting(true);
+
 		let weightPerUnit = dialogValue.weightPerUnit != '' ? parseFloat(dialogValue.weightPerUnit) : undefined;
 		if(weightPerUnit != undefined && isNaN(weightPerUnit) === true) {
 			weightPerUnit= undefined
@@ -384,110 +388,122 @@ function IngredientCreateDialog({
 			id: null,
 			name: dialogValue.name,
 			unit: dialogValue.unit,
-			defaultVolumeType: dialogValue.defaultVolumeType != '' ? dialogValue.defaultVolumeType : undefined,
+			defaultVolumeInputType: dialogValue.defaultVolumeInputType != '' ? dialogValue.defaultVolumeInputType : undefined,
 			weightPerUnit: weightPerUnit
 		};
 
-		const ingredient = await addIngredient(newIngredient);
-		setValue({
-			...defaultIngredientEntry,
-			ingredientType: ingredient,
-			unit: defaultIngredientUnit(ingredient),
+		addIngredient(newIngredient)
+		.then(({ data, error }) => {
+			setIsSubmitting(false);
+			if (error || !data) {
+				console.error("Error adding ingredient:", error);
+				// todo: show error toast
+			} else {
+				const ingredient = data;
+				setValue({
+					...defaultIngredientEntry,
+					ingredientType: ingredient,
+					unit: defaultIngredientUnit(ingredient),
+				});
+				handleClose();
+			}
 		});
-		handleClose();
 	}
 
-	const [isVolumeType, toggleIsVolumeType] = useState(false);
+	const [isVolumeType, toggleIsVolumeType] = useState(true);
 	const [isWeightType, toggleIsWeightType] = useState(false);
 
 	return (
 		<Dialog open={open} onClose={handleClose}>
-			<form onSubmit={handleSubmit}>
-				<DialogTitle>Skapa ny ingrediens</DialogTitle>
-					<DialogContent>
-						<FormControl variant="standard" >
-							<Stack direction="column" spacing={2} sx={{pt: 2}}>
-								<TextField
-									autoFocus
-									id="ingredient-create-name"
-								value={dialogValue.name}
-								onChange={(event) =>
-									setDialogValue({
-									...dialogValue,
-									name: event.target.value,
-								})}
-								label="Namn"
-								/>
-							<FormControl>
-								<InputLabel id="ingredient-create-unit-label">Enhet</InputLabel>
-								<Select
-									id="ingredient-create-unit"
-									labelId="ingredient-create-unit-label"
-									label="Enhet"
-									value={dialogValue.unit}
-									onChange={(event : SelectChangeEvent) => {
-										setDialogValue({
-											...dialogValue,
-											unit: event.target.value as string,
-											defaultVolumeType: "ml",
-										})
-										toggleIsVolumeType(event.target.value == "volume");
-										toggleIsWeightType(event.target.value == "weight");
-									}}
-								>
-									{
-										Object.entries(unitOptions).map(([key, value]) => (
-											<MenuItem value={key}>{value}</MenuItem>
-										))
-									}
-								</Select>
-							</FormControl>
-							<FormControl sx={{
-								display: isVolumeType ? 'flex' : 'none',
-								}}>
-								<InputLabel id="ingredient-create-volume-default-type-label">Standardenhet</InputLabel>
-								<Select
-									id="ingredient-create-volume-default-type"
-									labelId="ingredient-create-volume-default-type-label"
-									label="Standardenhet"
-									value={dialogValue.defaultVolumeType}
-									onChange={(event : SelectChangeEvent) => {
-										setDialogValue({
-											...dialogValue,
-											defaultVolumeType: event.target.value as string,
-										})
-									}}
-									>
-									{
-										volumeTypes.map((value) => (
-											<MenuItem value={value}>{value}</MenuItem>
-										))
-									}
-								</Select>
-							</FormControl>
-								<TextField
-									id="ingredient-create-weight-per-unit"
-									value={dialogValue.weightPerUnit}
+			{ isSubmitting && <CircularProgress />}
+			{ !isSubmitting && 
+				<form onSubmit={handleSubmit}>
+					<DialogTitle>Skapa ny ingrediens</DialogTitle>
+						<DialogContent>
+							<FormControl variant="standard" >
+								<Stack direction="column" spacing={2} sx={{pt: 2}}>
+									<TextField
+										autoFocus
+										id="ingredient-create-name"
+									value={dialogValue.name}
 									onChange={(event) =>
 										setDialogValue({
 										...dialogValue,
-										weightPerUnit: event.target.value,
+										name: event.target.value,
 									})}
-									label={
-										dialogValue.unit == "count" ?  "Vikt per styck" : "Vikt per dl"
-									}
-									sx={{
-										display: isWeightType ? 'none' : 'flex'
-									}}
-								/>
-							</Stack>
-						</FormControl>
-					</DialogContent>
-				<DialogActions>
-					<Button onClick={handleClose}>Avbryt</Button>
-					<Button type="submit">Skapa</Button>
-				</DialogActions>
-			</form>
+									label="Namn"
+									/>
+								<FormControl>
+									<InputLabel id="ingredient-create-unit-label">Enhet</InputLabel>
+									<Select
+										id="ingredient-create-unit"
+										labelId="ingredient-create-unit-label"
+										label="Enhet"
+										value={dialogValue.unit}
+										onChange={(event : SelectChangeEvent) => {
+											setDialogValue({
+												...dialogValue,
+												unit: event.target.value as string,
+												defaultVolumeInputType: null,
+											})
+											toggleIsVolumeType(event.target.value == "volume");
+											toggleIsWeightType(event.target.value == "weight");
+										}}
+									>
+										{
+											Object.entries(unitOptions).map(([key, value]) => (
+												<MenuItem value={key}>{value}</MenuItem>
+											))
+										}
+									</Select>
+								</FormControl>
+								<FormControl sx={{
+									display: isVolumeType ? 'flex' : 'none',
+									}}>
+									<InputLabel id="ingredient-create-volume-default-type-label">Standard inmatnings-enhet</InputLabel>
+									<Select
+										id="ingredient-create-volume-default-type"
+										labelId="ingredient-create-volume-default-type-label"
+										label="Standard inmatnings-enhet"
+										value={dialogValue.defaultVolumeInputType ?? "dl"}
+										onChange={(event : SelectChangeEvent) => {
+											setDialogValue({
+												...dialogValue,
+												defaultVolumeInputType: event.target.value as string,
+											})
+										}}
+										>
+										{
+											volumeTypes.map((value) => (
+												<MenuItem value={value}>{value}</MenuItem>
+											))
+										}
+									</Select>
+								</FormControl>
+									<TextField
+										id="ingredient-create-weight-per-unit"
+										value={dialogValue.weightPerUnit}
+										onChange={(event) =>
+											setDialogValue({
+											...dialogValue,
+											weightPerUnit: event.target.value,
+										})}
+										label={
+											dialogValue.unit == "count" ?  "Vikt per styck" : "Vikt per dl"
+										}
+										sx={{
+											display: isWeightType ? 'none' : 'flex'
+										}}
+									/>
+								</Stack>
+							</FormControl>
+						</DialogContent>
+					<DialogActions>
+						<Button onClick={handleClose}>Avbryt</Button>
+						<Button type="submit">Skapa</Button>
+					</DialogActions>
+				</form>
+			}
 		</Dialog>
 	)
 }

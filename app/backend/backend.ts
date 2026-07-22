@@ -29,9 +29,7 @@ async function requestBackend<Type>(url: string, options: RequestInit = {}, incl
 
 	if (!response.ok) {
 		const json = await response.json()
-		const error = new Error(json.details || response.statusText) as BackendError
-		error.status = response.status
-		error.statusText = response.statusText
+		const error = new Error(json.detail || response.statusText)
 		throw error
 	}
 
@@ -55,14 +53,28 @@ function useBackend<Type>(url: string)
 	}
 }
 
-async function postBackend<Type>(url: string, data: any, includeAuth: boolean = true) {
-	return requestBackend<Type>(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(data),
-	}, includeAuth)
+async function postBackend<Type>(url: string, data: any, 
+	{ includeAuth = true, method = 'POST' }: { includeAuth?: boolean, method?: string } = {}) {
+
+	try
+	{
+		const result = await requestBackend<Type>(url, {
+			method: method,
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		}, includeAuth)
+		return {
+			data: result,
+			error: null,
+		}
+	} catch (error: any) {
+		return {
+			data: null,
+			error: error.message ||  'Okänt fel',
+		}
+	}
 }
 
 export { backendCall, unauthorizedBackendCall, useBackend, postBackend }

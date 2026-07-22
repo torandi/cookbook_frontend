@@ -103,9 +103,11 @@ export function getAuthHeaders() {
 }
 
 export async function login(username: string, password: string) {
-	const data = await postBackend<LoginResponse>(`users/login/`, { username, password })
-	setAuthToken(data.accessToken, data.tokenType ?? 'Bearer')
-	return data
+	const {data, error } = await postBackend<LoginResponse>(`users/login/`, { username, password }, { includeAuth: false })
+	if (data) {
+		setAuthToken(data.accessToken, data.tokenType ?? 'Bearer')
+	}
+	return { data, error }
 }
 
 export function clearAuthToken() {

@@ -2,7 +2,7 @@
 
 import { IngredientType } from '@/app/types/ingredient';
 
-import { useBackend } from './backend'
+import { useBackend, postBackend } from './backend'
 
 export function useIngredient(id : number) {
 	const { data, error, isLoading } = useBackend<IngredientType>( `ingredients/${id}` );
@@ -24,10 +24,7 @@ export function useIngredients() {
 }
 
 export async function addIngredient(ingredient : IngredientType) {
-	// todo: post to backend
-	//ingredient.id = ingredients.at(-1).id + 1;
-	//ingredients.push(ingredient);
-	return ingredient;
+	return postBackend<IngredientType>(`ingredients/`, ingredient, { includeAuth: true })
 }
 
 // https://wellobe.aftonbladet.se/inspiration/kost/EW64qK/vad-vager-1-dl-av
