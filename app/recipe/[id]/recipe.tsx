@@ -13,6 +13,7 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Chip from '@mui/material/Chip'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
@@ -30,8 +31,15 @@ function formatTime(value: string | null) {
 		return 'Ej angivet'
 	}
 
-	if (/^\d+$/.test(value)) {
-		return `${value} min`
+	let numMinutes = parseInt(value)
+	if (!isNaN(numMinutes)) {
+		let hours = Math.floor(numMinutes / 60)
+		let minutes = numMinutes % 60
+
+		if (hours > 0) {
+			return `${hours} tim ${minutes} min`
+		}
+		return `${numMinutes} min`
 	}
 
 	return value
@@ -59,7 +67,7 @@ type RecipeDisplayProps = {
 
 export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 	const [portions, setPortions] = useState<number | null>(null)
-	const [allowCups, setAllowCups] = useState(false)
+	const [allowCups, setAllowCups] = useState(true)
 
 	const { recipe, error, isLoading } = useRecipe(recipeId, {
 		portions: portions ?? undefined,
@@ -117,7 +125,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					>
 						<Box>
 							<Typography variant="overline" color="text.secondary">
-								Portioner
+								{capitalize(recipe.portionName)}
 							</Typography>
 							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
 								<IconButton
@@ -136,9 +144,6 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 								>
 									<AddIcon />
 								</IconButton>
-								<Typography variant="body2" color="text.secondary">
-									{capitalize(recipe.portionName)}
-								</Typography>
 							</Box>
 						</Box>
 
@@ -170,30 +175,66 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 			</FullCard>
 
 			<Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-				<FullCard className="w-full md:w-1/2">
+				<FullCard className="w-1/3 md:w-1/3">
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Ingredienser
 					</Typography>
 					{ingredientRows.length === 0 ? (
-						<Typography color="text.secondary">Inga ingredienser angivna.</Typography>
+						<Typography color="text.secondary">Inga ingredienser</Typography>
 					) : (
-						<Box component="ul" sx={{ m: 0, pl: 3 }}>
+						<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
 							{ingredientRows.map((item) => (
-								<Typography component="li" key={item.id} sx={{ mb: 1 }}>
-									{formatQuantity(item.quantity ?? 0)} {formatUnit(item.unit)} {item.ingredient.name}
-									{item.optional ? ' (valfri)' : ''}
-								</Typography>
+								<Box
+									component="li"
+									key={item.id}
+									sx={{
+										py: 1.25,
+									}}
+								>
+									<Box
+										sx={{
+											display: 'grid',
+											gridTemplateColumns: 'minmax(0, 1fr) auto',
+											columnGap: 2,
+											rowGap: 0.5,
+											alignItems: 'start',
+										}}
+									>
+										<Box sx={{ minWidth: 0 }}>
+											<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+												<Typography sx={{ fontWeight: 500, color: 'grey.600' }}>
+													{item.ingredient.name}
+												</Typography>
+												{item.optional ? <Chip label="Valfri" size="small" variant="filled" color="info" /> : null}
+											</Box>
+										</Box>
+										<Typography sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
+											{formatQuantity(item.quantity ?? 0)} {formatUnit(item.unit)}
+										</Typography>
+										{item.comment ? (
+											<Typography
+												sx={{
+													gridColumn: '1 / -1',
+													fontSize: '0.875rem',
+													color: 'text.secondary',
+												}}
+											>
+												{item.comment}
+											</Typography>
+										) : null}
+									</Box>
+								</Box>
 							))}
 						</Box>
 					)}
 				</FullCard>
 
-				<FullCard className="w-full md:w-1/2">
+				<FullCard className="w-2/3 md:w-2/3">
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Instruktioner
 					</Typography>
 					{instructions.length === 0 ? (
-						<Typography color="text.secondary">Inga instruktioner angivna.</Typography>
+						<Typography color="text.secondary">Inga instruktioner</Typography>
 					) : (
 						<Box component="ol" sx={{ m: 0, pl: 3 }}>
 							{instructions.map((step) => (

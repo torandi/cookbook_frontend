@@ -8,6 +8,7 @@ type RecipeIngredientType = {
 	quantity: number | null
 	unit: string | null
 	weight: number | null
+	comment?: string | null
 	optional: boolean
 	ingredient: {
 		id: number

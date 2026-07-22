@@ -1,6 +1,7 @@
 import { config } from '@/app/config'
 
 import { postBackend, backendCall } from './backend'
+import { showErrorAlert } from '../ui/alert-state'
 
 const AUTH_STORAGE_KEY = 'cookbook-auth'
 const AUTH_COOKIE_NAME = 'cookbook-auth'
@@ -127,6 +128,7 @@ export async function validateAuth() {
         }
         catch (error)
         {
+			showErrorAlert("Du har blivit utloggad. Logga in igen.")
             setAuthToken(null)
             return false
         }
