@@ -157,8 +157,6 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 		(item) => item.quantity != null && item.unit != null && item.ingredient?.name,
 	)
 	const instructions = recipe.instructions
-		.slice()
-		.sort((left, right) => left.stepNumber - right.stepNumber)
 
 	return (
 		<Stack direction="column" spacing={2}>
@@ -285,7 +283,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 										<Box sx={{ minWidth: 0 }}>
 											<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
 												<Typography sx={{ fontWeight: 500, color: 'grey.800' }}>
-													{item.ingredient.name}
+													{item.ingredient?.name || ""}
 												</Typography>
 												{item.optional ? (
 													<Chip
