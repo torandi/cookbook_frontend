@@ -1,12 +1,12 @@
 'use client'
 
 import { ChangeEvent, useState } from 'react'
+import { showErrorAlert, showSuccessAlert } from '../ui/alert-state'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
 
 import { login } from '@/app/backend/auth'
 
@@ -14,19 +14,18 @@ export default function SignInPage() {
   const router = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError(null)
     setIsSubmitting(true)
 
     login(username, password).then(({ data, error }) => {
       if (data) {
+        showSuccessAlert('Inloggning lyckades')
         router.replace('/')
       } else {
-        setError(error ?? 'Inloggning misslyckades')
+        showErrorAlert(error ?? 'Inloggning misslyckades')
       }
     }).finally(() => {
       setIsSubmitting(false)
@@ -41,8 +40,6 @@ export default function SignInPage() {
 
       <form onSubmit={handleSubmit}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {error ? <Alert severity="error">{error}</Alert> : null}
-
           <TextField
             label="Användarnamn"
             value={username}

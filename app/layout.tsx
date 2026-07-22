@@ -12,6 +12,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { roboto } from '@/app/ui/fonts';
 import { theme } from '@/app/ui/theme';
 import TopMenu from '@/app/ui/topmenu';
+import GlobalAlerts from '@/app/ui/global-alerts';
 import AuthGuard from '@/app/auth-guard';
 
 export const metadata: Metadata = {
@@ -45,6 +46,7 @@ export default function RootLayout(
 						<AuthGuard>
 							<TopMenu/>
 							<Container maxWidth="xl" sx={{my: 4}}>
+								<GlobalAlerts />
 								{children}
 							</Container>
 							<AddMenuButton/>

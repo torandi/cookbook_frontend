@@ -35,6 +35,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { showSuccessAlert, showErrorAlert } from '@/app/ui/alert-state';
 
 const ingredientSpacing = 1;
 
@@ -396,8 +397,7 @@ function IngredientCreateDialog({
 		.then(({ data, error }) => {
 			setIsSubmitting(false);
 			if (error || !data) {
-				console.error("Error adding ingredient:", error);
-				// todo: show error toast
+				showErrorAlert(error ?? 'Misslyckades med att skapa ingrediens');
 			} else {
 				const ingredient = data;
 				setValue({
@@ -405,6 +405,7 @@ function IngredientCreateDialog({
 					ingredientType: ingredient,
 					unit: defaultIngredientUnit(ingredient),
 				});
+				showSuccessAlert(`Ingrediens "${ingredient.name}" skapad`);
 				handleClose();
 			}
 		});
