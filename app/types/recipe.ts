@@ -9,11 +9,5 @@ export interface RecipeType extends DbObject {
 	activeTime: number | null;
 	totalTime: number | null;
 	ingredients : RecipeIngredientType[];
-	instructions : RecipeInstructionType[];
-}
-
-
-export interface RecipeInstructionType extends DbObject {
-	stepNumber: number
-	description: string
+	instructions : string[];
 }

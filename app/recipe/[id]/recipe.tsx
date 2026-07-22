@@ -338,8 +338,8 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					) : (
 						<Box component="ol" sx={{ m: 0, pl: 3 }}>
 							{instructions.map((step) => (
-								<Typography component="li" key={step.id} sx={{ mb: 1 }}>
-									{step.description.replaceAll('{portions}', String(currentPortions))}
+								<Typography component="li" sx={{ mb: 1 }}>
+									{step.replaceAll('{portions}', String(currentPortions))}
 								</Typography>
 							))}
 						</Box>

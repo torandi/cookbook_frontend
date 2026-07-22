@@ -1,17 +1,15 @@
-import { IngredientType, IngredientInputEntry, VolumeType } from '@/app/types/ingredient'
+import { RecipeIngredientType } from '@/app/types/ingredient'
 
 import { RecipeType } from '@/app/types/recipe'
 
 import { create, StateCreator } from 'zustand'
-import { devtools } from 'zustand/middleware'
-// import type {} from '@redux-devtools/extension' // required for devtools typing
 
 import { omit } from '@/app/utils'
 import { stat } from 'node:fs'
 
-export const defaultIngredientEntry : IngredientInputEntry = {
+export const defaultIngredientEntry : RecipeIngredientType = {
 	id: null,
-	ingredientType: null,
+	ingredient: null,
 	quantity: null,
 	comment: '',
 	unit: null,
@@ -21,12 +19,12 @@ export const defaultIngredientEntry : IngredientInputEntry = {
 // State slices
 
 interface IngredientsSlice {
-	ingredients : { [id: number]: IngredientInputEntry | null }
+	ingredients : { [id: number]: RecipeIngredientType | null }
 	nextIngredientId: number
 	ingredientsOrder: number[]
 	addIngredient: () => void
 	removeIngredient: (id: number) => void
-	setIngredient: (id: number, value: IngredientInputEntry | null ) => void,
+	setIngredient: (id: number, value: RecipeIngredientType | null ) => void,
 	setIngredientsOrder: (newOrder: number[]) => void,
 }
 
@@ -44,12 +42,12 @@ interface InstructionsSlice {
 
 interface RecipeSlice {
 	recipe: RecipeType // ignoring instruction/ingredients fields
-	setTitle: (title: string) => void
+	setName: (title: string) => void
 	setPortions: (count: number) => void
 	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
-	setActiveTime: (time : string) => void
-	setTotalTime: (time : string) => void
+	setActiveTime: (time : number) => void
+	setTotalTime: (time : number) => void
 }
 
 interface ReadSlice {
@@ -78,7 +76,7 @@ const createIngredientsSlice : StateCreator<
 		removeIngredient: (id) => set((state : any) => {
 			return {
 				ingredientsOrder: state.ingredientsOrder.filter((x : number) => x != id),
-				ingredients: omit<IngredientInputEntry | null>(state.ingredients, id)
+				ingredients: omit<RecipeIngredientType | null>(state.ingredients, id)
 			}
 		}),
 		setIngredient: (id, value) => set((state : any) => ({
@@ -151,7 +149,7 @@ const createRecipeSlice : StateCreator<
 	> = (set) => ({
 		recipe: {
 			id: null,
-			title: "",
+			name: "",
 			portions: 4,
 			defaultWeight: false,
 			portionName: "portioner",
@@ -160,10 +158,10 @@ const createRecipeSlice : StateCreator<
 			ingredients: [], // not actually used in state
 			instructions: [], // not actually used in state
 		},
-		setTitle: (title: string) => set( state => ({
+		setName: (name: string) => set( state => ({
 			recipe: {
 				...state.recipe,
-				title: title,
+				name: name,
 			}
 		})),
 		setPortions: (count: number) => set( state => ({
@@ -178,13 +176,13 @@ const createRecipeSlice : StateCreator<
 				portionName: name,
 			}
 		})),
-		setActiveTime: (time : string) => set( state => ({
+		setActiveTime: (time : number) => set( state => ({
 			recipe: {
 				...state.recipe,
 				activeTime: time,
 			}
 		})),
-		setTotalTime: (time : string) => set( state => ({
+		setTotalTime: (time : number) => set( state => ({
 			recipe: {
 				...state.recipe,
 				totalTime: time,

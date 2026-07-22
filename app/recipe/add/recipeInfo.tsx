@@ -25,7 +25,7 @@ export const RecipeInfoInput = () => {
 		 portionName: state.recipe.portionName
 		}))
 	)
-	const setTitle = useRecipeAddStore( state => state.setTitle )
+	const setName = useRecipeAddStore( state => state.setName )
 	const setPortions = useRecipeAddStore( state => state.setPortions )
 	const setPortionName = useRecipeAddStore( state => state.setPortionName )
 	const setActiveTime = useRecipeAddStore( state => state.setActiveTime );

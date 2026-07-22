@@ -5,9 +5,6 @@ import { SaveButton } from './save';
 
 import FullCard from '@/app/components/fullcard';
 
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-//import Chip from '@mui/material/Chip';
 import FormControl from '@mui/material/FormControl';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';

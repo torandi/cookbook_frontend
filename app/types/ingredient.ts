@@ -24,7 +24,7 @@ export interface RecipeIngredientType extends DbObject {
 	weight?: number | null // not provided during creation, provided by backend
 	comment?: string | null
 	optional: boolean
-	ingredient: IngredientType;
+	ingredient: IngredientType | null;
 }
 
 export function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {
