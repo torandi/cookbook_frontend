@@ -38,10 +38,10 @@ export const RecipeInfoInput = () => {
 		<>
 			<Box>
 				<TextField
-					label="Titel"
+					label="Namn"
 					className="w-1/2"
 					value={ recipeInfo.name ?? "" }
-					onChange={ (event) => setTitle(event.target.value) }
+					onChange={ (event) => setName(event.target.value) }
 				/>
 				<TextField
 					label={ capitalize(recipeInfo.portionName) }
@@ -75,7 +75,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label="Total tid"
 					value={ recipeInfo.totalTime ?? ""}
-					onChange={ (event) => setTotalTime(event.target.value) }
+					onChange={ (event) => setTotalTime(parseInt(event.target.value)) }
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>
@@ -85,7 +85,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label="Aktiv tid"
 					value={ recipeInfo.activeTime ?? ""}
-					onChange={ (event) => setActiveTime(event.target.value) }
+					onChange={ (event) => setActiveTime(parseInt(event.target.value)) }
 					sx={{mx: 2}}
 					slotProps={{
 						input: {

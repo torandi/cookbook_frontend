@@ -337,8 +337,8 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						<Typography color="text.secondary">Inga instruktioner</Typography>
 					) : (
 						<Box component="ol" sx={{ m: 0, pl: 3 }}>
-							{instructions.map((step) => (
-								<Typography component="li" sx={{ mb: 1 }}>
+							{instructions.map((step, stepIndex) => (
+								<Typography component="li" key={stepIndex} sx={{ mb: 1 }}>
 									{step.replaceAll('{portions}', String(currentPortions))}
 								</Typography>
 							))}
