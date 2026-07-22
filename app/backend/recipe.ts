@@ -1,4 +1,4 @@
-import { useBackend } from './backend'
+import { useBackend, postBackend } from './backend'
 
 import { RecipeType } from '@/app/types/recipe'
 
@@ -13,8 +13,7 @@ export function useRecipe(id : number) {
 }
 
 export function addRecipe(recipe : RecipeType ) {
-	// todo: convert to backend call
-	console.log(recipe);
+	return postBackend<RecipeType>(`recipes/`, recipe, { includeAuth: true })
 }
 
 
