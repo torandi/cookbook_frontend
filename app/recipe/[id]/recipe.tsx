@@ -3,16 +3,22 @@
 import { useEffect, useState } from 'react'
 
 import { useRecipe } from '@/app/backend/recipe'
+import { postBackend } from '@/app/backend/backend'
+import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
 
 import { capitalize } from '@/app/utils'
+import { useRouter } from 'next/navigation'
 
 import FullCard from '@/app/components/fullcard'
 import Spinner from '@/app/components/spinner'
 
 import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
 import RemoveIcon from '@mui/icons-material/Remove'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
@@ -116,9 +122,11 @@ type RecipeDisplayProps = {
 }
 
 export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
+	const router = useRouter()
 	const [portions, setPortions] = useState<number | null>(null)
 	const [allowCups, setAllowCups] = useState(true)
 	const [showWeight, setShowWeight] = useState<boolean | null>(null)
+	const [isDeleting, setIsDeleting] = useState(false)
 
 	const { recipe, error, isLoading } = useRecipe(recipeId, {
 		portions: portions ?? undefined,
@@ -157,6 +165,37 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 		(item) => item.quantity != null && item.unit != null && item.ingredient?.name,
 	)
 	const instructions = recipe.instructions
+
+	const goToEdit = () => {
+		router.push(`/recipe/edit/${recipeId}`)
+	}
+
+	const deleteRecipe = async () => {
+		if (isDeleting) {
+			return
+		}
+
+		const accepted = window.confirm('Är du säker på att du vill ta bort receptet?')
+		if (!accepted) {
+			return
+		}
+
+		setIsDeleting(true)
+		const { error: deleteError } = await postBackend<null>(
+			`recipes/${recipeId}`,
+			null,
+			{ method: 'DELETE' },
+		)
+
+		if (deleteError) {
+			showErrorAlert(deleteError ?? 'Misslyckades att ta bort receptet', 10000)
+			setIsDeleting(false)
+			return
+		}
+
+		showSuccessAlert('Recept borttaget')
+		router.replace('/recipe')
+	}
 
 	return (
 		<Stack direction="column" spacing={2}>
@@ -349,7 +388,30 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						</Box>
 					)}
 				</FullCard>
+				
+				
 			</Box>
+
+			<FullCard className="w-full">
+				<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+					<Button
+						variant="outlined"
+						startIcon={<EditIcon />}
+						onClick={goToEdit}
+					>
+						Redigera
+					</Button>
+					<Button
+						variant="outlined"
+						color="error"
+						startIcon={<DeleteIcon />}
+						onClick={deleteRecipe}
+						disabled={isDeleting}
+					>
+						Ta bort
+					</Button>
+				</Box>
+			</FullCard>
 		</Stack>
 	)
 }

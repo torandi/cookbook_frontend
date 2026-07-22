@@ -40,7 +40,16 @@ async function requestBackend<Type>(url: string, options: RequestInit = {}, incl
 		throw error
 	}
 
-	return response.json() as Promise<Type>
+	if (response.status === 204) {
+		return null as Type
+	}
+
+	const responseText = await response.text()
+	if (!responseText) {
+		return null as Type
+	}
+
+	return JSON.parse(responseText) as Type
 }
 
 const backendCall = <Type>(url: string, options: RequestInit = {}) =>
