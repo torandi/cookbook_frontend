@@ -49,7 +49,6 @@ export default function RootLayout(
 								<GlobalAlerts />
 								{children}
 							</Container>
-							<AddMenuButton/>
 						</AuthGuard>
 					</ThemeProvider>
 				</AppRouterCacheProvider>
