@@ -237,8 +237,14 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 				</Stack>
 			</FullCard>
 
-			<Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-				<FullCard className="w-1/3 md:w-1/3">
+			<Box
+				sx={{
+					display: 'grid',
+					gap: 2,
+					gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' },
+				}}
+			>
+				<FullCard className="w-full">
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Ingredienser
 					</Typography>
@@ -327,7 +333,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					)}
 				</FullCard>
 
-				<FullCard className="w-2/3 md:w-2/3">
+				<FullCard className="w-full">
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Instruktioner
 					</Typography>
@@ -343,7 +349,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						</Box>
 					)}
 				</FullCard>
-			</Stack>
+			</Box>
 		</Stack>
 	)
 }
