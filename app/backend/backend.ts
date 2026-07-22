@@ -9,7 +9,7 @@ import useSWR from 'swr'
 // backendCall is the authenticated uncached fetch helper.
 // unauthorizedBackendCall is for public endpoints such as login.
 
-const buildUrl = (url: string) => `${config.backend}/${url.replace(/^\/+/, '')}/`
+const buildUrl = (url: string) => `${config.backend}/${url}`
 
 async function requestBackend<Type>(url: string, options: RequestInit = {}, includeAuth: boolean)
 {
@@ -29,7 +29,14 @@ async function requestBackend<Type>(url: string, options: RequestInit = {}, incl
 
 	if (!response.ok) {
 		const json = await response.json()
-		const error = new Error(json.detail || response.statusText)
+		if (typeof json.detail === 'string') {
+			const error = new Error(json.detail || response.statusText)
+			throw error
+		} else if (typeof json.detail === 'object' && json.detail !== null) {
+			const error = new Error(JSON.stringify(json.detail))
+			throw error
+		}
+		const error = new Error(response.statusText)
 		throw error
 	}
 

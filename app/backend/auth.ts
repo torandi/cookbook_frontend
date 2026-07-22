@@ -18,6 +18,8 @@ type StoredAuth = {
 	tokenType?: string
 }
 
+// todo: refactor to session cookies
+
 function readStoredAuth(): StoredAuth | null {
 	if (typeof window === 'undefined') {
 		return null

@@ -32,6 +32,7 @@ export const RecipeInfoInput = () => {
 	const setTotalTime = useRecipeAddStore( state => state.setTotalTime );
 
 	// todo: tags, category etc, probably in a different component
+	// and description
 	return (
 		<>
 			<Box>
