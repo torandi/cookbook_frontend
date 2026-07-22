@@ -1,14 +1,19 @@
 import { DbObject } from '@/app/types/dbobject';
-import { IngredientEntry} from '@app/types/ingredient';
+import { IngredientType, RecipeIngredientType } from '@/app/types/ingredient';
 
 export interface RecipeType extends DbObject {
-	title : string;
+	name : string;
 	defaultWeight: boolean;
-	inWeightUnits?: boolean; // only set when reading from backend, not when storing
 	portions: number;
 	portionName: string;
-	activeTime: string | null;
-	totalTime: string | null;
-	ingredients : IngredientEntry[];
-	instructions : string[];
+	activeTime: number | null;
+	totalTime: number | null;
+	ingredients : RecipeIngredientType[];
+	instructions : RecipeInstructionType[];
+}
+
+
+export interface RecipeInstructionType extends DbObject {
+	stepNumber: number
+	description: string
 }

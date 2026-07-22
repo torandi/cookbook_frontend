@@ -4,7 +4,7 @@ import { useState, useEffect, ChangeEvent, SyntheticEvent } from 'react';
 
 import { defaultIngredientEntry, useRecipeAddStore } from './state';
 
-import { IngredientType, IngredientInputEntry, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
+import { IngredientType, RecipeIngredientType, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { addIngredient, useIngredients } from '@/app/backend/ingredient'
 import { SortableList } from '@/app/components/sortableList'
 
@@ -18,7 +18,6 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -26,7 +25,6 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -47,7 +45,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 }) {
 	const value = useRecipeAddStore( state => state.ingredients[id] )
 	const setIngredient = useRecipeAddStore( state => state.setIngredient )
-	const setValue = (value : IngredientInputEntry | null) => setIngredient(id, value)
+	const setValue = (value : RecipeIngredientType | null) => setIngredient(id, value)
 	const addIngredient = useRecipeAddStore( state => state.addIngredient )
 	const removeIngredient = useRecipeAddStore( state => state.removeIngredient )
 
@@ -155,7 +153,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 // If this becomes to heavy on mobile devices, we could move the search to the backend
 function IngredientSelectBox({id, value, setValue} : {
 	id: number,
-	value: IngredientInputEntry | null,
+	value: RecipeIngredientType | null,
 	setValue: Function
 }) {
 	const { ingredients, error, isLoading } = useIngredients();
@@ -200,7 +198,7 @@ function IngredientSelectBox({id, value, setValue} : {
 		} else {
 			setValue({
 				...defaultIngredientEntry,
-				ingredientType: newValue,
+				ingredient: newValue as IngredientType,
 				unit: defaultIngredientUnit(newValue as IngredientType),
 			});
 		}
@@ -224,7 +222,7 @@ function IngredientSelectBox({id, value, setValue} : {
 					return ""
 				}}
 				isOptionEqualToValue = { (option, value) => (option as IngredientType).name === (value as IngredientType).name }
-				value={value?.ingredientType ?? null}
+				value={value?.ingredient ?? null}
 				onChange={handleOnChange}
 				clearOnEscape
 				autoSelect
@@ -266,13 +264,13 @@ function IngredientSelectBox({id, value, setValue} : {
 
 function QuantityFields({ id, value, setValue } : {
 	id: number,
-	value: IngredientInputEntry | null,
+	value: RecipeIngredientType | null,
 	setValue: Function
 })
 {
-	const unitType = value?.ingredientType?.unit ?? "volume";
+	const unitType = value?.ingredient?.unit ?? "volume";
 
-	const hasWeightOption = (value?.ingredientType?.weightPerUnit ?? 0) > 0;
+	const hasWeightOption = (value?.ingredient?.weightPerUnit ?? 0) > 0;
 
 	let units : string[] = [];
 	const unit = value?.unit ?? "dl";
@@ -310,8 +308,8 @@ function QuantityFields({ id, value, setValue } : {
 					input: {
 						endAdornment: !hasUnitOptions && (
 							<InputAdornment position="end">
-							{ value?.ingredientType?.unit == "count" ? "st" :
-								(value?.ingredientType?.unit == "weight" ? "g" : unit)
+							{ value?.ingredient?.unit == "count" ? "st" :
+								(value?.ingredient?.unit == "weight" ? "g" : unit)
 							}
 							</InputAdornment>
 						)
@@ -354,7 +352,7 @@ function IngredientCreateDialog({
 	setValue : Function,
 	setDialogValue: Function,
 	setOpen: Function,
-	value: IngredientInputEntry | null,
+	value: RecipeIngredientType | null,
 	dialogValue: any,
 	open: boolean
 }) {
@@ -402,7 +400,7 @@ function IngredientCreateDialog({
 				const ingredient = data;
 				setValue({
 					...defaultIngredientEntry,
-					ingredientType: ingredient,
+					ingredient: ingredient,
 					unit: defaultIngredientUnit(ingredient),
 				});
 				showSuccessAlert(`Ingrediens "${ingredient.name}" skapad`);

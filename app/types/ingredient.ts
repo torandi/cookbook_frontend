@@ -11,18 +11,20 @@ export const unitOptions = {
 }
 
 export interface IngredientType extends DbObject {
-	name : string;
-	unit : UnitType;
-	defaultVolumeInputType? : VolumeType;
-	weightPerUnit?: number; // weight in grams per unit (piece or ml)
+	name : string
+	unit : UnitType
+	defaultVolumeInputType? : VolumeType
+	weightPerUnit?: number // weight in grams per unit (piece or ml)
 }
 
-export interface IngredientInputEntry extends DbObject {
-	ingredientType: IngredientType | null,
-	quantity: number | null,
-	comment: string,
-	optional: boolean | null,
+// A ingredient entry in a recipe
+export interface RecipeIngredientType extends DbObject {
+	quantity: number | null
 	unit: VolumeType | "g" | "st" | null
+	weight?: number | null // not provided during creation, provided by backend
+	comment?: string | null
+	optional: boolean
+	ingredient: IngredientType;
 }
 
 export function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {

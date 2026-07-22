@@ -17,7 +17,7 @@ export const RecipeInfoInput = () => {
 	const recipeInfo = useRecipeAddStore(
 	 useShallow( state =>
 		({
-		 title: state.recipe.title,
+		 name: state.recipe.name,
 		 portions: state.recipe.portions,
 		 defaultWeight: state.recipe.defaultWeight,
 		 activeTime: state.recipe.activeTime,
@@ -30,6 +30,7 @@ export const RecipeInfoInput = () => {
 	const setPortionName = useRecipeAddStore( state => state.setPortionName )
 	const setActiveTime = useRecipeAddStore( state => state.setActiveTime );
 	const setTotalTime = useRecipeAddStore( state => state.setTotalTime );
+	const setDefaultWeight = useRecipeAddStore( state => state.setDefaultWeight )
 
 	// todo: tags, category etc, probably in a different component
 	// and description
@@ -39,7 +40,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label="Titel"
 					className="w-1/2"
-					value={ recipeInfo.title }
+					value={ recipeInfo.name ?? "" }
 					onChange={ (event) => setTitle(event.target.value) }
 				/>
 				<TextField
@@ -47,7 +48,7 @@ export const RecipeInfoInput = () => {
 					value={ recipeInfo.portions ?? "" }
 					onChange={ (event) => {
 						const num = parseInt(event.target.value)
-						setPortions(isNaN(num) ? 1 : 4)
+						setPortions(isNaN(num) ? 1 : num)
 					}}
 					sx={{mx: 2}}
 					slotProps={{
@@ -61,6 +62,14 @@ export const RecipeInfoInput = () => {
 					value={ recipeInfo.portionName }
 					onChange={ (event) => setPortionName(event.target.value) }
 				/>
+				
+				<Tooltip title="Ställer in om receptet ska visas som gram eller volymmått som standard">
+					<FormControlLabel control={
+						<Switch
+							value={ recipeInfo.defaultWeight ?? false }
+							onChange={ (event) => setDefaultWeight(event.target.checked) }
+						/>} label="Föredra gram" labelPlacement="bottom"/>
+				</Tooltip>
 			</Box>
 			<Box sx={{my: 2}}>
 				<TextField

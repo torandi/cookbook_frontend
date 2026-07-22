@@ -20,45 +20,95 @@ import Stack from '@mui/material/Stack'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
 
-function formatQuantity(value: number) {
-	return new Intl.NumberFormat('sv-SE', {
-		maximumFractionDigits: 2,
-	}).format(value)
+
+function formatQuantity(value: number | null, unit: string | null) {
+	if (value === null || unit === null) {
+		return ""
+	}
+
+	if (unit == 'g') {
+		return `${new Intl.NumberFormat('sv-SE', {
+			maximumFractionDigits: 2,
+		}).format(value)} ${unit}`
+	}
+
+	const denominatorOptions = [2, 3, 4]
+	const absoluteValue = Math.abs(value)
+	const whole = Math.floor(absoluteValue)
+	const fractionalPart = absoluteValue - whole
+
+	if (fractionalPart < 0.02) {
+		return `${whole} ${unit}`
+	}
+
+	let bestNumerator = 0
+	let bestDenominator = 1
+	let bestError = Number.POSITIVE_INFINITY
+
+	for (const denominator of denominatorOptions) {
+		const numerator = Math.round(fractionalPart * denominator)
+		const approximation = numerator / denominator
+		const error = Math.abs(fractionalPart - approximation)
+
+		if (error < bestError) {
+			bestError = error
+			bestNumerator = numerator
+			bestDenominator = denominator
+		}
+	}
+
+	if (bestNumerator === 0 || bestError > 0.06) {
+		return `${new Intl.NumberFormat('sv-SE', {
+			maximumFractionDigits: 2,
+		}).format(value)} ${unit}`
+	}
+
+	if (bestNumerator === bestDenominator) {
+		const roundedWhole = whole + 1
+		return `${roundedWhole} ${unit}`
+	}
+
+	const gcd = (a: number, b: number): number => {
+		let x = a
+		let y = b
+		while (y !== 0) {
+			const temp = y
+			y = x % y
+			x = temp
+		}
+		return x
+	}
+
+	const divisor = gcd(bestNumerator, bestDenominator)
+	const reducedNumerator = bestNumerator / divisor
+	const reducedDenominator = bestDenominator / divisor
+
+	if (![2, 3, 4, 8].includes(reducedDenominator)) {
+		return `${new Intl.NumberFormat('sv-SE', {
+			maximumFractionDigits: 2,
+		}).format(value)} ${unit}`
+	}
+
+	if (whole === 0) {
+		return `${reducedNumerator}/${reducedDenominator} ${unit}`
+	}
+
+	return `${whole} ${reducedNumerator}/${reducedDenominator} ${unit}`
 }
 
-function formatTime(value: string | null) {
-	if (!value) {
+function formatTime(value: number | null) {
+	if (value === null || value === undefined) {
 		return 'Ej angivet'
 	}
 
-	let numMinutes = parseInt(value)
-	if (!isNaN(numMinutes)) {
-		let hours = Math.floor(numMinutes / 60)
-		let minutes = numMinutes % 60
+	let numMinutes = value
+	let hours = Math.floor(numMinutes / 60)
+	let minutes = numMinutes % 60
 
-		if (hours > 0) {
-			return `${hours} tim ${minutes} min`
-		}
-		return `${numMinutes} min`
+	if (hours > 0) {
+		return `${hours} tim ${minutes} min`
 	}
-
-	return value
-}
-
-function formatUnit(value: string | null) {
-	if (!value) {
-		return ''
-	}
-
-	if (value === 'count') {
-		return 'st'
-	}
-
-	if (value === 'weight') {
-		return 'g'
-	}
-
-	return value
+	return `${numMinutes} min`
 }
 
 type RecipeDisplayProps = {
@@ -68,6 +118,7 @@ type RecipeDisplayProps = {
 export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 	const [portions, setPortions] = useState<number | null>(null)
 	const [allowCups, setAllowCups] = useState(true)
+	const [showWeight, setShowWeight] = useState<boolean | null>(null)
 
 	const { recipe, error, isLoading } = useRecipe(recipeId, {
 		portions: portions ?? undefined,
@@ -78,7 +129,10 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 		if (recipe && portions === null) {
 			setPortions(recipe.portions)
 		}
-	}, [recipe, portions])
+		if (recipe && showWeight === null) {
+			setShowWeight(recipe.defaultWeight)
+		}
+	}, [recipe, portions, showWeight])
 
 	if (error) {
 		return (
@@ -120,7 +174,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						sx={{
 							display: 'grid',
 							gap: 2,
-							gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' },
+							gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(5, minmax(0, 1fr))' },
 						}}
 					>
 						<Box>
@@ -170,6 +224,17 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 							}
 							label="Tillåt cups"
 						/>
+
+						<FormControlLabel
+							control={
+								<Switch
+									checked={showWeight || false}
+									onChange={(event) => setShowWeight(event.target.checked)}
+								/>
+							}
+							label="Visa i vikt"
+						/>
+
 					</Box>
 				</Stack>
 			</FullCard>
@@ -183,12 +248,29 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						<Typography color="text.secondary">Inga ingredienser</Typography>
 					) : (
 						<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-							{ingredientRows.map((item) => (
+							{ingredientRows.map((item, index) => (
+								(() => {
+									const showWeightValue = showWeight && item.weight != null
+									const primaryQuantity = showWeightValue && item.weight != null
+										? formatQuantity(item.weight, 'g')
+										: formatQuantity(item.quantity, item.unit)
+									const secondaryQuantity = showWeightValue
+										? (item.quantity != null && item.unit != null && item.unit !== 'g'
+											? formatQuantity(item.quantity, item.unit)
+											: null)
+										: (item.weight != null && item.unit != null && item.unit !== 'g'
+											? formatQuantity(item.weight, 'g')
+											: null)
+
+									return (
 								<Box
 									component="li"
 									key={item.id}
 									sx={{
 										py: 1.25,
+										px: 1,
+										borderRadius: 1,
+										backgroundColor: index % 2 === 0 ? 'action.hover' : 'action.selected',
 									}}
 								>
 									<Box
@@ -202,14 +284,30 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 									>
 										<Box sx={{ minWidth: 0 }}>
 											<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-												<Typography sx={{ fontWeight: 500, color: 'grey.600' }}>
+												<Typography sx={{ fontWeight: 500, color: 'grey.800' }}>
 													{item.ingredient.name}
 												</Typography>
-												{item.optional ? <Chip label="Valfri" size="small" variant="filled" color="info" /> : null}
+												{item.optional ? (
+													<Chip
+														label="Valfri"
+														size="small"
+														variant="outlined"
+														sx={{
+															borderColor: 'divider',
+															backgroundColor: 'background.paper',
+															color: 'text.secondary',
+														}}
+													/>
+												) : null}
 											</Box>
 										</Box>
 										<Typography sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
-											{formatQuantity(item.quantity ?? 0)} {formatUnit(item.unit)}
+											{primaryQuantity}
+											{secondaryQuantity ? (
+												<Typography component="span" sx={{ color: 'text.secondary', ml: 0.5 }}>
+													({secondaryQuantity})
+												</Typography>
+											) : null}
 										</Typography>
 										{item.comment ? (
 											<Typography
@@ -224,6 +322,8 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 										) : null}
 									</Box>
 								</Box>
+									)
+								})()
 							))}
 						</Box>
 					)}
