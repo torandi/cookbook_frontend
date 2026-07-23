@@ -25,6 +25,7 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
+import MarkdownInstruction from '@/app/components/markdownInstruction'
 
 type RecipeDisplayProps = {
 	recipeId: number
@@ -290,9 +291,11 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					) : (
 						<Box component="ol" sx={{ m: 0, pl: 3 }}>
 							{instructions.map((step, stepIndex) => (
-								<Typography component="li" key={stepIndex} sx={{ mb: 1 }}>
-									{step.replaceAll('{portions}', String(currentPortions))}
-								</Typography>
+								<Box component="li" key={stepIndex} sx={{ mb: 1 }}>
+									<MarkdownInstruction
+										text={step.replaceAll('{portions}', String(currentPortions))}
+									/>
+								</Box>
 							))}
 						</Box>
 					)}
