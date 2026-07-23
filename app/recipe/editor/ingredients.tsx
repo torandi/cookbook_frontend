@@ -113,7 +113,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 						className="flex-none"
 						control={
 							<Switch
-								value={value?.optional ?? false}
+								checked={value?.optional ?? false}
 								tabIndex={-1}
 								onChange={ (event: ChangeEvent<HTMLInputElement>) => {
 									if (!value) return;
@@ -196,10 +196,13 @@ function IngredientSelectBox({id, value, setValue} : {
 				weightPerUnit: ''
 			})
 		} else {
+			const currentOptional = value?.optional ?? false
+
 			setValue({
 				...defaultIngredientEntry,
 				ingredient: newValue as IngredientType,
 				unit: defaultIngredientUnit(newValue as IngredientType),
+				optional: currentOptional, // have to override, to not reset optional when changing ingredient (as optional is not null in default)
 			});
 		}
 	}

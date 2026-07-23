@@ -4,7 +4,7 @@ import { config } from '@/app/config'
 
 import { getAuthHeaders } from './auth'
 
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 
 // backendCall is the authenticated uncached fetch helper.
 // unauthorizedBackendCall is for public endpoints such as login.
@@ -81,6 +81,9 @@ async function postBackend<Type>(url: string, data: any,
 			},
 			body: JSON.stringify(data),
 		}, includeAuth)
+
+		// Invalided the cache for this url (put/delete updates the resource)
+		mutate(url)
 		return {
 			data: result,
 			error: null,

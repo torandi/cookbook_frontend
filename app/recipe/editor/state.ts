@@ -10,7 +10,7 @@ export const defaultIngredientEntry : RecipeIngredientType = {
 	id: null,
 	ingredient: null,
 	quantity: null,
-	comment: '',
+	comment: null,
 	unit: null,
 	optional: false,
 }
