@@ -523,6 +523,11 @@ function IngredientCreateDialog({
 										sx={{
 											display: isWeightType ? 'none' : 'flex'
 										}}
+										slotProps={{
+											input: {
+												endAdornment: <InputAdornment position="end">g</InputAdornment>
+											}
+										}}
 									/>
 									<TextField
 										id="ingredient-create-calories"
@@ -533,6 +538,11 @@ function IngredientCreateDialog({
 											calories: event.target.value,
 										})}
 										label="Kalorier"
+										slotProps={{
+											input: {
+												endAdornment: <InputAdornment position="end">kcal</InputAdornment>
+											}
+										}}
 									/>
 									<Typography variant="subtitle2" color="text.secondary">
 										Macros
@@ -547,6 +557,11 @@ function IngredientCreateDialog({
 												protein: event.target.value,
 											})}
 											label="Protein"
+											slotProps={{
+												input: {
+													endAdornment: <InputAdornment position="end">g</InputAdornment>
+												}
+											}}
 										/>
 										<TextField
 											id="ingredient-create-carbohydrates"
@@ -557,6 +572,11 @@ function IngredientCreateDialog({
 												carbohydrates: event.target.value,
 											})}
 											label="Kolhydrater"
+											slotProps={{
+												input: {
+													endAdornment: <InputAdornment position="end">g</InputAdornment>
+												}
+											}}
 										/>
 										<TextField
 											id="ingredient-create-fat"
@@ -567,6 +587,11 @@ function IngredientCreateDialog({
 												fat: event.target.value,
 											})}
 											label="Fett"
+											slotProps={{
+												input: {
+													endAdornment: <InputAdornment position="end">g</InputAdornment>
+												}
+											}}
 										/>
 									</Stack>
 								</Stack>

@@ -117,10 +117,10 @@ export default function IngredientsPage() {
 													<TableCell>{ingredient.unit}</TableCell>
 													<TableCell>{ingredient.defaultVolumeInputType ?? '-'}</TableCell>
 													<TableCell align="right">{weightPerUnit ? weightPerUnit + " g" : '-'}</TableCell>
-													<TableCell align="right">{calories != null ? calories : '-'}</TableCell>
-													<TableCell align="right">{protein != null ? protein : '-'}</TableCell>
-													<TableCell align="right">{carbohydrates != null ? carbohydrates : '-'}</TableCell>
-													<TableCell align="right">{fat != null ? fat : '-'}</TableCell>
+													<TableCell align="right">{calories != null ? calories + " kcal" : '-'}</TableCell>
+													<TableCell align="right">{protein != null ? protein + " g": '-'}</TableCell>
+													<TableCell align="right">{carbohydrates != null ? carbohydrates + " g" : '-'}</TableCell>
+													<TableCell align="right">{fat != null ? fat + " g" : '-'}</TableCell>
 												</TableRow>
 											);
 										})}
