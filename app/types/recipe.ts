@@ -1,8 +1,9 @@
 import { DbObject } from '@/app/types/dbobject';
-import { IngredientType, RecipeIngredientType } from '@/app/types/ingredient';
+import { RecipeIngredientType } from '@/app/types/ingredient';
 
 export interface RecipeType extends DbObject {
 	name : string;
+	description: string;
 	defaultWeight: boolean;
 	portions: number;
 	portionName: string;

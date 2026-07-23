@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 
 import FullCard from '@/app/components/fullcard'
 import Spinner from '@/app/components/spinner'
+import MarkdownText from '@/app/components/markdownText'
 
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -25,7 +26,6 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
-import MarkdownInstruction from '@/app/components/markdownInstruction'
 
 type RecipeDisplayProps = {
 	recipeId: number
@@ -115,6 +115,11 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						<Typography variant="h4" component="h1" sx={{ mb: 1 }}>
 							{recipe.name}
 						</Typography>
+						{recipe.description?.trim() ? (
+							<Box sx={{ mt: 1 }}>
+								<MarkdownText text={recipe.description} />
+							</Box>
+						) : null}
 					</Box>
 
 					<Box
@@ -292,7 +297,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						<Box component="ol" sx={{ m: 0, pl: 3 }}>
 							{instructions.map((step, stepIndex) => (
 								<Box component="li" key={stepIndex} sx={{ mb: 1 }}>
-									<MarkdownInstruction
+									<MarkdownText
 										text={step.replaceAll('{portions}', String(currentPortions))}
 									/>
 								</Box>

@@ -18,6 +18,7 @@ export const RecipeInfoInput = () => {
 	 useShallow( state =>
 		({
 		 name: state.recipe.name,
+		 description: state.recipe.description,
 		 portions: state.recipe.portions,
 		 defaultWeight: state.recipe.defaultWeight,
 		 activeTime: state.recipe.activeTime,
@@ -26,6 +27,7 @@ export const RecipeInfoInput = () => {
 		}))
 	)
 	const setName = useRecipeEditorStore( state => state.setName )
+	const setDescription = useRecipeEditorStore( state => state.setDescription )
 	const setPortions = useRecipeEditorStore( state => state.setPortions )
 	const setPortionName = useRecipeEditorStore( state => state.setPortionName )
 	const setActiveTime = useRecipeEditorStore( state => state.setActiveTime );
@@ -33,7 +35,6 @@ export const RecipeInfoInput = () => {
 	const setDefaultWeight = useRecipeEditorStore( state => state.setDefaultWeight )
 
 	// todo: tags, category etc, probably in a different component
-	// and description
 	return (
 		<>
 			<Box>
@@ -62,7 +63,6 @@ export const RecipeInfoInput = () => {
 					value={ recipeInfo.portionName }
 					onChange={ (event) => setPortionName(event.target.value) }
 				/>
-				
 				<Tooltip title="Ställer in om receptet ska visas som gram eller volymmått som standard">
 					<FormControlLabel control={
 						<Switch
@@ -70,6 +70,15 @@ export const RecipeInfoInput = () => {
 							onChange={ (event) => setDefaultWeight(event.target.checked) }
 						/>} label="Föredra gram" labelPlacement="bottom"/>
 				</Tooltip>
+
+				<TextField
+					label="Beskrivning"
+					value={ recipeInfo.description ?? "" }
+					onChange={ (event) => setDescription(event.target.value) }
+					multiline
+					minRows={4}
+					sx={{ mt: 2, width: '100%' }}
+				/>
 			</Box>
 			<Box sx={{my: 2}}>
 				<TextField

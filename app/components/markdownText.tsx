@@ -6,11 +6,11 @@ import remarkGfm from 'remark-gfm'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 
-type MarkdownInstructionProps = {
+type MarkdownTextProps = {
     text: string
 }
 
-export default function MarkdownInstruction({ text }: MarkdownInstructionProps) {
+export default function MarkdownText({ text }: MarkdownTextProps) {
     return (
         <Box
             sx={{

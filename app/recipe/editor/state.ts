@@ -18,6 +18,7 @@ export const defaultIngredientEntry : RecipeIngredientType = {
 const defaultRecipeState: RecipeType = {
 	id: null,
 	name: '',
+	description: '',
 	portions: 4,
 	defaultWeight: false,
 	portionName: 'portioner',
@@ -66,6 +67,7 @@ interface InstructionsSlice {
 interface RecipeSlice {
 	recipe: RecipeType // ignoring instruction/ingredients fields
 	setName: (title: string) => void
+	setDescription: (description: string) => void
 	setPortions: (count: number) => void
 	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
@@ -182,6 +184,12 @@ const createRecipeSlice : StateCreator<
 			recipe: {
 				...state.recipe,
 				name: name,
+			}
+		})),
+		setDescription: (description: string) => set( state => ({
+			recipe: {
+				...state.recipe,
+				description,
 			}
 		})),
 		setPortions: (count: number) => set( state => ({
