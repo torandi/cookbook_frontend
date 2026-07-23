@@ -2,6 +2,11 @@ import { useBackend, postBackend } from './backend'
 
 import { RecipeType } from '@/app/types/recipe'
 
+export function useRecipes() {
+	const { data, error, isLoading } = useBackend<RecipeType[]>('recipes/')
+	return { recipes: data ?? [], error, isLoading }
+}
+
 export function useRecipe(id : number, { portions, allowCups } : { portions?: number, allowCups?: boolean } = {}) {
 	const query = new URLSearchParams()
 
