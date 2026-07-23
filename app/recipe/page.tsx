@@ -31,7 +31,6 @@ function RecipeListContent() {
 		<Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
 			<FullCard sx={{ mb: 2 }} className="w-full">
 				<TextField
-					fullWidth
 					label="Sök recept"
 					value={search}
 					onChange={e => setSearch(e.target.value)}

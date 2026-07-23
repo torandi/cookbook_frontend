@@ -43,15 +43,7 @@ export default function IngredientsPage() {
 					return true;
 				}
 
-				const searchableFields = [
-					String(ingredient.id ?? ''),
-					ingredient.name ?? '',
-					ingredient.unit ?? '',
-					ingredient.defaultVolumeInputType ?? '',
-					String(ingredient.weightPerUnit ?? ''),
-				].join(' ').toLowerCase();
-
-				return searchableFields.includes(searchText);
+				return ingredient.name.toLowerCase().includes(searchText);
 			})
 			.sort((a, b) => a.name.localeCompare(b.name));
 	}, [ingredients, search, incompleteOnly]);
@@ -62,7 +54,6 @@ export default function IngredientsPage() {
 				<FullCard>
 					<Stack spacing={2} direction="row">
 						<TextField
-							fullWidth
 							label="Sök ingrediens"
 							value={search}
 							onChange={(event) => setSearch(event.target.value)}
