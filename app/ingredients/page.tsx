@@ -29,7 +29,15 @@ export default function IngredientsPage() {
 
 		return allIngredients
 			.filter((ingredient) => {
-				if (incompleteOnly && ingredient.weightPerUnit == null && ingredient.unit != "weight") {
+				if (incompleteOnly 
+                    && (
+                        (ingredient.weightPerUnit == null && ingredient.unit != "weight")
+                        || (ingredient.calories == null)
+                        || (ingredient.protein == null)
+                        || (ingredient.carbohydrates == null)
+                        || (ingredient.fat == null)
+                    )
+                ) {
 					return true;
 				}
 				if (incompleteOnly) {
@@ -78,37 +86,47 @@ export default function IngredientsPage() {
 						<Typography color="error">Kunde inte hämta ingredienser</Typography>
 					) : (
 						<Stack spacing={1}>
-							<Typography color="text.secondary">
-								{filteredIngredients.length} träffar
-							</Typography>
 							<TableContainer>
 								<Table size="small">
 									<TableHead>
 										<TableRow>
-											<TableCell>ID</TableCell>
-											<TableCell>Namn</TableCell>
-											<TableCell>Enhet</TableCell>
-											<TableCell>Standard volymenhet</TableCell>
-											<TableCell align="right">Vikt per enhet (dl/st)</TableCell>
+											<TableCell rowSpan={2}>Namn</TableCell>
+											<TableCell rowSpan={2}>Enhet</TableCell>
+											<TableCell rowSpan={2}>Standard volymenhet</TableCell>
+											<TableCell rowSpan={2} align="right">Vikt per enhet (dl/st)</TableCell>
+											<TableCell rowSpan={2} align="right">Kalorier</TableCell>
+											<TableCell colSpan={3} align="center">Macros</TableCell>
+										</TableRow>
+										<TableRow>
+											<TableCell align="right">Protein</TableCell>
+											<TableCell align="right">Kolhydrater</TableCell>
+											<TableCell align="right">Fett</TableCell>
 										</TableRow>
 									</TableHead>
 									<TableBody>
 										{filteredIngredients.map((ingredient) => {
                                             const weightPerUnit = ingredient.unit == "volume" && ingredient.weightPerUnit ?
                                                 ingredient.weightPerUnit * 100 : ingredient.weightPerUnit;
+											const calories = ingredient.calories;
+											const protein = ingredient.protein;
+											const carbohydrates = ingredient.carbohydrates;
+											const fat = ingredient.fat;
 											return (
 												<TableRow key={ingredient.id ?? ingredient.name} hover>
-													<TableCell>{ingredient.id ?? '-'}</TableCell>
 													<TableCell>{ingredient.name}</TableCell>
 													<TableCell>{ingredient.unit}</TableCell>
 													<TableCell>{ingredient.defaultVolumeInputType ?? '-'}</TableCell>
 													<TableCell align="right">{weightPerUnit ? weightPerUnit + " g" : '-'}</TableCell>
+													<TableCell align="right">{calories != null ? calories : '-'}</TableCell>
+													<TableCell align="right">{protein != null ? protein : '-'}</TableCell>
+													<TableCell align="right">{carbohydrates != null ? carbohydrates : '-'}</TableCell>
+													<TableCell align="right">{fat != null ? fat : '-'}</TableCell>
 												</TableRow>
 											);
 										})}
 										{filteredIngredients.length === 0 && (
 											<TableRow>
-												<TableCell colSpan={6}>
+												<TableCell colSpan={9} align="center">
 													<Typography color="text.secondary">Inga ingredienser hittades</Typography>
 												</TableCell>
 											</TableRow>

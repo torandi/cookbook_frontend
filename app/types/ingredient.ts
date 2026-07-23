@@ -15,6 +15,10 @@ export interface IngredientType extends DbObject {
 	unit : UnitType
 	defaultVolumeInputType? : VolumeType
 	weightPerUnit?: number // weight in grams per unit (piece or ml)
+	calories?: number
+	protein?: number
+	carbohydrates?: number
+	fat?: number
 }
 
 // A ingredient entry in a recipe

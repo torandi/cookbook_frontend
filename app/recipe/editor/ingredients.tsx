@@ -30,6 +30,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton'
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Typography from '@mui/material/Typography';
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
@@ -163,7 +164,11 @@ function IngredientSelectBox({id, value, setValue} : {
 		name: '',
 		unit: "volume",
 		defaultVolumeInputType: null,
-		weightPerUnit: ''
+		weightPerUnit: '',
+		calories: '',
+		protein: '',
+		carbohydrates: '',
+		fat: '',
 	})
 
 	const filter = createFilterOptions<IngredientOrNewType>({
@@ -193,7 +198,11 @@ function IngredientSelectBox({id, value, setValue} : {
 				name: newValue.inputValue,
 				unit: "volume",
 				defaultVolumeInputType: null,
-				weightPerUnit: ''
+				weightPerUnit: '',
+				calories: '',
+				protein: '',
+				carbohydrates: '',
+				fat: '',
 			})
 		} else {
 			const currentOptional = value?.optional ?? false
@@ -365,7 +374,11 @@ function IngredientCreateDialog({
 			name: '',
 			unit: "volume",
 			defaultVolumeInputType: '',
-			weightPerUnit: ''
+			weightPerUnit: '',
+			calories: '',
+			protein: '',
+			carbohydrates: '',
+			fat: '',
 		})
 		setOpen(false);
 	}
@@ -376,10 +389,20 @@ function IngredientCreateDialog({
 		event.preventDefault();
 		setIsSubmitting(true);
 
-		let weightPerUnit = dialogValue.weightPerUnit != '' ? parseFloat(dialogValue.weightPerUnit) : undefined;
-		if(weightPerUnit != undefined && isNaN(weightPerUnit) === true) {
-			weightPerUnit= undefined
+		const parseOptionalNumber = (value: string) => {
+			if (value === '') {
+				return undefined;
+			}
+
+			const parsed = parseFloat(value);
+			return isNaN(parsed) ? undefined : parsed;
 		}
+
+		let weightPerUnit = parseOptionalNumber(dialogValue.weightPerUnit);
+		const calories = parseOptionalNumber(dialogValue.calories);
+		const protein = parseOptionalNumber(dialogValue.protein);
+		const carbohydrates = parseOptionalNumber(dialogValue.carbohydrates);
+		const fat = parseOptionalNumber(dialogValue.fat);
 
 		if(weightPerUnit && dialogValue.unit == "volume") {
 			// convert from dl to ml as stored in backend
@@ -391,7 +414,11 @@ function IngredientCreateDialog({
 			name: dialogValue.name,
 			unit: dialogValue.unit,
 			defaultVolumeInputType: dialogValue.defaultVolumeInputType != '' ? dialogValue.defaultVolumeInputType : undefined,
-			weightPerUnit: weightPerUnit
+			weightPerUnit: weightPerUnit,
+			calories,
+			protein,
+			carbohydrates,
+			fat,
 		};
 
 		addIngredient(newIngredient)
@@ -497,6 +524,51 @@ function IngredientCreateDialog({
 											display: isWeightType ? 'none' : 'flex'
 										}}
 									/>
+									<TextField
+										id="ingredient-create-calories"
+										value={dialogValue.calories}
+										onChange={(event) =>
+											setDialogValue({
+											...dialogValue,
+											calories: event.target.value,
+										})}
+										label="Kalorier"
+									/>
+									<Typography variant="subtitle2" color="text.secondary">
+										Macros
+									</Typography>
+									<Stack direction="row" spacing={1}>
+										<TextField
+											id="ingredient-create-protein"
+											value={dialogValue.protein}
+											onChange={(event) =>
+												setDialogValue({
+												...dialogValue,
+												protein: event.target.value,
+											})}
+											label="Protein"
+										/>
+										<TextField
+											id="ingredient-create-carbohydrates"
+											value={dialogValue.carbohydrates}
+											onChange={(event) =>
+												setDialogValue({
+												...dialogValue,
+												carbohydrates: event.target.value,
+											})}
+											label="Kolhydrater"
+										/>
+										<TextField
+											id="ingredient-create-fat"
+											value={dialogValue.fat}
+											onChange={(event) =>
+												setDialogValue({
+												...dialogValue,
+												fat: event.target.value,
+											})}
+											label="Fett"
+										/>
+									</Stack>
 								</Stack>
 							</FormControl>
 						</DialogContent>
