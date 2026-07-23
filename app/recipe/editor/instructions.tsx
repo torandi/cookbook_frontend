@@ -10,7 +10,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
 import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
@@ -20,6 +19,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import Typography from '@mui/material/Typography';
 
 function InstructionStepInput({ id, index, isLastItem } :
 															{
@@ -136,21 +136,31 @@ const InstructionsInput = () => {
 	const setInstructionsOrder = useRecipeEditorStore( state => state.setInstructionsOrder )
 
 	return (
-		<SortableList
-			onItemsUpdated={setInstructionsOrder}
-			items={instructionsOrder}
-			>
-			<Stack direction="column" spacing={2}>
-				{ instructionsOrder.map((id, index) => (
-					<InstructionStepInput
-						id={id}
-						key={id}
-						index={index}
-						isLastItem = { instructionsOrder.at(-1) == id }
-					/>
-				))}
-			</Stack>
-		</SortableList>
+		<>
+			<Typography sx={{
+				color: 'text.secondary',
+				mb: 2,
+				fontSize: '0.875rem',
+				}}>
+				Markdown stöds, t.ex. <code>**fetstil**</code> och <code>*kursiv*</code>. <br/>
+				Använd <code>{'{portions}'}</code> för att referera till antalet portioner i instruktionerna.
+			</Typography>
+			<SortableList
+				onItemsUpdated={setInstructionsOrder}
+				items={instructionsOrder}
+				>
+				<Stack direction="column" spacing={2}>
+					{ instructionsOrder.map((id, index) => (
+						<InstructionStepInput
+							id={id}
+							key={id}
+							index={index}
+							isLastItem = { instructionsOrder.at(-1) == id }
+						/>
+					))}
+				</Stack>
+			</SortableList>
+		</>
 	)
 }
 
