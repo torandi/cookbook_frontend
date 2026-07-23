@@ -17,12 +17,14 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { mutate } from 'swr';
 
 import { deleteIngredient, updateIngredient, useIngredients } from '@/app/backend/ingredient';
+import IngredientCreateDialog from '@/app/components/ingredientCreateDialog';
 import FullCard from '@/app/components/fullcard';
 import Spinner from '@/app/components/spinner';
 import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state';
@@ -162,6 +164,7 @@ export default function IngredientsPage() {
 	const [skipBlurSave, setSkipBlurSave] = useState<Record<string, boolean>>({});
 	const [savingCell, setSavingCell] = useState<Record<string, boolean>>({});
 	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const { ingredients, isLoading, error } = useIngredients();
 
 	const resetField = (ingredient: IngredientType, field: EditableField) => {
@@ -306,14 +309,24 @@ export default function IngredientsPage() {
 							label="Endast ofullständiga"
 						/>
 						</Box>
-						<Tooltip title={editMode ? 'Avsluta redigering' : 'Redigera'}>
-							<IconButton
-								aria-label={editMode ? 'Avsluta redigering' : 'Redigera'}
-								onClick={() => setEditMode((prev) => !prev)}
-							>
-								{editMode ? <CheckIcon /> : <EditIcon />}
-							</IconButton>
-						</Tooltip>
+						<Box sx={{ display: 'flex', alignItems: 'center' }}>
+							<Tooltip title="Skapa ingrediens">
+								<IconButton
+									aria-label="Skapa ingrediens"
+									onClick={() => setCreateDialogOpen(true)}
+								>
+									<AddIcon />
+								</IconButton>
+							</Tooltip>
+							<Tooltip title={editMode ? 'Avsluta redigering' : 'Redigera'}>
+								<IconButton
+									aria-label={editMode ? 'Avsluta redigering' : 'Redigera'}
+									onClick={() => setEditMode((prev) => !prev)}
+								>
+									{editMode ? <CheckIcon /> : <EditIcon />}
+								</IconButton>
+							</Tooltip>
+						</Box>
 					</Box>
 				</FullCard>
 
@@ -572,6 +585,13 @@ export default function IngredientsPage() {
 					)}
 				</FullCard>
 			</Stack>
+			<IngredientCreateDialog
+				open={createDialogOpen}
+				onClose={() => setCreateDialogOpen(false)}
+				onCreated={() => {
+					void mutate('ingredients');
+				}}
+			/>
 		</Box>
 	);
 }

@@ -31,7 +31,6 @@ import IconButton from '@mui/material/IconButton'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import AddIcon from '@mui/icons-material/Add';
 
 const ingredientSpacing = 1;
 
@@ -197,60 +196,49 @@ function IngredientSelectBox({id, value, setValue} : {
 
 	return (
 		<>
-			<Box className="flex-3 flex flex-row" sx={{ mr: ingredientSpacing, gap: 1 }}>
-				<Autocomplete
-					id = {`ingredient-type-${id}`}
-					className = "flex-1"
-					loading={ isLoading }
-					options={ ingredients ?? [] }
-					getOptionLabel = { (option : IngredientOrNewType ) => {
-						// Dynamically created option
-						if ("inputValue" in option && option.inputValue) {
-							return option.title;
-						} else if ("name" in option) {
-							return option.name
-						}
-						return ""
-					}}
-					isOptionEqualToValue = { (option, value) => (option as IngredientType).name === (value as IngredientType).name }
-					value={value?.ingredient ?? null}
-					onChange={handleOnChange}
-					clearOnEscape
-					autoSelect
-					autoHighlight
-					selectOnFocus
-					handleHomeEndKeys
-					filterOptions={generateOptions}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							label="Ingrediens"
-							slotProps={{
-								...params.slotProps,
-								input: {
-									...params.slotProps.input,
-									endAdornment: (
-										<>
-											{isLoading ? <CircularProgress color="inherit" size={20} /> : null}
-											{params.slotProps.input.endAdornment}
-										</>
-									),
-								},
-							}}
-						/>
-					)}
-				/>
-				<Tooltip title="Skapa ingrediens">
-					<IconButton
-						onClick={() => {
-							setDialogInitialName('');
-							setDialogOpen(true);
+			<Autocomplete
+				id = {`ingredient-type-${id}`}
+				className = "flex-3"
+				sx={{mr: ingredientSpacing}}
+				loading={ isLoading }
+				options={ ingredients ?? [] }
+				getOptionLabel = { (option : IngredientOrNewType ) => {
+					// Dynamically created option
+					if ("inputValue" in option && option.inputValue) {
+						return option.title;
+					} else if ("name" in option) {
+						return option.name
+					}
+					return ""
+				}}
+				isOptionEqualToValue = { (option, value) => (option as IngredientType).name === (value as IngredientType).name }
+				value={value?.ingredient ?? null}
+				onChange={handleOnChange}
+				clearOnEscape
+				autoSelect
+				autoHighlight
+				selectOnFocus
+				handleHomeEndKeys
+				filterOptions={generateOptions}
+				renderInput={(params) => (
+					<TextField
+						{...params}
+						label="Ingrediens"
+						slotProps={{
+							...params.slotProps,
+							input: {
+								...params.slotProps.input,
+								endAdornment: (
+									<>
+										{isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+										{params.slotProps.input.endAdornment}
+									</>
+								),
+							},
 						}}
-					>
-						<AddIcon/>
-					</IconButton>
-				</Tooltip>
-			</Box>
+					/>
+				)}
+			/>
 
 			<IngredientCreateDialog
 				open={dialogOpen}
