@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
+import FullCard from '@/app/components/fullcard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -28,7 +29,7 @@ function RecipeListContent() {
 
 	return (
 		<Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
-			<Box sx={{ mb: 2 }}>
+			<FullCard sx={{ mb: 2 }} className="w-full">
 				<TextField
 					fullWidth
 					label="Sök recept"
@@ -36,25 +37,27 @@ function RecipeListContent() {
 					onChange={e => setSearch(e.target.value)}
 					autoFocus
 				/>
-			</Box>
+			</FullCard>
 			{isLoading && <CircularProgress />}
 			{error && <Typography color="error">Kunde inte hämta recept</Typography>}
 			{!isLoading && !error && (
-				<List>
+				<FullCard className="w-full">
+					<List>
 					{filtered.map(recipe => (
-						<ListItemButton
-							key={recipe.id}
-							onClick={() => router.push(`/recipe/${recipe.id}`)}
-						>
-							<ListItemText primary={recipe.name} />
-						</ListItemButton>
-					))}
-					{filtered.length === 0 && (
-						<Typography color="text.secondary" sx={{ p: 1 }}>
-							Inga recept hittades
-						</Typography>
-					)}
-				</List>
+							<ListItemButton
+								key={recipe.id}
+								onClick={() => router.push(`/recipe/${recipe.id}`)}
+							>
+								<ListItemText primary={recipe.name} />
+							</ListItemButton>
+						))}
+						{filtered.length === 0 && (
+							<Typography color="text.secondary" sx={{ p: 1 }}>
+								Inga recept hittades
+							</Typography>
+						)}
+					</List>
+				</FullCard>
 			)}
 		</Box>
 	);
