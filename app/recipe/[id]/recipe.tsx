@@ -29,7 +29,7 @@ import Typography from '@mui/material/Typography'
 
 function formatQuantity(value: number | null, unit: string | null) {
 	if (value === null || unit === null) {
-		return ""
+		return "-"
 	}
 
 	if (unit == 'g') {
@@ -162,7 +162,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 
 	const currentPortions = portions ?? recipe.portions
 	const ingredientRows = recipe.ingredients.filter(
-		(item) => item.quantity != null && item.unit != null && item.ingredient?.name,
+		(item) => item.ingredient?.name,
 	)
 	const instructions = recipe.instructions
 
