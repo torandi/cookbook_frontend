@@ -1,6 +1,6 @@
 'use client'
 
-import { useRecipeAddStore } from './state'
+import { useRecipeEditorStore } from './state'
 
 import { useShallow } from 'zustand/react/shallow'
 
@@ -14,7 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 import InputAdornment from '@mui/material/InputAdornment';
 
 export const RecipeInfoInput = () => {
-	const recipeInfo = useRecipeAddStore(
+	const recipeInfo = useRecipeEditorStore(
 	 useShallow( state =>
 		({
 		 name: state.recipe.name,
@@ -25,12 +25,12 @@ export const RecipeInfoInput = () => {
 		 portionName: state.recipe.portionName
 		}))
 	)
-	const setName = useRecipeAddStore( state => state.setName )
-	const setPortions = useRecipeAddStore( state => state.setPortions )
-	const setPortionName = useRecipeAddStore( state => state.setPortionName )
-	const setActiveTime = useRecipeAddStore( state => state.setActiveTime );
-	const setTotalTime = useRecipeAddStore( state => state.setTotalTime );
-	const setDefaultWeight = useRecipeAddStore( state => state.setDefaultWeight )
+	const setName = useRecipeEditorStore( state => state.setName )
+	const setPortions = useRecipeEditorStore( state => state.setPortions )
+	const setPortionName = useRecipeEditorStore( state => state.setPortionName )
+	const setActiveTime = useRecipeEditorStore( state => state.setActiveTime );
+	const setTotalTime = useRecipeEditorStore( state => state.setTotalTime );
+	const setDefaultWeight = useRecipeEditorStore( state => state.setDefaultWeight )
 
 	// todo: tags, category etc, probably in a different component
 	// and description

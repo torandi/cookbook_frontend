@@ -2,9 +2,9 @@
 
 import { useState, useEffect, ChangeEvent, SyntheticEvent } from 'react';
 
-import { defaultIngredientEntry, useRecipeAddStore } from './state';
+import { defaultIngredientEntry, useRecipeEditorStore } from './state';
 
-import { IngredientType, RecipeIngredientType, VolumeType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
+import { IngredientType, RecipeIngredientType, unitOptions, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { addIngredient, useIngredients } from '@/app/backend/ingredient'
 import { SortableList } from '@/app/components/sortableList'
 
@@ -43,11 +43,11 @@ function IngredientEntryInput({ id, isLastItem } : {
 	id: number,
 	isLastItem: boolean,
 }) {
-	const value = useRecipeAddStore( state => state.ingredients[id] )
-	const setIngredient = useRecipeAddStore( state => state.setIngredient )
+	const value = useRecipeEditorStore( state => state.ingredients[id] )
+	const setIngredient = useRecipeEditorStore( state => state.setIngredient )
 	const setValue = (value : RecipeIngredientType | null) => setIngredient(id, value)
-	const addIngredient = useRecipeAddStore( state => state.addIngredient )
-	const removeIngredient = useRecipeAddStore( state => state.removeIngredient )
+	const addIngredient = useRecipeEditorStore( state => state.addIngredient )
+	const removeIngredient = useRecipeEditorStore( state => state.removeIngredient )
 
 	// If we are ever the last item, and value is set to non-null
 	// ad another item
@@ -156,7 +156,7 @@ function IngredientSelectBox({id, value, setValue} : {
 	value: RecipeIngredientType | null,
 	setValue: Function
 }) {
-	const { ingredients, error, isLoading } = useIngredients();
+	const { ingredients, isLoading } = useIngredients();
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [dialogValue, setDialogValue] = useState({
@@ -508,8 +508,8 @@ function IngredientCreateDialog({
 }
 
 export const IngredientsInput = () => {
-	const ingredientsOrder = useRecipeAddStore( state => state.ingredientsOrder )
-	const setIngredientsOrder = useRecipeAddStore( state => state.setIngredientsOrder )
+	const ingredientsOrder = useRecipeEditorStore( state => state.ingredientsOrder )
+	const setIngredientsOrder = useRecipeEditorStore( state => state.setIngredientsOrder )
 
 	return (
 		<SortableList

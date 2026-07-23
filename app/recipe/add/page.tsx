@@ -1,34 +1,5 @@
-import { IngredientsInput } from './ingredients';
-import { InstructionsInput } from './instructions';
-import { RecipeInfoInput } from './recipeInfo';
-import { SaveButton } from './save';
-
-import FullCard from '@/app/components/fullcard';
-
-import FormControl from '@mui/material/FormControl';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import RecipeEditorPage from '../editor/editor';
 
 export default function Page() {
-	return (
-		<FormControl variant="outlined" className="w-full">
-			<Stack direction="column" spacing={2}>
-				<FullCard className="w-full">
-					<SaveButton/>
-					<Typography variant="h4" component="h1" sx={{mb: 2}}>Nytt recept</Typography>
-					<RecipeInfoInput/>
-				</FullCard>
-				<Stack direction="row" spacing={2}>
-					<FullCard className="w-1/2">
-						<Typography variant="h5" component="h1" sx={{mb: 2}}>Ingredienser</Typography>
-						<IngredientsInput/>
-					</FullCard>
-
-					<FullCard className="w-1/2">
-						<InstructionsInput/>
-					</FullCard>
-				</Stack>
-			</Stack>
-		</FormControl>
-	)
+	return <RecipeEditorPage title="Nytt recept" />
 }

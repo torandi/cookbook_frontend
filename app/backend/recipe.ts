@@ -27,4 +27,8 @@ export function addRecipe(recipe : RecipeType ) {
 	return postBackend<RecipeType>(`recipes/`, recipe, { includeAuth: true })
 }
 
+export function updateRecipe(id: number, recipe: RecipeType) {
+	return postBackend<RecipeType>(`recipes/${id}`, recipe, { includeAuth: true, method: 'PUT' })
+}
+
 

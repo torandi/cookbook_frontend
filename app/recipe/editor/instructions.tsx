@@ -2,7 +2,7 @@
 
 import { useEffect, ChangeEvent } from 'react';
 
-import { useRecipeAddStore } from './state';
+import { useRecipeEditorStore } from './state';
 
 import { SortableList } from '@/app/components/sortableList'
 
@@ -27,13 +27,13 @@ function InstructionStepInput({ id, index, isLastItem } :
 	index: number,
 	isLastItem: boolean,
 }) {
-	const value = useRecipeAddStore( state => state.instructions[id] )
-	const setInstruction = useRecipeAddStore( state => state.setInstruction )
+	const value = useRecipeEditorStore( state => state.instructions[id] )
+	const setInstruction = useRecipeEditorStore( state => state.setInstruction )
 	const setValue = (value : string) => setInstruction(id, value)
-	const addInstruction = useRecipeAddStore( state => state.addInstruction )
-	const removeInstruction = useRecipeAddStore( state => state.removeInstruction )
-	const insertInstruction = useRecipeAddStore( state => state.insertInstruction )
-	const trimInstructions = useRecipeAddStore( state => state.trimInstructions )
+	const addInstruction = useRecipeEditorStore( state => state.addInstruction )
+	const removeInstruction = useRecipeEditorStore( state => state.removeInstruction )
+	const insertInstruction = useRecipeEditorStore( state => state.insertInstruction )
+	const trimInstructions = useRecipeEditorStore( state => state.trimInstructions )
 
 	const handleDelete = () => {
 		if(isLastItem) {
@@ -132,8 +132,8 @@ function InstructionStepInput({ id, index, isLastItem } :
 }
 
 const InstructionsInput = () => {
-	const instructionsOrder = useRecipeAddStore( state => state.instructionsOrder )
-	const setInstructionsOrder = useRecipeAddStore( state => state.setInstructionsOrder )
+	const instructionsOrder = useRecipeEditorStore( state => state.instructionsOrder )
+	const setInstructionsOrder = useRecipeEditorStore( state => state.setInstructionsOrder )
 
 	return (
 		<SortableList

@@ -1,7 +1,7 @@
 import { DbObject } from '@/app/types/dbobject';
 
 export type UnitType = "count" | "volume" | "weight";
-export const volumeTypes = ["ml", "cl", "dl", "liter", "krm", "tsk", "msk", "cups"] as const;
+export const volumeTypes = ["ml", "cl", "krm", "tsk", "msk", "dl", "liter", "cups"] as const;
 export type VolumeType = typeof volumeTypes[number];
 
 export const unitOptions = {

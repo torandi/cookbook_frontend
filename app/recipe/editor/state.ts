@@ -5,7 +5,6 @@ import { RecipeType } from '@/app/types/recipe'
 import { create, StateCreator } from 'zustand'
 
 import { omit } from '@/app/utils'
-import { stat } from 'node:fs'
 
 export const defaultIngredientEntry : RecipeIngredientType = {
 	id: null,
@@ -15,6 +14,30 @@ export const defaultIngredientEntry : RecipeIngredientType = {
 	unit: null,
 	optional: false,
 }
+
+const defaultRecipeState: RecipeType = {
+	id: null,
+	name: '',
+	portions: 4,
+	defaultWeight: false,
+	portionName: 'portioner',
+	totalTime: null,
+	activeTime: null,
+	ingredients: [],
+	instructions: [],
+}
+
+const createDefaultEditorState = () => ({
+	recipe: {
+		...defaultRecipeState,
+	},
+	ingredients: { 0: null } as { [id: number]: RecipeIngredientType | null },
+	nextIngredientId: 1,
+	ingredientsOrder: [0],
+	instructions: { 0: '' } as { [id: number]: string },
+	nextInstructionId: 1,
+	instructionsOrder: [0],
+})
 
 // State slices
 
@@ -54,10 +77,15 @@ interface ReadSlice {
 	getAll: () => RecipeType
 }
 
-type RecipieAddStore = RecipeSlice & IngredientsSlice & InstructionsSlice & ReadSlice
+interface InitSlice {
+	reset: () => void
+	setFromRecipe: (recipe: RecipeType) => void
+}
+
+type RecipeEditorStore = RecipeSlice & IngredientsSlice & InstructionsSlice & ReadSlice & InitSlice
 
 const createIngredientsSlice : StateCreator<
-	RecipieAddStore,
+	RecipeEditorStore,
 	[],
 	[],
 	IngredientsSlice
@@ -91,7 +119,7 @@ const createIngredientsSlice : StateCreator<
 	})
 
 const createInstructionsSlice : StateCreator<
-	RecipieAddStore,
+	RecipeEditorStore,
 	[],
 	[],
 	InstructionsSlice
@@ -142,21 +170,13 @@ const createInstructionsSlice : StateCreator<
 	})
 
 const createRecipeSlice : StateCreator<
-	RecipieAddStore,
+	RecipeEditorStore,
 	[],
 	[],
 	RecipeSlice
 	> = (set) => ({
 		recipe: {
-			id: null,
-			name: "",
-			portions: 4,
-			defaultWeight: false,
-			portionName: "portioner",
-			totalTime: null,
-			activeTime: null,
-			ingredients: [], // not actually used in state
-			instructions: [], // not actually used in state
+			...defaultRecipeState,
 		},
 		setName: (name: string) => set( state => ({
 			recipe: {
@@ -198,7 +218,7 @@ const createRecipeSlice : StateCreator<
 
 
 const createReadSlice : StateCreator<
-	RecipieAddStore,
+	RecipeEditorStore,
 	[],
 	[],
 	ReadSlice
@@ -214,11 +234,70 @@ const createReadSlice : StateCreator<
 		})
 	})
 
-export const useRecipeAddStore = create<
-	RecipieAddStore
+const createInitSlice : StateCreator<
+	RecipeEditorStore,
+	[],
+	[],
+	InitSlice
+	> = (set) => ({
+		reset: () => {
+			set(() => ({ ...createDefaultEditorState() }))
+		},
+		setFromRecipe: (recipe) => {
+			const ingredientEntries = recipe.ingredients.map((ingredient, index) => [
+				index,
+				{
+					...defaultIngredientEntry,
+					...ingredient,
+					comment: ingredient.comment ?? '',
+					optional: ingredient.optional ?? false,
+				},
+			] as const)
+
+			const instructionEntries = recipe.instructions.map((instruction, index) => [
+				index,
+				instruction,
+			] as const)
+
+			const ingredients = ingredientEntries.length > 0
+				? Object.fromEntries(ingredientEntries)
+				: { 0: null }
+
+			const ingredientsOrder = ingredientEntries.length > 0
+				? ingredientEntries.map(([id]) => id)
+				: [0]
+
+			const instructions = instructionEntries.length > 0
+				? Object.fromEntries(instructionEntries)
+				: { 0: '' }
+
+			const instructionsOrder = instructionEntries.length > 0
+				? instructionEntries.map(([id]) => id)
+				: [0]
+
+			set(() => ({
+				recipe: {
+					...defaultRecipeState,
+					...recipe,
+					ingredients: [],
+					instructions: [],
+				},
+				ingredients,
+				ingredientsOrder,
+				nextIngredientId: ingredientsOrder.length,
+				instructions,
+				instructionsOrder,
+				nextInstructionId: instructionsOrder.length,
+			}))
+		},
+	})
+
+export const useRecipeEditorStore = create<
+	RecipeEditorStore
 >()((...a) => ({
 	...createRecipeSlice(...a),
 	...createIngredientsSlice(...a),
 	...createInstructionsSlice(...a),
 	...createReadSlice(...a),
+	...createInitSlice(...a),
 }))
