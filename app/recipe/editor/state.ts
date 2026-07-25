@@ -87,7 +87,7 @@ interface InstructionsSlice {
 	removeInstructionGroup: (groupId: number) => void
 	setInstructionGroupOrder: (newOrder: number[]) => void
 
-	trimInstructions: () => void
+	trimInstructions: (groupId: number) => void
 }
 
 interface RecipeSlice {
@@ -255,15 +255,14 @@ const createInstructionsSlice : StateCreator<
 				[groupId]: newOrder,
 			},
 		})),
-		trimInstructions: () => {
-			Object.entries(get().instructionsOrder).forEach(([groupId, order]) => {
-				const values = get().instructions;
-				if (order.length > 1
-							&& values[order.at(-1) ?? 0].trim() == ""
-							&& values[order.at(-2) ?? 0].trim() == "") {
-					get().removeInstruction(order.at(-1) ?? 0, Number(groupId));
-				}
-			})
+		trimInstructions: (groupId: number) => {
+			const order = get().instructionsOrder[groupId];
+			const values = get().instructions;
+			if (order.length > 1
+						&& values[order.at(-1) ?? 0].trim() == ""
+						&& values[order.at(-2) ?? 0].trim() == "") {
+				get().removeInstruction(order.at(-1) ?? 0, groupId);
+			}
 		},
 		addInstructionGroup: () => set((state) => ({
 			nextInstructionId: state.nextInstructionId + 1,

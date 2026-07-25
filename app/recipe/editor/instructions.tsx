@@ -50,7 +50,7 @@ function InstructionStepInput({ id, groupId,index, isLastItem } :
 		if(value && isLastItem) {
 			addInstruction(groupId)
 		} else if(!value && !isLastItem) {
-			trimInstructions()
+			trimInstructions(groupId)
 		}
 	}, [isLastItem, value]);
 
