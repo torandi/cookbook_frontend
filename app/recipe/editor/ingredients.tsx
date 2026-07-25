@@ -13,12 +13,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -29,15 +24,19 @@ import Tooltip from '@mui/material/Tooltip';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton'
 
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import DeleteIcon from '@mui/icons-material/Delete'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 const ingredientSpacing = 1;
 
 type IngredientOrNewType = IngredientType | { inputValue: string, title: string };
 
-function IngredientEntryInput({ id, isLastItem } : {
+function IngredientEntryInput({ id, groupId, isLastItem } : {
 	id: number,
+	groupId: number,
 	isLastItem: boolean,
 }) {
 	const value = useRecipeEditorStore( state => state.ingredients[id] )
@@ -50,7 +49,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 	// ad another item
 	useEffect(() => {
 		if(isLastItem && value != null) {
-			addIngredient()
+			addIngredient(groupId)
 		}
 	}, [isLastItem, value])
 
@@ -59,7 +58,7 @@ function IngredientEntryInput({ id, isLastItem } : {
 			// We're the last item, just clear our value
 			setValue(null);
 		} else {
-			removeIngredient(id)
+			removeIngredient(id, groupId);
 		}
 	}
 
@@ -345,21 +344,103 @@ function QuantityFields({ id, value, setValue } : {
 export const IngredientsInput = () => {
 	const ingredientsOrder = useRecipeEditorStore( state => state.ingredientsOrder )
 	const setIngredientsOrder = useRecipeEditorStore( state => state.setIngredientsOrder )
+	const groups = useRecipeEditorStore( state => state.ingredientGroups )
+	const ingredientGroupOrder = useRecipeEditorStore( state => state.ingredientGroupOrder )
+	const setIngredientGroupOrder = useRecipeEditorStore( state => state.setIngredientGroupOrder )
+	const setIngredientGroupName = useRecipeEditorStore( state => state.setIngredientGroupName )
+	const addIngredientGroup = useRecipeEditorStore( state => state.addIngredientGroup )
 
+	const moveGroupUp = (groupId: number) => {
+		const index = ingredientGroupOrder.indexOf(groupId);
+		if(index > 0) {
+			const newOrder = [...ingredientGroupOrder];
+			newOrder.splice(index, 1);
+			newOrder.splice(index - 1, 0, groupId);
+			setIngredientGroupOrder(newOrder);
+		}
+	}
+
+	const moveGroupDown = (groupId: number) => {
+		const index = ingredientGroupOrder.indexOf(groupId);
+		if(index >= 0 && index < ingredientGroupOrder.length - 1) {
+			const newOrder = [...ingredientGroupOrder];
+			newOrder.splice(index, 1);
+			newOrder.splice(index + 1, 0, groupId);
+			setIngredientGroupOrder(newOrder);
+		}
+	}
+
+	// todo: support right click to move to another group
 	return (
-		<SortableList
-			onItemsUpdated={setIngredientsOrder}
-			items={ingredientsOrder}
-		>
-			<Stack direction="column" spacing={2}>
-				{ ingredientsOrder.map((id : number) => (
-					<IngredientEntryInput
-						id = { id }
-						key = { id }
-						isLastItem = { ingredientsOrder.at(-1) == id }
-					/>
-				))}
-			</Stack>
-		</SortableList>
+		<Box sx={{marginBottom: 5}} >
+			{ ingredientGroupOrder.map((groupId : number) => {
+				const groupName = groups[groupId] ?? "";
+				return (
+					<Stack direction="column" spacing={2} style={{marginBottom: 5}} key={groupId}
+							sx={{border: '1px solid #ccc', borderRadius: '4px', p: 2}}>
+						<Stack direction="row" spacing={2}>
+							<TextField
+								label="Sektionsnamn"
+								value={groupName ?? ""}
+								onChange={ (event: ChangeEvent<HTMLInputElement>) => {
+									setIngredientGroupName(groupId, event.currentTarget.value)
+								}}
+							/>
+							<Tooltip title="Flytta sektion uppåt">
+								<IconButton
+									className="float-right self-center justify-self-end"
+									onClick={() => moveGroupUp(groupId)}
+								>
+									<KeyboardArrowUpIcon/>
+								</IconButton>
+							</Tooltip>
+							<Tooltip title="Flytta sektion nedåt">
+								<IconButton
+									className="float-right self-center justify-self-end"
+									onClick={() => moveGroupDown(groupId)}
+								>
+									<KeyboardArrowDownIcon/>
+								</IconButton>
+							</Tooltip>
+							<Tooltip title="Ta bort sektion">
+								<IconButton
+									className="float-right self-center justify-self-end"
+									onClick={() => {
+										setIngredientGroupOrder(ingredientGroupOrder.filter(x => x != groupId));
+									}}
+								>
+									<DeleteIcon/>
+								</IconButton>
+							</Tooltip>
+						</Stack>
+
+
+						<SortableList
+							onItemsUpdated={setIngredientsOrder}
+							items={ingredientsOrder[groupId]}
+						>
+							<Stack direction="column" spacing={2}>
+								{ ingredientsOrder[groupId].map((id : number) => (
+									<IngredientEntryInput
+										id = { id }
+										key = { id }
+										groupId = { groupId }
+										isLastItem = { ingredientsOrder[groupId].at(-1) == id }
+									/>
+								))}
+							</Stack>
+						</SortableList>
+					</Stack>
+				)
+			})}
+			<Tooltip title="Lägg till sektion">
+				<IconButton
+					className="float-right self-center justify-self-end"
+					onClick={addIngredientGroup}
+				>
+					<PlaylistAddIcon/>
+				</IconButton>
+			</Tooltip>
+		</Box>
 	)
 }

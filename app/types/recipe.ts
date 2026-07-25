@@ -1,6 +1,16 @@
 import { DbObject } from '@/app/types/dbobject';
 import { RecipeIngredientType } from '@/app/types/ingredient';
 
+export interface InstructionGroupType {
+	name: string | null;
+	instructions: string[];
+}
+
+export interface IngredientGroupType {
+	name: string | null;
+	ingredients: RecipeIngredientType[];
+}
+
 export interface RecipeType extends DbObject {
 	name : string;
 	description: string;
@@ -9,6 +19,6 @@ export interface RecipeType extends DbObject {
 	portionName: string;
 	activeTime: number | null;
 	totalTime: number | null;
-	ingredients : RecipeIngredientType[];
-	instructions : string[];
+	ingredients : IngredientGroupType[];
+	instructions : InstructionGroupType[];
 }
