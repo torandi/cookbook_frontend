@@ -29,6 +29,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { AddGroupButton, GroupEditRow } from './groups';
 
 const ingredientSpacing = 1;
 
@@ -350,26 +351,7 @@ export const IngredientsInput = () => {
 	const setIngredientGroupName = useRecipeEditorStore( state => state.setIngredientGroupName )
 	const addIngredientGroup = useRecipeEditorStore( state => state.addIngredientGroup )
 
-	const moveGroupUp = (groupId: number) => {
-		const index = ingredientGroupOrder.indexOf(groupId);
-		if(index > 0) {
-			const newOrder = [...ingredientGroupOrder];
-			newOrder.splice(index, 1);
-			newOrder.splice(index - 1, 0, groupId);
-			setIngredientGroupOrder(newOrder);
-		}
-	}
-
-	const moveGroupDown = (groupId: number) => {
-		const index = ingredientGroupOrder.indexOf(groupId);
-		if(index >= 0 && index < ingredientGroupOrder.length - 1) {
-			const newOrder = [...ingredientGroupOrder];
-			newOrder.splice(index, 1);
-			newOrder.splice(index + 1, 0, groupId);
-			setIngredientGroupOrder(newOrder);
-		}
-	}
-
+	
 	// todo: support right click to move to another group
 	return (
 		<Box sx={{marginBottom: 5}} >
@@ -378,45 +360,17 @@ export const IngredientsInput = () => {
 				return (
 					<Stack direction="column" spacing={2} style={{marginBottom: 5}} key={groupId}
 							sx={{border: '1px solid #ccc', borderRadius: '4px', p: 2}}>
-						<Stack direction="row" spacing={2}>
-							<TextField
-								label="Sektionsnamn"
-								value={groupName ?? ""}
-								onChange={ (event: ChangeEvent<HTMLInputElement>) => {
-									setIngredientGroupName(groupId, event.currentTarget.value)
-								}}
-							/>
-							<Tooltip title="Flytta sektion uppåt">
-								<IconButton
-									className="float-right self-center justify-self-end"
-									onClick={() => moveGroupUp(groupId)}
-								>
-									<KeyboardArrowUpIcon/>
-								</IconButton>
-							</Tooltip>
-							<Tooltip title="Flytta sektion nedåt">
-								<IconButton
-									className="float-right self-center justify-self-end"
-									onClick={() => moveGroupDown(groupId)}
-								>
-									<KeyboardArrowDownIcon/>
-								</IconButton>
-							</Tooltip>
-							<Tooltip title="Ta bort sektion">
-								<IconButton
-									className="float-right self-center justify-self-end"
-									onClick={() => {
-										setIngredientGroupOrder(ingredientGroupOrder.filter(x => x != groupId));
-									}}
-								>
-									<DeleteIcon/>
-								</IconButton>
-							</Tooltip>
-						</Stack>
-
+						<GroupEditRow
+							groupId={groupId}
+							groupName={groupName}
+							groupOrder={ingredientGroupOrder}
+							setGroupOrder={setIngredientGroupOrder}
+							setGroupName={setIngredientGroupName}
+						/>
+						
 
 						<SortableList
-							onItemsUpdated={setIngredientsOrder}
+							onItemsUpdated={(newOrder: number[]) => setIngredientsOrder(groupId, newOrder)}
 							items={ingredientsOrder[groupId]}
 						>
 							<Stack direction="column" spacing={2}>
@@ -433,14 +387,9 @@ export const IngredientsInput = () => {
 					</Stack>
 				)
 			})}
-			<Tooltip title="Lägg till sektion">
-				<IconButton
-					className="float-right self-center justify-self-end"
-					onClick={addIngredientGroup}
-				>
-					<PlaylistAddIcon/>
-				</IconButton>
-			</Tooltip>
+			<Box sx={{marginTop: 2}}>
+				<AddGroupButton onClick={addIngredientGroup} />
+			</Box>
 		</Box>
 	)
 }

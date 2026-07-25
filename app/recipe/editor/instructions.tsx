@@ -16,12 +16,11 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton'
 
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import DeleteIcon from '@mui/icons-material/Delete'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Typography from '@mui/material/Typography';
+import { AddGroupButton, GroupEditRow } from './groups';
 
 function InstructionStepInput({ id, groupId,index, isLastItem } :
 															{
@@ -143,26 +142,6 @@ const InstructionsInput = () => {
 	const setInstructionGroupName = useRecipeEditorStore( state => state.setInstructionGroupName )
 	const addInstructionGroup = useRecipeEditorStore( state => state.addInstructionGroup )
 
-	const moveGroupUp = (groupId: number) => {
-		const index = instructionGroupOrder.indexOf(groupId);
-		if(index > 0) {
-			const newOrder = [...instructionGroupOrder];
-			newOrder.splice(index, 1);
-			newOrder.splice(index - 1, 0, groupId);
-			setInstructionGroupOrder(newOrder);
-		}
-	}
-
-	const moveGroupDown = (groupId: number) => {
-		const index = instructionGroupOrder.indexOf(groupId);
-		if(index >= 0 && index < instructionGroupOrder.length - 1) {
-			const newOrder = [...instructionGroupOrder];
-			newOrder.splice(index, 1);
-			newOrder.splice(index + 1, 0, groupId);
-			setInstructionGroupOrder(newOrder);
-		}
-	}
-
 	return (
 		<Box sx={{marginBottom: 5}} >
 			<Typography sx={{
@@ -177,46 +156,17 @@ const InstructionsInput = () => {
 			{ instructionGroupOrder.map((groupId : number) => {
 				const groupName = groups[groupId] ?? "";
 				return (
-	<Stack direction="column" spacing={2} style={{marginBottom: 5}} key={groupId}
+					<Stack direction="column" spacing={2} style={{marginBottom: 5}} key={groupId}
 							sx={{border: '1px solid #ccc', borderRadius: '4px', p: 2}}>
-						<Stack direction="row" spacing={2}>
-							<TextField
-								label="Sektionsnamn"
-								value={groupName ?? ""}
-								onChange={ (event: ChangeEvent<HTMLInputElement>) => {
-									setInstructionGroupName(groupId, event.currentTarget.value)
-								}}
-							/>
-							<Tooltip title="Flytta sektion uppåt">
-								<IconButton
-									className="float-right self-center justify-self-end"
-									onClick={() => moveGroupUp(groupId)}
-								>
-									<KeyboardArrowUpIcon/>
-								</IconButton>
-							</Tooltip>
-							<Tooltip title="Flytta sektion nedåt">
-								<IconButton
-									className="float-right self-center justify-self-end"
-									onClick={() => moveGroupDown(groupId)}
-								>
-									<KeyboardArrowDownIcon/>
-								</IconButton>
-							</Tooltip>
-							<Tooltip title="Ta bort sektion">
-								<IconButton
-									className="float-right self-center justify-self-end"
-									onClick={() => {
-										setInstructionGroupOrder(instructionGroupOrder.filter(x => x != groupId));
-									}}
-								>
-									<DeleteIcon/>
-								</IconButton>
-							</Tooltip>
-						</Stack>
-
+								<GroupEditRow
+									groupId={groupId}
+									groupName={groupName}
+									groupOrder={instructionGroupOrder}
+									setGroupOrder={setInstructionGroupOrder}
+									setGroupName={setInstructionGroupName}
+								/>
 						<SortableList
-							onItemsUpdated={setInstructionsOrder}
+							onItemsUpdated={(newOrder: number[]) => setInstructionsOrder(groupId, newOrder)}
 							items={instructionsOrder[groupId]}
 							>
 							<Stack direction="column" spacing={2}>
@@ -235,15 +185,7 @@ const InstructionsInput = () => {
 				)
 			})}
 			<Box sx={{marginTop: 2}}>
-				<Tooltip title="Lägg till nytt sektion">
-					<IconButton
-						className="float-right self-center justify-self-end"
-						onClick={() => addInstructionGroup()}
-						tabIndex={-1}
-					>
-						<PlaylistAddIcon/>
-					</IconButton>
-				</Tooltip>
+				<AddGroupButton onClick={addInstructionGroup}/>
 			</Box>
 		</Box>
 	)
