@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -93,41 +94,56 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 									{day.meals.map((meal, mealIdx) => (
 										<Stack
 											key={meal.id ?? mealIdx}
-											direction="row"
-											spacing={1}
-											sx={{ alignItems: 'center' }}
+											spacing={0.25}
+											sx={{ py: 0.25 }}
 										>
-											<Typography variant="body2" sx={{ fontWeight: 500, minWidth: 70 }}>
-												{meal.name.trimEnd() ? meal.name : 'Måltid'}
-											</Typography>
-											{meal.recipe ? (
-												<Link
-													href={`/recipe/${meal.recipe.id}`}
-													target="_blank"
-													rel="noopener noreferrer"
-													style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-												>
-													<RestaurantMenuRoundedIcon
-														fontSize="small"
-														sx={{ color: 'primary.main' }}
-													/>
-													<Typography variant="body2" color="primary">
-														{meal.recipe.name}
+											<Box
+												sx={{
+													display: 'grid',
+													gridTemplateColumns: '70px minmax(0, 1fr) auto',
+													columnGap: 1,
+													alignItems: 'center',
+												}}
+											>
+												<Typography variant="body2" sx={{ fontWeight: 500 }}>
+													{meal.name.trimEnd() ? meal.name : 'Måltid'}
+												</Typography>
+												{meal.recipe ? (
+													<Link
+														href={`/recipe/${meal.recipe.id}`}
+														target="_blank"
+														rel="noopener noreferrer"
+														style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}
+													>
+														<RestaurantMenuRoundedIcon
+															fontSize="small"
+															sx={{ color: 'primary.main' }}
+														/>
+														<Typography variant="body2" color="primary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+															{meal.recipe.name}
+														</Typography>
+													</Link>
+												) : (
+													<Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+														Inget recept
 													</Typography>
-												</Link>
-											) : (
-												<Typography variant="body2" color="text.secondary">
-													Inget recept
-												</Typography>
-											)}
-											{meal.comment ? (
-												<Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-													{meal.comment}
-												</Typography>
-											) : null}
-											<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 300 }}>
-												{meal.portions} port.
-											</Typography>
+												)}
+												<Chip
+													size="small"
+													variant="outlined"
+													label={`${meal.portions} port.`}
+													sx={{ height: 22, '& .MuiChip-label': { px: 1, fontWeight: 500 } }}
+												/>
+												{meal.comment ? (
+													<Typography
+														variant="caption"
+														color="text.disabled"
+														sx={{ gridColumn: '2 / 4' }}
+													>
+														{meal.comment}
+													</Typography>
+												) : null}
+											</Box>
 										</Stack>
 									))}
 								</Stack>
