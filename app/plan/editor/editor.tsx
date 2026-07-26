@@ -19,7 +19,7 @@ import FullCard from '@/app/components/fullcard'
 import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
 import { addPlan, updatePlan } from '@/app/backend/plan'
 import { PlanType } from '@/app/types/plan'
-import { RecipeType } from '@/app/types/recipe'
+import { RecipeSummaryType } from '@/app/types/recipe'
 import {
 	usePlanEditorStore,
 	editorStateToPlan,
@@ -123,13 +123,20 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 			<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions + 1)}>
 				<AddIcon fontSize="small" />
 			</IconButton>
+			<IconButton
+				size="small"
+				color="error"
+				onClick={() => removeMeal(dayLocalId, meal.localId)}
+			>
+				<DeleteIcon fontSize="small" />
+			</IconButton>
 		</Stack>
 
 			<RecipePickDialog
 				open={recipeOpen}
 				onClose={() => setRecipeOpen(false)}
 				currentRecipe={meal.recipe}
-				onSelect={(recipe: RecipeType | null) => setRecipe(dayLocalId, meal.localId, recipe)}
+				onSelect={(recipe: RecipeSummaryType | null) => setRecipe(dayLocalId, meal.localId, recipe)}
 			/>
 		</Stack>
 	)

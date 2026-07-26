@@ -2,14 +2,15 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
 import { PlanType } from '@/app/types/plan'
-import { RecipeType } from '@/app/types/recipe'
+import { RecipeSummaryType } from '@/app/types/recipe'
 
 export interface EditorMeal {
 	localId: number
 	dbId: number | null
 	name: string
-	recipe: RecipeType | null
+	recipe: RecipeSummaryType | null
 	portions: number
+	comment: string | null
 }
 
 export interface EditorDay {
@@ -30,7 +31,7 @@ interface PlanEditorState {
 	addMeal: (dayLocalId: number, mealName: string) => void
 	removeMeal: (dayLocalId: number, mealLocalId: number) => void
 	renameMeal: (dayLocalId: number, mealLocalId: number, name: string) => void
-	setRecipe: (dayLocalId: number, mealLocalId: number, recipe: RecipeType | null) => void
+	setRecipe: (dayLocalId: number, mealLocalId: number, recipe: RecipeSummaryType | null) => void
 	setPortions: (dayLocalId: number, mealLocalId: number, portions: number) => void
 	reset: () => void
 	setFromPlan: (plan: PlanType) => void
@@ -66,6 +67,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 					name: mealName,
 					recipe: null,
 					portions,
+					comment: null,
 				}))
 				state.days.push({ localId: dayLocalId, dbId: null, date, meals })
 			}
@@ -79,18 +81,27 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 		addMeal: (dayLocalId, mealName) => set((state) => {
 			const day = state.days.find((d) => d.localId === dayLocalId)
 			if (!day) return
-			day.meals.push({ localId: state.nextLocalId++, dbId: null, name: mealName, recipe: null, portions: 4 })
+			day.meals.push({
+				localId: state.nextLocalId++,
+				dbId: null,
+				name: mealName,
+				recipe: null,
+				portions: 2,
+				comment: null
+			})
 		}),
 
 		removeMeal: (dayLocalId, mealLocalId) => set((state) => {
 			const day = state.days.find((d) => d.localId === dayLocalId)
-			if (!day) return
+			if (!day)
+				return
 			day.meals = day.meals.filter((m) => m.localId !== mealLocalId)
 		}),
 
 		renameMeal: (dayLocalId, mealLocalId, name) => set((state) => {
 			const day = state.days.find((d) => d.localId === dayLocalId)
-			if (!day) return
+			if (!day)
+				return
 			const meal = day.meals.find((m) => m.localId === mealLocalId)
 			if (meal) meal.name = name
 		}),
@@ -127,7 +138,8 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 					dbId: meal.id,
 					name: meal.name,
 					recipe: meal.recipe,
-					portions: meal.portions ?? 4,
+					portions: meal.portions ?? 2,
+					comment: meal.comment,
 				})),
 			}))
 		}),
@@ -150,6 +162,7 @@ export function editorStateToPlan(
 				name: meal.name,
 				recipe: meal.recipe,
 				portions: meal.portions,
+				comment: meal.comment,
 			})),
 		})),
 	}

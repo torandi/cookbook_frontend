@@ -12,17 +12,16 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 
 import { useRecipes } from '@/app/backend/recipe'
-import { RecipeType } from '@/app/types/recipe'
+import { RecipeSummaryType } from '@/app/types/recipe'
 
 type RecipePickDialogProps = {
 	open: boolean
 	onClose: () => void
-	onSelect: (recipe: RecipeType | null) => void
-	currentRecipe: RecipeType | null
+	onSelect: (recipe: RecipeSummaryType | null) => void
+	currentRecipe: RecipeSummaryType | null
 }
 
 export default function RecipePickDialog({
@@ -38,7 +37,7 @@ export default function RecipePickDialog({
 		r.name.toLowerCase().includes(search.toLowerCase())
 	)
 
-	function handleSelect(recipe: RecipeType) {
+	function handleSelect(recipe: RecipeSummaryType) {
 		onSelect(recipe)
 		setSearch('')
 		onClose()

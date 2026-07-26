@@ -22,3 +22,10 @@ export interface RecipeType extends DbObject {
 	ingredients : IngredientGroupType[];
 	instructions : InstructionGroupType[];
 }
+
+export interface RecipeSummaryType extends DbObject {
+	name : string;
+	description: string;
+	activeTime: number | null;
+	totalTime: number | null;
+}
