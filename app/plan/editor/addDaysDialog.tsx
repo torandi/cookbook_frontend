@@ -1,6 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { I18nProvider } from 'react-aria-components'
+import type { DateValue, RangeValue } from 'react-aria-components'
+
+import {
+	RangeCalendar,
+	RangeCalendarHeader,
+	RangeNavButton,
+	RangeCalendarYearPicker,
+	RangeCalendarGrid,
+	RangeCalendarGridHeader,
+	RangeCalendarGridBody,
+	RangeCalendarCell,
+} from '@/libs/tailgrids/core/range-calendar'
 
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -10,7 +23,6 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Stack from '@mui/material/Stack'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 type AddDaysDialogProps = {
@@ -20,9 +32,7 @@ type AddDaysDialogProps = {
 }
 
 export default function AddDaysDialog({ open, onClose, onAdd }: AddDaysDialogProps) {
-	const today = new Date().toISOString().split('T')[0]
-	const [startDate, setStartDate] = useState(today)
-	const [endDate, setEndDate] = useState(today)
+	const [range, setRange] = useState<RangeValue<DateValue> | null>(null)
 	const [lunch, setLunch] = useState(true)
 	const [middag, setMiddag] = useState(true)
 
@@ -30,42 +40,38 @@ export default function AddDaysDialog({ open, onClose, onAdd }: AddDaysDialogPro
 		const mealNames: string[] = []
 		if (lunch) mealNames.push('Lunch')
 		if (middag) mealNames.push('Middag')
-		if (mealNames.length === 0 || !startDate || !endDate) return
-		onAdd(startDate, endDate, mealNames)
+		if (mealNames.length === 0 || !range) return
+		onAdd(range.start.toString(), range.end.toString(), mealNames)
 		onClose()
 	}
 
-	const valid = (lunch || middag) && !!startDate && !!endDate && startDate <= endDate
+	const valid = (lunch || middag) && range != null
 
 	return (
-		<Dialog open={open} onClose={onClose}>
+		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
 			<DialogTitle>Lägg till dagar</DialogTitle>
 			<DialogContent>
 				<Stack spacing={2} sx={{ mt: 1 }}>
-					<Stack direction="row" spacing={2}>
-						<TextField
-							label="Från"
-							type="date"
-							value={startDate}
-							onChange={(e) => {
-								setStartDate(e.target.value)
-								if (e.target.value > endDate) setEndDate(e.target.value)
-							}}
-							size="small"
-							slotProps={{ inputLabel: { shrink: true } }}
-						/>
-						<TextField
-							label="Till"
-							type="date"
-							value={endDate}
-							onChange={(e) => setEndDate(e.target.value)}
-							size="small"
-							slotProps={{
-								inputLabel: { shrink: true },
-								htmlInput: { min: startDate },
-							}}
-						/>
-					</Stack>
+					<I18nProvider locale="sv-SE">
+						<RangeCalendar
+							aria-label="Välj datumintervall"
+							value={range}
+							onChange={setRange}
+						>
+							<RangeCalendarHeader>
+								<RangeNavButton slot="previous" />
+								<RangeCalendarYearPicker />
+								<RangeNavButton slot="next" />
+							</RangeCalendarHeader>
+							<RangeCalendarGrid>
+								<RangeCalendarGridHeader />
+								<RangeCalendarGridBody>
+									{(date) => <RangeCalendarCell date={date} />}
+								</RangeCalendarGridBody>
+							</RangeCalendarGrid>
+						</RangeCalendar>
+					</I18nProvider>
+
 					<Typography variant="subtitle2">Måltider</Typography>
 					<Stack direction="row" spacing={1}>
 						<FormControlLabel
