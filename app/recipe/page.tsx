@@ -20,6 +20,7 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import { useRecipes } from '@/app/backend/recipe';
+import { formatTime } from '@/app/utils';
 
 function RecipeListContent() {
 	const searchParams = useSearchParams();
@@ -125,7 +126,7 @@ function RecipeListContent() {
 			)}
 			{error && (
 				<Alert severity="error" sx={{ mb: 2 }}>
-					Kunde inte hamta recept
+					Kunde inte hämta recept
 				</Alert>
 			)}
 			{!isLoading && !error && (
@@ -143,18 +144,61 @@ function RecipeListContent() {
 									},
 								}}
 							>
-								<ListItemText
-									primary={recipe.name}
-									secondary={recipe.description?.trim() ?? ''}
-									slotProps={{
-										primary: {
-											sx: { fontWeight: 600 },
-										},
-										secondary: {
-											sx: { color: 'text.secondary' },
-										},
+								<Box
+									sx={{
+										display: 'flex',
+										justifyContent: 'space-between',
+										alignItems: 'flex-start',
+										gap: 2,
+										width: '100%',
 									}}
-								/>
+								>
+									<Box sx={{ minWidth: 0, flex: 1 }}>
+										<ListItemText
+											primary={recipe.name}
+											secondary={recipe.description?.trim() ?? ''}
+											slotProps={{
+												primary: {
+													sx: { fontWeight: 600 },
+												},
+												secondary: {
+													sx: { color: 'text.secondary' },
+												},
+											}}
+										/>
+									</Box>
+									{(recipe.totalTime != null || recipe.activeTime != null) && (
+										<Stack
+											spacing={0.2}
+											sx={{
+												textAlign: 'right',
+												minWidth: { xs: 92, sm: 118 },
+												alignSelf: 'center',
+											}}
+										>
+											{recipe.totalTime != null && (
+												<Box>
+													<Typography variant="caption" color="text.secondary" sx={{ fontWeight: 400 }}>
+														Total tid:&nbsp;
+													</Typography>
+													<Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+														{formatTime(recipe.totalTime)}
+													</Typography>
+												</Box>
+											)}
+											{recipe.activeTime != null && (
+												<Box>
+													<Typography variant="caption" color="text.secondary" sx={{ fontWeight: 400 }}>
+														Aktiv tid:&nbsp;
+													</Typography>
+													<Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+														{formatTime(recipe.activeTime)}
+													</Typography>
+												</Box>
+											)}
+										</Stack>
+									)}
+								</Box>
 							</ListItemButton>
 							{index < filtered.length - 1 && <Divider component="li" />}
 						</Box>
