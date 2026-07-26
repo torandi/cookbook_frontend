@@ -17,6 +17,7 @@ const pages: Page[] = [
   { url: '/recipe', title: 'Recept' },
   { url: '/recipe/add', title: 'Nytt recept' },
   { url: '/ingredients', title: 'Ingredienser' },
+  { url: '/plan', title: 'Planering' },
 ]
 
 export default function TopMenu() {
