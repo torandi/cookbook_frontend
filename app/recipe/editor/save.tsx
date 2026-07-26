@@ -6,6 +6,7 @@ import { addRecipe, updateRecipe } from '@/app/backend/recipe'
 
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation'
+import { clearRecipeDraft } from './draft';
 
 export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 	const router = useRouter()
@@ -19,6 +20,7 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 			: await addRecipe(data);
 
 		if (recipeData) {
+			clearRecipeDraft(recipeId)
 			showSuccessAlert(recipeId != undefined ? 'Recept uppdaterat' : 'Recept sparat')
 			router.push(`/recipe/${recipeData.id}`)
 		} else {

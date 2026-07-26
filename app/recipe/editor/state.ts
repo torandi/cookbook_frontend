@@ -47,6 +47,8 @@ const createDefaultEditorState = () => ({
 	instructionsOrder: { 0: [0] } as { [groupId: number]: number[] }, // array of instruction ids for each group
 })
 
+export type RecipeEditorDraft = ReturnType<typeof createDefaultEditorState>
+
 // State slices
 
 interface IngredientsSlice {
