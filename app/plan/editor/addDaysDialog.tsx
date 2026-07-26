@@ -9,6 +9,7 @@ import {
 	RangeCalendarHeader,
 	RangeNavButton,
 	RangeCalendarYearPicker,
+	RangeCalendarHeading,
 	RangeCalendarGrid,
 	RangeCalendarGridHeader,
 	RangeCalendarGridBody,
@@ -60,7 +61,7 @@ export default function AddDaysDialog({ open, onClose, onAdd }: AddDaysDialogPro
 						>
 							<RangeCalendarHeader>
 								<RangeNavButton slot="previous" />
-								<RangeCalendarYearPicker />
+								<RangeCalendarHeading />
 								<RangeNavButton slot="next" />
 							</RangeCalendarHeader>
 							<RangeCalendarGrid>

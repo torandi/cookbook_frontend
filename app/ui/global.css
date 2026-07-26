@@ -9,7 +9,7 @@
 @tailwind utilities;
 @tailwind forms;
 
-
+/* tailgrids theme variables */
 @theme {
   --font-sans: "DM Sans", sans-serif;
 
