@@ -12,6 +12,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import RemoveIcon from '@mui/icons-material/Remove'
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
 
 import FullCard from '@/app/components/fullcard'
@@ -56,6 +57,7 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 	const renameMeal = usePlanEditorStore((s) => s.renameMeal)
 	const removeMeal = usePlanEditorStore((s) => s.removeMeal)
 	const setRecipe = usePlanEditorStore((s) => s.setRecipe)
+	const setPortions = usePlanEditorStore((s) => s.setPortions)
 
 	function commitRename() {
 		const trimmed = editValue.trim()
@@ -111,13 +113,17 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 				sx={{ cursor: 'pointer', maxWidth: 260 }}
 			/>
 
-			<IconButton
-				size="small"
-				color="error"
-				onClick={() => removeMeal(dayLocalId, meal.localId)}
-			>
-				<DeleteIcon fontSize="small" />
+		<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
+			<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions - 1)}>
+				<RemoveIcon fontSize="small" />
 			</IconButton>
+			<Typography variant="body2" sx={{ minWidth: 20, textAlign: 'center' }}>
+				{meal.portions}
+			</Typography>
+			<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions + 1)}>
+				<AddIcon fontSize="small" />
+			</IconButton>
+		</Stack>
 
 			<RecipePickDialog
 				open={recipeOpen}

@@ -8,7 +8,6 @@ import {
 	RangeCalendar,
 	RangeCalendarHeader,
 	RangeNavButton,
-	RangeCalendarYearPicker,
 	RangeCalendarHeading,
 	RangeCalendarGrid,
 	RangeCalendarGridHeader,
@@ -23,26 +22,30 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 
 type AddDaysDialogProps = {
 	open: boolean
 	onClose: () => void
-	onAdd: (startDate: string, endDate: string, mealNames: string[]) => void
+	onAdd: (startDate: string, endDate: string, mealNames: string[], portions: number) => void
 }
 
 export default function AddDaysDialog({ open, onClose, onAdd }: AddDaysDialogProps) {
 	const [range, setRange] = useState<RangeValue<DateValue> | null>(null)
 	const [lunch, setLunch] = useState(true)
 	const [middag, setMiddag] = useState(true)
+	const [portions, setPortions] = useState(2)
 
 	function handleAdd() {
 		const mealNames: string[] = []
 		if (lunch) mealNames.push('Lunch')
 		if (middag) mealNames.push('Middag')
 		if (mealNames.length === 0 || !range) return
-		onAdd(range.start.toString(), range.end.toString(), mealNames)
+		onAdd(range.start.toString(), range.end.toString(), mealNames, portions)
 		onClose()
 	}
 
@@ -87,6 +90,17 @@ export default function AddDaysDialog({ open, onClose, onAdd }: AddDaysDialogPro
 					{!lunch && !middag && (
 						<Typography color="error" variant="caption">Välj minst en måltidstyp</Typography>
 					)}
+
+					<Typography variant="subtitle2">Portioner per måltid</Typography>
+					<Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+						<IconButton size="small" onClick={() => setPortions((p) => Math.max(1, p - 1))}>
+							<RemoveIcon fontSize="small" />
+						</IconButton>
+						<Typography sx={{ minWidth: 24, textAlign: 'center' }}>{portions}</Typography>
+						<IconButton size="small" onClick={() => setPortions((p) => p + 1)}>
+							<AddIcon fontSize="small" />
+						</IconButton>
+					</Stack>
 				</Stack>
 			</DialogContent>
 			<DialogActions>

@@ -9,6 +9,7 @@ export interface EditorMeal {
 	dbId: number | null
 	name: string
 	recipe: RecipeType | null
+	portions: number
 }
 
 export interface EditorDay {
@@ -24,12 +25,13 @@ interface PlanEditorState {
 	nextLocalId: number
 
 	setName: (name: string) => void
-	addDays: (startDate: string, endDate: string, mealNames: string[]) => void
+	addDays: (startDate: string, endDate: string, mealNames: string[], portions: number) => void
 	removeDay: (dayLocalId: number) => void
 	addMeal: (dayLocalId: number, mealName: string) => void
 	removeMeal: (dayLocalId: number, mealLocalId: number) => void
 	renameMeal: (dayLocalId: number, mealLocalId: number, name: string) => void
 	setRecipe: (dayLocalId: number, mealLocalId: number, recipe: RecipeType | null) => void
+	setPortions: (dayLocalId: number, mealLocalId: number, portions: number) => void
 	reset: () => void
 	setFromPlan: (plan: PlanType) => void
 }
@@ -53,7 +55,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 
 		setName: (name) => set((state) => { state.name = name }),
 
-		addDays: (startDate, endDate, mealNames) => set((state) => {
+		addDays: (startDate, endDate, mealNames, portions) => set((state) => {
 			const dates = datesInRange(startDate, endDate)
 			for (const date of dates) {
 				if (state.days.some((d) => d.date === date)) continue
@@ -63,6 +65,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 					dbId: null,
 					name: mealName,
 					recipe: null,
+					portions,
 				}))
 				state.days.push({ localId: dayLocalId, dbId: null, date, meals })
 			}
@@ -76,7 +79,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 		addMeal: (dayLocalId, mealName) => set((state) => {
 			const day = state.days.find((d) => d.localId === dayLocalId)
 			if (!day) return
-			day.meals.push({ localId: state.nextLocalId++, dbId: null, name: mealName, recipe: null })
+			day.meals.push({ localId: state.nextLocalId++, dbId: null, name: mealName, recipe: null, portions: 4 })
 		}),
 
 		removeMeal: (dayLocalId, mealLocalId) => set((state) => {
@@ -99,6 +102,13 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 			if (meal) meal.recipe = recipe
 		}),
 
+		setPortions: (dayLocalId, mealLocalId, portions) => set((state) => {
+			const day = state.days.find((d) => d.localId === dayLocalId)
+			if (!day) return
+			const meal = day.meals.find((m) => m.localId === mealLocalId)
+			if (meal) meal.portions = Math.max(1, portions)
+		}),
+
 		reset: () => set((state) => {
 			state.name = ''
 			state.days = []
@@ -117,6 +127,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 					dbId: meal.id,
 					name: meal.name,
 					recipe: meal.recipe,
+					portions: meal.portions ?? 4,
 				})),
 			}))
 		}),
@@ -138,6 +149,7 @@ export function editorStateToPlan(
 				id: meal.dbId,
 				name: meal.name,
 				recipe: meal.recipe,
+				portions: meal.portions,
 			})),
 		})),
 	}

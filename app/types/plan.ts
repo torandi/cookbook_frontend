@@ -4,6 +4,7 @@ import { RecipeType } from './recipe'
 export interface MealType extends DbObject {
 	name: string
 	recipe: RecipeType | null
+	portions: number
 }
 
 export interface PlanDayType extends DbObject {

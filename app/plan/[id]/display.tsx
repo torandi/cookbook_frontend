@@ -121,6 +121,9 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 													Inget recept
 												</Typography>
 											)}
+											<Typography variant="body2" color="text.secondary">
+												{meal.portions} port.
+											</Typography>
 										</Stack>
 									))}
 								</Stack>
