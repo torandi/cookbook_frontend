@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
 import MenuList from '@mui/material/MenuList';
@@ -13,6 +14,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { useRouter } from 'next/navigation';
 
 import { useRecipes } from '@/app/backend/recipe';
+import { Typography } from '@mui/material';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -123,7 +125,10 @@ export default function SearchBar(props: React.ComponentProps<typeof InputBase>)
                 <MenuList>
                   {filtered.map(r => (
                     <MenuItem key={r.id} onClick={() => handleSelect(r.id)}>
-                      {r.name}
+                      <Stack direction="column" spacing={0.5}>
+                        <Typography sx={{ fontWeight: 500 }}>{r.name}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>{r.description}</Typography>
+                      </Stack>
                     </MenuItem>
                   ))}
                 </MenuList>
