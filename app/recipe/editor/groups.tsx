@@ -5,7 +5,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import DeleteIcon from '@mui/icons-material/Delete'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 
-import { Stack, TextField, IconButton, Tooltip } from '@mui/material'
+import { Box, Stack, TextField, IconButton, Tooltip } from '@mui/material'
 import type { ChangeEvent } from 'react'
 
 
@@ -45,17 +45,20 @@ export function GroupEditRow({
 
 
     return (
-        <Stack direction="row" spacing={2}>
+        <Box className="flex flex-row w-full">
             <TextField
                 label="Sektionsnamn"
                 value={groupName ?? ""}
+                className="flex-grow"
                 onChange={ (event: ChangeEvent<HTMLInputElement>) => {
                     setGroupName(groupId, event.currentTarget.value)
                 }}
             />
             <Tooltip title="Flytta sektion uppåt">
                 <IconButton
-                    className="float-right self-center justify-self-end"
+                    className="flex-none self-center justify-self-end"
+                    sx={{ ml: 6}}
+                    tabIndex={-1}
                     onClick={() => moveGroupUp(groupId)}
                 >
                     <KeyboardArrowUpIcon/>
@@ -63,7 +66,8 @@ export function GroupEditRow({
             </Tooltip>
             <Tooltip title="Flytta sektion nedåt">
                 <IconButton
-                    className="float-right self-center justify-self-end"
+                    className="flex-none self-center justify-self-end"
+                    tabIndex={-1}
                     onClick={() => moveGroupDown(groupId)}
                 >
                     <KeyboardArrowDownIcon/>
@@ -71,7 +75,8 @@ export function GroupEditRow({
             </Tooltip>
             <Tooltip title="Ta bort sektion">
                 <IconButton
-                    className="float-right self-center justify-self-end"
+                    className="flex-none self-center justify-self-end"
+                    tabIndex={-1}
                     onClick={() => {
                         setGroupOrder(groupOrder.filter(x => x != groupId));
                     }}
@@ -79,7 +84,7 @@ export function GroupEditRow({
                     <DeleteIcon/>
                 </IconButton>
             </Tooltip>
-        </Stack>
+        </Box>
     )
 }
 
@@ -89,6 +94,7 @@ export function AddGroupButton({ onClick } : { onClick: () => void }) {
             <IconButton
                 className="float-right self-center justify-self-end"
                 onClick={onClick}
+                tabIndex={-1}
             >
                 <PlaylistAddIcon/>
             </IconButton>

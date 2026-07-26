@@ -351,7 +351,6 @@ export const IngredientsInput = () => {
 	const setIngredientGroupName = useRecipeEditorStore( state => state.setIngredientGroupName )
 	const addIngredientGroup = useRecipeEditorStore( state => state.addIngredientGroup )
 
-	
 	// todo: support right click to move to another group
 	return (
 		<Box sx={{marginBottom: 5}} >
@@ -368,7 +367,6 @@ export const IngredientsInput = () => {
 							setGroupName={setIngredientGroupName}
 						/>
 						
-
 						<SortableList
 							onItemsUpdated={(newOrder: number[]) => setIngredientsOrder(groupId, newOrder)}
 							items={ingredientsOrder[groupId]}
