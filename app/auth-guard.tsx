@@ -25,7 +25,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return
       }
 
-      router.replace('/signin')
+      const nextPath = typeof window === 'undefined'
+        ? pathname
+        : `${window.location.pathname}${window.location.search}`
+      router.replace(`/signin?next=${encodeURIComponent(nextPath)}`)
     })
 
   }, [pathname, router])

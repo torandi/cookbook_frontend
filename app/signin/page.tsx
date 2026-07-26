@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { showErrorAlert, showSuccessAlert } from '../ui/alert-state'
 import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
@@ -15,6 +15,19 @@ export default function SignInPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [nextPath, setNextPath] = useState('/')
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    const next = params.get('next')
+    if (next && next.startsWith('/') && !next.startsWith('//')) {
+      setNextPath(next)
+    }
+  }, [])
 
   async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -23,7 +36,7 @@ export default function SignInPage() {
     login(username, password).then(({ data, error }) => {
       if (data) {
         showSuccessAlert('Inloggning lyckades')
-        router.replace('/')
+        router.replace(nextPath)
       } else {
         showErrorAlert(error ?? 'Inloggning misslyckades')
       }
