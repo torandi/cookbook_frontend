@@ -31,6 +31,82 @@ type RecipeDisplayProps = {
 	recipeId: number
 }
 
+function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, showWeight: boolean, index: number }) {
+	const showWeightValue = showWeight && ingredient.weight != null
+	const primaryQuantity = showWeightValue && ingredient.weight != null
+		? formatQuantity(ingredient.weight, 'g')
+		: formatQuantity(ingredient.quantity, ingredient.unit)
+	const secondaryQuantity = showWeightValue
+		? (ingredient.quantity != null && ingredient.unit != null && ingredient.unit !== 'g'
+			? formatQuantity(ingredient.quantity, ingredient.unit)
+			: null)
+		: (ingredient.weight != null && ingredient.unit != null && ingredient.unit !== 'g'
+			? formatQuantity(ingredient.weight, 'g')
+			: null)
+
+	return (
+		<Box
+			component="li"
+			key={ingredient.id}
+			sx={{
+				py: 1.25,
+				px: 1,
+				borderRadius: 1,
+				backgroundColor: index % 2 === 0 ? 'action.hover' : 'action.selected',
+			}}
+		>
+			<Box
+				sx={{
+					display: 'grid',
+					gridTemplateColumns: 'minmax(0, 1fr) auto',
+					columnGap: 2,
+					rowGap: 0.5,
+					alignItems: 'start',
+				}}
+			>
+				<Box sx={{ minWidth: 0 }}>
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+						<Typography sx={{ fontWeight: 500, color: 'grey.800' }}>
+							{ingredient.ingredient?.name || ""}
+						</Typography>
+						{ingredient.optional ? (
+							<Chip
+								label="Valfri"
+								size="small"
+								variant="outlined"
+								sx={{
+									borderColor: 'divider',
+									backgroundColor: 'background.paper',
+									color: 'text.secondary',
+								}}
+							/>
+						) : null}
+					</Box>
+				</Box>
+				<Typography sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
+					{primaryQuantity}
+					{secondaryQuantity ? (
+						<Typography component="span" sx={{ color: 'text.secondary', ml: 0.5 }}>
+							({secondaryQuantity})
+						</Typography>
+					) : null}
+				</Typography>
+				{ingredient.comment ? (
+					<Typography
+						sx={{
+							gridColumn: '1 / -1',
+							fontSize: '0.875rem',
+							color: 'text.secondary',
+						}}
+					>
+						{ingredient.comment}
+					</Typography>
+				) : null}
+			</Box>
+		</Box>
+	)
+}
+
 export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 	const router = useRouter()
 	const [portions, setPortions] = useState<number | null>(null)
@@ -71,10 +147,6 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 	}
 
 	const currentPortions = portions ?? recipe.portions
-	const ingredientRows = recipe.ingredients.filter(
-		(item) => item.ingredient?.name,
-	)
-	const instructions = recipe.instructions
 
 	const goToEdit = () => {
 		router.push(`/recipe/edit/${recipeId}`)
@@ -202,108 +274,49 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Ingredienser
 					</Typography>
-					{ingredientRows.length === 0 ? (
-						<Typography color="text.secondary">Inga ingredienser</Typography>
-					) : (
-						<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-							{ingredientRows.map((item, index) => (
-								(() => {
-									const showWeightValue = showWeight && item.weight != null
-									const primaryQuantity = showWeightValue && item.weight != null
-										? formatQuantity(item.weight, 'g')
-										: formatQuantity(item.quantity, item.unit)
-									const secondaryQuantity = showWeightValue
-										? (item.quantity != null && item.unit != null && item.unit !== 'g'
-											? formatQuantity(item.quantity, item.unit)
-											: null)
-										: (item.weight != null && item.unit != null && item.unit !== 'g'
-											? formatQuantity(item.weight, 'g')
-											: null)
-
-									return (
-								<Box
-									component="li"
-									key={item.id}
-									sx={{
-										py: 1.25,
-										px: 1,
-										borderRadius: 1,
-										backgroundColor: index % 2 === 0 ? 'action.hover' : 'action.selected',
-									}}
-								>
-									<Box
-										sx={{
-											display: 'grid',
-											gridTemplateColumns: 'minmax(0, 1fr) auto',
-											columnGap: 2,
-											rowGap: 0.5,
-											alignItems: 'start',
-										}}
-									>
-										<Box sx={{ minWidth: 0 }}>
-											<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-												<Typography sx={{ fontWeight: 500, color: 'grey.800' }}>
-													{item.ingredient?.name || ""}
-												</Typography>
-												{item.optional ? (
-													<Chip
-														label="Valfri"
-														size="small"
-														variant="outlined"
-														sx={{
-															borderColor: 'divider',
-															backgroundColor: 'background.paper',
-															color: 'text.secondary',
-														}}
-													/>
-												) : null}
-											</Box>
-										</Box>
-										<Typography sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
-											{primaryQuantity}
-											{secondaryQuantity ? (
-												<Typography component="span" sx={{ color: 'text.secondary', ml: 0.5 }}>
-													({secondaryQuantity})
-												</Typography>
-											) : null}
-										</Typography>
-										{item.comment ? (
-											<Typography
-												sx={{
-													gridColumn: '1 / -1',
-													fontSize: '0.875rem',
-													color: 'text.secondary',
-												}}
-											>
-												{item.comment}
-											</Typography>
-										) : null}
-									</Box>
-								</Box>
-									)
-								})()
-							))}
+					{ recipe.ingredients.map((group, groupIndex) => (
+						<Box key={`ingredient-group-${groupIndex}`} sx={{ mb: 2 }}>
+							{group.name ? (
+								<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+									{group.name}
+								</Typography>
+							) : null}
+							<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
+								{group.ingredients.map((item, index) => (
+									<IngredientItem
+										key={item.id}
+										ingredient={item}
+										showWeight={showWeight || false}
+										index={index}
+									/>
+								))}
+							</Box>
 						</Box>
-					)}
+					))}
 				</FullCard>
 
 				<FullCard className="w-full">
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Instruktioner
 					</Typography>
-					{instructions.length === 0 ? (
-						<Typography color="text.secondary">Inga instruktioner</Typography>
-					) : (
-						<Box component="ol" sx={{ m: 0, pl: 3 }}>
-							{instructions.map((step, stepIndex) => (
-								<Box component="li" key={stepIndex} sx={{ mb: 1 }}>
-									<MarkdownText
-										text={step.replaceAll('{portions}', String(currentPortions))}
-									/>
-								</Box>
-							))}
+					{ recipe.instructions.map((group, groupIndex) => (
+						<Box key={`instruction-group-${groupIndex}`} sx={{ mb: 2 }}>
+							{group.name ? (
+								<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+									{group.name}
+								</Typography>
+							) : null}
+							<Box component="ol" sx={{ m: 0, pl: 3 }}>
+								{group.instructions.map((step, stepIndex) => (
+									<Box component="li" key={stepIndex} sx={{ mb: 1 }}>
+										<MarkdownText
+											text={step.replaceAll('{portions}', String(currentPortions))}
+										/>
+									</Box>
+								))}
+							</Box>
 						</Box>
-					)}
+					))}
 				</FullCard>
 				
 				

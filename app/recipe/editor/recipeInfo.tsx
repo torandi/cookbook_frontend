@@ -4,7 +4,7 @@ import { useRecipeEditorStore } from './state'
 
 import { useShallow } from 'zustand/react/shallow'
 
-import { capitalize } from '@/app/utils'
+import { capitalize, intOrDefault, intOrDefaultNoNull } from '@/app/utils'
 
 import Box from '@mui/material/Box';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -48,8 +48,7 @@ export const RecipeInfoInput = () => {
 					label={ capitalize(recipeInfo.portionName) }
 					value={ recipeInfo.portions ?? "" }
 					onChange={ (event) => {
-						const num = parseInt(event.target.value)
-						setPortions(isNaN(num) ? 1 : num)
+						setPortions(intOrDefaultNoNull(event.target.value, 1))
 					}}
 					sx={{mx: 2}}
 					slotProps={{
@@ -84,7 +83,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label="Total tid"
 					value={ recipeInfo.totalTime ?? ""}
-					onChange={ (event) => setTotalTime(parseInt(event.target.value)) }
+					onChange={ (event) => setTotalTime(intOrDefault(event.target.value, null)) }
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>
@@ -94,7 +93,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label="Aktiv tid"
 					value={ recipeInfo.activeTime ?? ""}
-					onChange={ (event) => setActiveTime(parseInt(event.target.value)) }
+					onChange={ (event) => setActiveTime(intOrDefault(event.target.value, null)) }
 					sx={{mx: 2}}
 					slotProps={{
 						input: {

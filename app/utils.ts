@@ -14,9 +14,32 @@ export function omit<ValueType>(obj : { [key: number]: ValueType }, key : number
 	return rest;
 }
 
+export function intOrDefault(value: string | null, defaultValue: number | null) : number | null {
+	if (value === null) {
+		return defaultValue
+	}
+	const parsed = parseInt(value)
+	if (isNaN(parsed)) {
+		return defaultValue
+	}
+	return parsed
+}
+
+export function intOrDefaultNoNull(value: string | null, defaultValue: number) : number {
+	if (value === null) {
+		return defaultValue
+	}
+	const parsed = parseInt(value)
+	if (isNaN(parsed)) {
+		return defaultValue
+	}
+	return parsed
+}
+
 export function capitalize(str : string) : string {
 	return str[0].toUpperCase() + str.slice(1)
 }
+
 export function formatQuantity(value: number | null, unit: string | null) {
 	if (value === null || unit === null) {
 		return "-"

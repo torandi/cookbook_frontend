@@ -97,8 +97,8 @@ interface RecipeSlice {
 	setPortions: (count: number) => void
 	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
-	setActiveTime: (time : number) => void
-	setTotalTime: (time : number) => void
+	setActiveTime: (time : number | null) => void
+	setTotalTime: (time : number | null) => void
 }
 
 interface ReadSlice {
@@ -341,13 +341,13 @@ const createRecipeSlice : StateCreator<
 				portionName: name,
 			}
 		})),
-		setActiveTime: (time : number) => set( state => ({
+		setActiveTime: (time : number | null) => set( state => ({
 			recipe: {
 				...state.recipe,
 				activeTime: time,
 			}
 		})),
-		setTotalTime: (time : number) => set( state => ({
+		setTotalTime: (time : number | null) => set( state => ({
 			recipe: {
 				...state.recipe,
 				totalTime: time,
@@ -373,14 +373,14 @@ const createReadSlice : StateCreator<
 			ingredients: get().ingredientGroupOrder.map((groupId) => {
 				const ingredientIds = get().ingredientsOrder[groupId];
 				return {
-					name: get().ingredientGroups[Number(groupId)],
+					name: get().ingredientGroups[Number(groupId)] ?? '',
 					ingredients: ingredientIds.map(id => get().ingredients[id]).filter(i => i != null),
 				}
 			}),
 			instructions: get().instructionGroupOrder.map((groupId) => {
 				const instructionIds = get().instructionsOrder[groupId];
 				return {
-					name: get().instructionGroups[Number(groupId)],
+					name: get().instructionGroups[Number(groupId)] ?? '',
 					instructions: instructionIds.map(id => get().instructions[id]).filter(i => i != null),
 				}
 			})
@@ -420,10 +420,13 @@ const createInitSlice : StateCreator<
 			})
 
 			const instructions = {} as { [id: number]: string }
+			const instructionGroupEntries = {} as { [id: number] : string | null }
 			const instructionsOrder = {} as { [groupId: number]: number[] }
 			const instructionGroupOrder = [] as number[]
+
 			let nextInstructionId = 0;
 			recipe.instructions.forEach((group, index) => {
+				instructionGroupEntries[index] = group.name ?? '';
 				instructionsOrder[index] = [];
 				instructionGroupOrder.push(index);
 				group.instructions.forEach((instruction, instructionIndex) => {
@@ -448,6 +451,9 @@ const createInitSlice : StateCreator<
 				ingredientsOrder: ingredientOrder,
 				instructions,
 				instructionsOrder,
+				instructionGroupEntries,
+				instructionGroupOrder,
+				nextInstructionGroupId: recipe.instructions.length,
 				nextInstructionId,
 			}))
 		},
