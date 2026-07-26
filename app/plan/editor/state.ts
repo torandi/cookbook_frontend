@@ -37,6 +37,8 @@ interface PlanEditorState {
 	setFromPlan: (plan: PlanType) => void
 }
 
+export type PlanEditorDraft = Pick<PlanEditorState, 'name' | 'days' | 'nextLocalId'>
+
 function datesInRange(startDate: string, endDate: string): string[] {
 	const dates: string[] = []
 	const current = new Date(startDate + 'T00:00:00')
