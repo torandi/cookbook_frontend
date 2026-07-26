@@ -10,6 +10,15 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
+import InputAdornment from '@mui/material/InputAdornment';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import { useRecipes } from '@/app/backend/recipe';
 
 function RecipeListContent() {
@@ -26,34 +35,139 @@ function RecipeListContent() {
 	const filtered = recipes.filter(r =>
 		r.name.toLowerCase().includes(search.toLowerCase())
 	);
+	const totalCount = recipes.length;
+	const filteredCount = filtered.length;
 
 	return (
-		<Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
-			<FullCard sx={{ mb: 2 }} className="w-full">
-				<TextField
-					label="Sök recept"
-					value={search}
-					onChange={e => setSearch(e.target.value)}
-					autoFocus
-				/>
-			</FullCard>
-			{isLoading && <CircularProgress />}
-			{error && <Typography color="error">Kunde inte hämta recept</Typography>}
-			{!isLoading && !error && (
-				<FullCard className="w-full">
-					<List>
-					{filtered.map(recipe => (
-							<ListItemButton
-								key={recipe.id}
-								onClick={() => router.push(`/recipe/${recipe.id}`)}
+		<Box sx={{ p: { xs: 1, sm: 2 }, maxWidth: 900, mx: 'auto' }}>
+			<FullCard
+				sx={{
+					mb: 2,
+					background:
+						'linear-gradient(135deg, rgba(37,99,235,0.09) 0%, rgba(14,165,233,0.14) 55%, rgba(16,185,129,0.12) 100%)',
+				}}
+				className="w-full"
+			>
+				<Stack spacing={2}>
+					<Stack
+						direction={{ xs: 'column', sm: 'row' }}
+						spacing={1.5}
+						sx={{
+							alignItems: { sm: 'center' },
+							justifyContent: 'space-between',
+						}}>
+						<Stack
+							direction="row"
+							spacing={1.25}
+							sx={{ alignItems: 'center' }}>
+							<Avatar
+								sx={{
+									bgcolor: 'primary.main',
+									width: 42,
+									height: 42,
+									boxShadow: '0 6px 16px rgba(37, 99, 235, 0.35)',
+								}}
 							>
-								<ListItemText primary={recipe.name} />
+								<RestaurantMenuRoundedIcon fontSize="small" />
+							</Avatar>
+							<Box>
+								<Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.1 }}>
+									Receptsamling
+								</Typography>
+								<Typography color="text.secondary">
+								</Typography>
+							</Box>
+						</Stack>
+						<Chip
+							icon={<MenuBookRoundedIcon />}
+							label={`${filteredCount} av ${totalCount} recept`}
+							color="primary"
+							variant="filled"
+							sx={{
+								fontWeight: 600,
+								alignSelf: { xs: 'flex-start', sm: 'center' },
+							}}
+						/>
+					</Stack>
+					<TextField
+						label="Sök recept"
+						value={search}
+						onChange={e => setSearch(e.target.value)}
+						autoFocus
+						fullWidth
+						size="small"
+						slotProps={{
+							input: {
+								startAdornment: (
+									<InputAdornment position="start">
+										<SearchRoundedIcon color="primary" fontSize="small" />
+									</InputAdornment>
+								),
+							},
+						}}
+						sx={{
+							'& .MuiOutlinedInput-root': {
+								bgcolor: 'rgba(255,255,255,0.82)',
+								backdropFilter: 'blur(6px)',
+								borderRadius: 2,
+							},
+						}}
+					/>
+				</Stack>
+			</FullCard>
+			{isLoading && (
+				<Box sx={{ py: 6, display: 'flex', justifyContent: 'center' }}>
+					<Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+						<CircularProgress size={24} />
+						<Typography color="text.secondary">Laddar recept...</Typography>
+					</Stack>
+				</Box>
+			)}
+			{error && (
+				<Alert severity="error" sx={{ mb: 2 }}>
+					Kunde inte hamta recept
+				</Alert>
+			)}
+			{!isLoading && !error && (
+				<FullCard sx={{ overflow: 'hidden' }} className="w-full">
+					<List sx={{ py: 0 }}>
+					{filtered.map((recipe, index) => (
+						<Box key={recipe.id}>
+							<ListItemButton
+								onClick={() => router.push(`/recipe/${recipe.id}`)}
+								sx={{
+									py: 1.5,
+									borderRadius: 1,
+									'&:hover': {
+										bgcolor: 'rgba(59,130,246,0.10)',
+									},
+								}}
+							>
+								<ListItemText
+									primary={recipe.name}
+									secondary={recipe.description?.trim() ?? ''}
+									slotProps={{
+										primary: {
+											sx: { fontWeight: 600 },
+										},
+										secondary: {
+											sx: { color: 'text.secondary' },
+										},
+									}}
+								/>
 							</ListItemButton>
+							{index < filtered.length - 1 && <Divider component="li" />}
+						</Box>
 						))}
 						{filtered.length === 0 && (
-							<Typography color="text.secondary" sx={{ p: 1 }}>
-								Inga recept hittades
-							</Typography>
+							<Box sx={{ py: 7, px: 3, textAlign: 'center' }}>
+								<Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
+									Inga recept hittades
+								</Typography>
+								<Typography color="text.secondary">
+									Testa ett annat sökord eller rensa sökningen.
+								</Typography>
+							</Box>
 						)}
 					</List>
 				</FullCard>
