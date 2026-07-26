@@ -1,5 +1,5 @@
 import { useBackend, postBackend } from './backend'
-import { PlanType, ShoppingListItemType } from '@/app/types/plan'
+import { PlanType, ShoppingListType} from '@/app/types/plan'
 
 export function usePlans() {
 	const { data, error, isLoading } = useBackend<PlanType[]>('plans/')
@@ -12,8 +12,8 @@ export function usePlan(id: number) {
 }
 
 export function usePlanShoppingList(id: number) {
-	const { data, error, isLoading } = useBackend<ShoppingListItemType[]>(`plans/${id}/shopping_list`)
-	return { shoppingList: data ?? [], error, isLoading }
+	const { data, error, isLoading } = useBackend<ShoppingListType>(`plans/${id}/shopping_list`)
+	return { shoppingList: data, error, isLoading }
 }
 
 export function addPlan(plan: PlanType) {

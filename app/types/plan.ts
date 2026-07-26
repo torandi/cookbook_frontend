@@ -23,5 +23,10 @@ export interface ShoppingListItemType {
 	ingredientName: string
 	quantity: number | null
 	unit: string | null
+	extra: boolean
 	comment: string | null
+}
+
+export interface ShoppingListType {
+	items: ShoppingListItemType[]
 }

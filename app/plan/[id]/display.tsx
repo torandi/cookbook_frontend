@@ -85,8 +85,7 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 							<Box key={day.id ?? dayIdx}>
 								<Typography
 									variant="subtitle1"
-									fontWeight={600}
-									sx={{ textTransform: 'capitalize', mb: 0.5 }}
+									sx={{ textTransform: 'capitalize', mb: 0.5, fontWeight: 600}}
 								>
 									{formatDate(day.date)}
 								</Typography>
@@ -152,13 +151,13 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 					<Alert severity="error">Kunde inte ladda inköpslistan: {listError.message}</Alert>
 				)}
 
-				{!listLoading && !listError && shoppingList.length === 0 && (
+				{!listLoading && !listError && (!shoppingList || shoppingList.items.length === 0) && (
 					<Typography color="text.secondary">Inköpslistan är tom.</Typography>
 				)}
 
-				{!listLoading && !listError && shoppingList.length > 0 && (
+				{!listLoading && !listError && shoppingList && shoppingList.items.length > 0 && (
 					<List dense disablePadding>
-						{shoppingList.map((item, idx) => (
+						{shoppingList.items.map((item, idx) => (
 							<ListItem
 								key={idx}
 								disableGutters
