@@ -31,6 +31,7 @@ interface PlanEditorState {
 	addMeal: (dayLocalId: number, mealName: string) => void
 	removeMeal: (dayLocalId: number, mealLocalId: number) => void
 	renameMeal: (dayLocalId: number, mealLocalId: number, name: string) => void
+	setComment: (dayLocalId: number, mealLocalId: number, comment: string) => void
 	setRecipe: (dayLocalId: number, mealLocalId: number, recipe: RecipeSummaryType | null) => void
 	setPortions: (dayLocalId: number, mealLocalId: number, portions: number) => void
 	reset: () => void
@@ -104,6 +105,13 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 				return
 			const meal = day.meals.find((m) => m.localId === mealLocalId)
 			if (meal) meal.name = name
+		}),
+
+		setComment: (dayLocalId, mealLocalId, comment) => set((state) => {
+			const day = state.days.find((d) => d.localId === dayLocalId)
+			if (!day) return
+			const meal = day.meals.find((m) => m.localId === mealLocalId)
+			if (meal) meal.comment = comment
 		}),
 
 		setRecipe: (dayLocalId, mealLocalId, recipe) => set((state) => {

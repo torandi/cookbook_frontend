@@ -88,7 +88,7 @@ export default function PlanListPage() {
 
 				{!isLoading && !error && plans.length === 0 && (
 					<Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-						Inga planer ännu. Skapa din första plan!
+						Inga planer ännu.
 					</Typography>
 				)}
 

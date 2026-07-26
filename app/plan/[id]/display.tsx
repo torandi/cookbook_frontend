@@ -98,7 +98,7 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 											sx={{ alignItems: 'center' }}
 										>
 											<Typography variant="body2" sx={{ fontWeight: 500, minWidth: 70 }}>
-												{meal.name}
+												{meal.name.trimEnd() ? meal.name : 'Måltid'}
 											</Typography>
 											{meal.recipe ? (
 												<Link
@@ -120,7 +120,12 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 													Inget recept
 												</Typography>
 											)}
-											<Typography variant="body2" color="text.secondary">
+											{meal.comment ? (
+												<Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+													{meal.comment}
+												</Typography>
+											) : null}
+											<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 300 }}>
 												{meal.portions} port.
 											</Typography>
 										</Stack>

@@ -55,6 +55,7 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 	const [recipeOpen, setRecipeOpen] = useState(false)
 
 	const renameMeal = usePlanEditorStore((s) => s.renameMeal)
+	const setComment = usePlanEditorStore((s) => s.setComment)
 	const removeMeal = usePlanEditorStore((s) => s.removeMeal)
 	const setRecipe = usePlanEditorStore((s) => s.setRecipe)
 	const setPortions = usePlanEditorStore((s) => s.setPortions)
@@ -100,7 +101,7 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 						'&:hover': { textDecoration: 'underline' },
 					}}
 				>
-					{meal.name}
+					{meal.name.trim() ? meal.name : '(namnlös måltid)'}
 				</Typography>
 			)}
 
@@ -111,6 +112,14 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 				variant={meal.recipe ? 'filled' : 'outlined'}
 				onClick={() => setRecipeOpen(true)}
 				sx={{ cursor: 'pointer', maxWidth: 260 }}
+			/>
+
+			<TextField
+				size="small"
+				label="Tillbehör"
+				value={meal.comment ?? ''}
+				onChange={(e) => setComment(dayLocalId, meal.localId, e.target.value)}
+				sx={{ minWidth: 220, flex: 1 }}
 			/>
 
 		<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
