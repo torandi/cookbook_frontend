@@ -84,24 +84,29 @@ function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, sh
 					</Box>
 				</Box>
 				<Typography sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
-					{primaryQuantity}
-					{secondaryQuantity ? (
-						<Typography component="span" sx={{ color: 'text.secondary', ml: 0.5 }}>
-							({secondaryQuantity})
-						</Typography>
-					) : null}
+					{ ingredient.quantity != null ? (
+						<>
+							{primaryQuantity}
+							{secondaryQuantity ? (
+								<Typography component="span" sx={{ color: 'text.secondary', ml: 0.5 }}>
+									({secondaryQuantity})
+								</Typography>
+							) : null}
+							{ingredient.comment ? (
+								<Typography
+									sx={{
+										gridColumn: '1 / -1',
+										fontSize: '0.875rem',
+										color: 'text.secondary',
+									}}
+								>
+									{ingredient.comment}
+								</Typography>
+							) : null}
+						</>
+					) : (ingredient.comment && ingredient.comment.trim())
+					}
 				</Typography>
-				{ingredient.comment ? (
-					<Typography
-						sx={{
-							gridColumn: '1 / -1',
-							fontSize: '0.875rem',
-							color: 'text.secondary',
-						}}
-					>
-						{ingredient.comment}
-					</Typography>
-				) : null}
 			</Box>
 		</Box>
 	)
