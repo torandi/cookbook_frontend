@@ -24,10 +24,7 @@ import Tooltip from '@mui/material/Tooltip';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton'
 
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import DeleteIcon from '@mui/icons-material/Delete'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { AddGroupButton, GroupEditRow } from './groups';
 
@@ -47,7 +44,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 	const removeIngredient = useRecipeEditorStore( state => state.removeIngredient )
 
 	// If we are ever the last item, and value is set to non-null
-	// ad another item
+	// add another item
 	useEffect(() => {
 		if(isLastItem && value != null) {
 			addIngredient(groupId)

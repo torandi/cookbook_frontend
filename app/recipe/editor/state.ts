@@ -417,6 +417,10 @@ const createInitSlice : StateCreator<
 					}
 					ingredientOrder[index].push(id);
 				})
+				// add one empty ingredient at the end of each group
+				const id = nextIngredientId++;
+				ingredientEntries[id] = null;
+				ingredientOrder[index].push(id);
 			})
 
 			const instructions = {} as { [id: number]: string }
@@ -434,6 +438,10 @@ const createInitSlice : StateCreator<
 					instructions[id] = instruction;
 					instructionsOrder[index].push(id);
 				})
+				// add one empty instruction at the end of each group
+				const id = nextInstructionId++;
+				instructions[id] = '';
+				instructionsOrder[index].push(id);
 			})
 
 			set(() => ({
