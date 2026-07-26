@@ -374,14 +374,14 @@ const createReadSlice : StateCreator<
 				const ingredientIds = get().ingredientsOrder[groupId];
 				return {
 					name: get().ingredientGroups[Number(groupId)] ?? '',
-					ingredients: ingredientIds.map(id => get().ingredients[id]).filter(i => i != null),
+					ingredients: ingredientIds.map(id => get().ingredients[id]).filter(i => i != null && i.ingredient != null) as RecipeIngredientType[],
 				}
 			}),
 			instructions: get().instructionGroupOrder.map((groupId) => {
 				const instructionIds = get().instructionsOrder[groupId];
 				return {
 					name: get().instructionGroups[Number(groupId)] ?? '',
-					instructions: instructionIds.map(id => get().instructions[id]).filter(i => i != null),
+					instructions: instructionIds.map(id => get().instructions[id]).filter(i => i != null && i.trim() != '') as string[],
 				}
 			})
 		})
