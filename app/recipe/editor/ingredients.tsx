@@ -105,6 +105,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 						label="Ev."
 						labelPlacement="top"
 						className="flex-none"
+						sx={{mx: 0}}
 						control={
 							<Switch
 								checked={value?.optional ?? false}
@@ -122,6 +123,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 					<Tooltip title="Ta bort ingrediens">
 						<IconButton
 							className="flex-none self-center justify-self-end"
+							sx={{px: 1}}
 							onClick={handleDelete}
 							tabIndex={-1}
 						>
@@ -132,6 +134,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 						<IconButton
 							{...listeners}
 							className="flex-none self-center justify-self-end"
+							sx={{px: 1}}
 							tabIndex={-1}
 						>
 							<DragIndicatorIcon/>
@@ -355,7 +358,7 @@ export const IngredientsInput = () => {
 				const groupName = groups[groupId] ?? "";
 				return (
 					<Stack direction="column" spacing={2} style={{marginBottom: 5}} key={groupId}
-							sx={{border: '1px solid #ccc', borderRadius: '4px', p: 2}}>
+							sx={{border: '1px solid #ccc', borderRadius: '4px', p: 1}}>
 						<GroupEditRow
 							groupId={groupId}
 							groupName={groupName}

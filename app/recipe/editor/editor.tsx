@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Box from '@mui/material/Box'
 
 import { IngredientsInput } from './ingredients'
 import { InstructionsInput } from './instructions'
@@ -55,16 +56,17 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 					<Typography variant="h4" component="h1" sx={{ mb: 2 }}>{title}</Typography>
 					<RecipeInfoInput />
 				</FullCard>
-				<Stack direction="row" spacing={2}>
-					<FullCard className="w-1/2">
+
+				<Box sx={{ display: 'flex', flexDirection: { md: 'column', lg: 'row' }, gap: 2 }}>
+					<FullCard className="w-1/2 md:w-full">
 						<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Ingredienser</Typography>
 						<IngredientsInput />
 					</FullCard>
 
-					<FullCard className="w-1/2">
+					<FullCard className="w-1/2 md:w-full">
 						<InstructionsInput />
 					</FullCard>
-				</Stack>
+				</Box>
 			</Stack>
 		</FormControl>
 	)

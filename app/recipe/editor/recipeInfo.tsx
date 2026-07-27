@@ -47,6 +47,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label={ capitalize(recipeInfo.portionName) }
 					value={ recipeInfo.portions ?? "" }
+					className="w-1/8"
 					onChange={ (event) => {
 						setPortions(intOrDefaultNoNull(event.target.value, 1))
 					}}
@@ -60,6 +61,7 @@ export const RecipeInfoInput = () => {
 				<TextField
 					label="Portions-enhet"
 					value={ recipeInfo.portionName }
+					className="w-1/8"
 					onChange={ (event) => setPortionName(event.target.value) }
 				/>
 				<Tooltip title="Ställer in om receptet ska visas som gram eller volymmått som standard">
