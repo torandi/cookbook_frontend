@@ -40,3 +40,6 @@ next-env.d.ts
 
 # vim swap files
 *.swp
+
+
+config.json

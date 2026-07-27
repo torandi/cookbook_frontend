@@ -1,6 +1,6 @@
 'use client'
 
-import { config } from '@/app/config'
+import config from '@/config.json'
 
 import { getAuthHeaders } from './auth'
 
