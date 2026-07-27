@@ -94,7 +94,7 @@ interface RecipeSlice {
 	recipe: RecipeType // ignoring instruction/ingredients fields
 	setName: (title: string) => void
 	setDescription: (description: string) => void
-	setPortions: (count: number) => void
+	setPortions: (count: number | null) => void
 	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
 	setActiveTime: (time : number | null) => void
@@ -329,7 +329,7 @@ const createRecipeSlice : StateCreator<
 				description,
 			}
 		})),
-		setPortions: (count: number) => set( state => ({
+		setPortions: (count: number | null) => set( state => ({
 			recipe: {
 				...state.recipe,
 				portions: count,
@@ -374,7 +374,9 @@ const createReadSlice : StateCreator<
 				const ingredientIds = get().ingredientsOrder[groupId];
 				return {
 					name: get().ingredientGroups[Number(groupId)] ?? '',
-					ingredients: ingredientIds.map(id => get().ingredients[id]).filter(i => i != null && i.ingredient != null) as RecipeIngredientType[],
+					ingredients: ingredientIds.map(id => 
+						get().ingredients[id]).filter(i => 
+							i != null && i.ingredient != null) as RecipeIngredientType[],
 				}
 			}),
 			instructions: get().instructionGroupOrder.map((groupId) => {

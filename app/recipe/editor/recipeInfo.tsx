@@ -49,7 +49,7 @@ export const RecipeInfoInput = () => {
 					value={ recipeInfo.portions ?? "" }
 					className="w-1/8"
 					onChange={ (event) => {
-						setPortions(intOrDefaultNoNull(event.target.value, 1))
+						setPortions(intOrDefault(event.target.value, null))
 					}}
 					sx={{mx: 2}}
 					slotProps={{

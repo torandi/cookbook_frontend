@@ -11,6 +11,7 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 	const router = useRouter()
 	const getData = useRecipeEditorStore( state => state.getAll )
 
+
 	const saveRecipe = async () => {
 		const data = getData();
 		const { data: recipeData, error } = recipeId != undefined

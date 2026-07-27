@@ -151,7 +151,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 		)
 	}
 
-	const currentPortions = portions ?? recipe.portions
+	const currentPortions = portions ?? recipe.portions ?? 1
 
 	const goToEdit = () => {
 		router.push(`/recipe/edit/${recipeId}`)

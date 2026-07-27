@@ -1,3 +1,5 @@
+import { numericQuantity } from 'numeric-quantity'
+
 // Returns true if src contains search ignoring case
 export function containsIgnoreCase(src : string, search: string) : boolean {
 	return src.toLowerCase().search(search.toLowerCase()) != -1;
@@ -23,6 +25,19 @@ export function intOrDefault(value: string | null, defaultValue: number | null) 
 		return defaultValue
 	}
 	return parsed
+}
+
+export function evalNumberExpression(value: string | null, defaultValue: number | null) : number | null {
+	if (value === null) {
+		return defaultValue
+	}
+
+	const evaluated = numericQuantity(value)
+	if (typeof evaluated === 'number' && !isNaN(evaluated)) {
+		return evaluated
+	}
+
+	return defaultValue
 }
 
 export function intOrDefaultNoNull(value: string | null, defaultValue: number) : number {

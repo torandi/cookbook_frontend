@@ -15,7 +15,7 @@ export interface RecipeType extends DbObject {
 	name : string;
 	description: string;
 	defaultWeight: boolean;
-	portions: number;
+	portions: number | null;
 	portionName: string;
 	activeTime: number | null;
 	totalTime: number | null;

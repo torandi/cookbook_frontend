@@ -27,6 +27,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { AddGroupButton, GroupEditRow } from './groups';
+import { evalNumberExpression } from '@/app/utils';
 
 const ingredientSpacing = 1;
 
@@ -297,7 +298,7 @@ function QuantityFields({ id, value, setValue } : {
 				onChange={ (event: ChangeEvent<{ value: string }> ) => {
 					setValue({
 						...value,
-						quantity: event.target.value
+						quantity: evalNumberExpression(event.target.value, null) ?? event.target.value
 					})
 				}}
 				slotProps={{
