@@ -1,4 +1,4 @@
-import { config } from '@/app/config'
+import config from '@/config.json'
 
 import { postBackend, backendCall } from './backend'
 import { showErrorAlert } from '../ui/alert-state'

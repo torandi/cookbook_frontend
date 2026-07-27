@@ -15,6 +15,8 @@ Install pnpm, and run
 pnpm install
 ```
 
+Then copy config.example.json to config.json
+
 Then run the following to start the development server
 
 ```
