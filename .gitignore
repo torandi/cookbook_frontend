@@ -41,5 +41,7 @@ next-env.d.ts
 # vim swap files
 *.swp
 
-
+#config files
 config.json
+#server specific file
+server.sh
