@@ -1,5 +1,7 @@
 'use client';
 import React, {useState} from 'react';
+import type { DragEndEvent } from '@dnd-kit/core';
+
 import {
 	DndContext,
 	closestCenter,
@@ -28,12 +30,12 @@ export function SortableList( { children, onItemsUpdated, items } : {
 		})
 	);
 
-	const handleDragEnd = (event) => {
+	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
 
-		if (active.id !== over.id) {
-			const oldIndex = items.indexOf(active.id);
-			const newIndex = items.indexOf(over.id);
+		if (over && active.id !== over.id) {
+			const oldIndex = items.indexOf(active.id as number);
+			const newIndex = items.indexOf(over.id as number);
 
 			onItemsUpdated(arrayMove(items, oldIndex, newIndex));
 		}
