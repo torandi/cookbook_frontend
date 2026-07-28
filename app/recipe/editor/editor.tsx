@@ -8,12 +8,14 @@ import { RecipeInfoInput } from './recipeInfo'
 import Button from '@mui/material/Button'
 import { SaveButton } from './save'
 import { RecipeEditorDraft, useRecipeEditorStore } from './state'
+import { useUnload } from '@/app/lifetimeHooks'
 
 import { RecipeType } from '@/app/types/recipe'
 import FullCard from '@/app/components/fullcard'
 
 import FormControl from '@mui/material/FormControl'
 import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -22,6 +24,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useRouter } from 'next/navigation'
 import { getRecipeDraftKey, loadRecipeDraft, saveRecipeDraft, clearRecipeDraft } from './draft'
+import { RecipeIngredientType } from '@/app/types/ingredient'
 
 type RecipeEditorPageProps = {
 	title: string
@@ -30,39 +33,19 @@ type RecipeEditorPageProps = {
 }
 
 export default function RecipeEditorPage({ title, recipeId, initialRecipe }: RecipeEditorPageProps) {
-	const reset = useRecipeEditorStore((state) => state.reset)
+	const resetState = useRecipeEditorStore((state) => state.reset)
 	const setFromRecipe = useRecipeEditorStore((state) => state.setFromRecipe)
 	const router = useRouter()
 	const draftKey = getRecipeDraftKey(recipeId)
 	const [pendingDraft, setPendingDraft] = useState<RecipeEditorDraft | null>(null)
-	const [draftDecisionResolved, setDraftDecisionResolved] = useState(false)
-
-	useEffect(() => {
-		setDraftDecisionResolved(false)
-		setPendingDraft(null)
-
-		const draft = loadRecipeDraft(draftKey)
-		if (draft) {
-			setPendingDraft(draft)
-			return
-		}
-
-		if (initialRecipe) {
-			setFromRecipe(initialRecipe)
-			setDraftDecisionResolved(true)
-			return
-		}
-
-		reset()
-		setDraftDecisionResolved(true)
-	}, [draftKey, initialRecipe?.id, reset, setFromRecipe])
 
 	function handleRestoreDraft() {
-		if (pendingDraft) {
-			useRecipeEditorStore.setState(pendingDraft)
+		const draft = loadRecipeDraft(draftKey) as RecipeEditorDraft | null
+		if (draft) {
+			useRecipeEditorStore.setState(draft)
 		}
+		clearRecipeDraft(recipeId)
 		setPendingDraft(null)
-		setDraftDecisionResolved(true)
 	}
 
 	function handleDiscardDraft() {
@@ -72,64 +55,58 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 		if (initialRecipe) {
 			setFromRecipe(initialRecipe)
 		} else {
-			reset()
+			resetState()
 		}
-
-		setDraftDecisionResolved(true)
 	}
 
-	useEffect(() => {
-		if (!draftDecisionResolved) {
+	const saveDraft = () => {
+		const state = useRecipeEditorStore.getState()
+		if (state.recipe.name.trim() === '' 
+			&& Object.entries(state.instructions).filter(([key, instruction]: [string, string]) => instruction.trim() !== '').length === 0
+			&& Object.entries(state.ingredients).filter(([key, ingredient]: [string, RecipeIngredientType | null]) => ingredient !== null).length === 0) {
+			// don't save if recipe is empty
 			return
 		}
+		saveRecipeDraft(draftKey, state as RecipeEditorDraft)
+	}
 
-		const persistCurrentState = () => {
-			const state = useRecipeEditorStore.getState()
-			saveRecipeDraft(draftKey, {
-				recipe: state.recipe,
-				ingredientGroups: state.ingredientGroups,
-				ingredients: state.ingredients,
-				ingredientGroupOrder: state.ingredientGroupOrder,
-				nextIngredientId: state.nextIngredientId,
-				nextIngredientGroupId: state.nextIngredientGroupId,
-				ingredientsOrder: state.ingredientsOrder,
-				instructionGroups: state.instructionGroups,
-				instructions: state.instructions,
-				instructionGroupOrder: state.instructionGroupOrder,
-				nextInstructionId: state.nextInstructionId,
-				nextInstructionGroupId: state.nextInstructionGroupId,
-				instructionsOrder: state.instructionsOrder,
-			})
+	// Save draft if tab is closed or page is refreshed
+	useUnload((event: BeforeUnloadEvent) => {
+		saveDraft()
+	})
+
+	useEffect(() => {
+		const draft = loadRecipeDraft(draftKey)
+		if (draft !== null) {
+			setPendingDraft(draft)
+		} else if (initialRecipe) {
+			setFromRecipe(initialRecipe)
 		}
-
-		persistCurrentState()
-		const unsubscribe = useRecipeEditorStore.subscribe(() => {
-			persistCurrentState()
-		})
-
-		return () => {
-			unsubscribe()
-		}
-	}, [draftDecisionResolved, draftKey])
+	}, [draftKey, initialRecipe?.id, setFromRecipe])
 
 	return (
 		<>
-			<Dialog open={pendingDraft !== null} onClose={handleDiscardDraft}>
-				<DialogTitle>Aterstalla utkast</DialogTitle>
+			{pendingDraft !== null && (
+			<Dialog open={true} onClose={handleDiscardDraft}>
+				<DialogTitle>Återställ utkast?</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Det finns ett sparat utkast for detta recept. Vill du aterstalla det eller borja fran serverversionen?
+						{recipeId !== undefined ? 
+						`Det finns ett sparat utkast för detta recept. Vill du återställa det?`
+						: `Det finns ett sparat utkast för ${pendingDraft.name}. Vill du återställa det?`
+						}
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleDiscardDraft} color="inherit">
-						Borja om
-					</Button>
 					<Button onClick={handleRestoreDraft} variant="contained" autoFocus>
-						Aterstall utkast
+						Återställ utkast
+					</Button>
+					<Button onClick={handleDiscardDraft} color="inherit">
+						Avbryt & radera utkast
 					</Button>
 				</DialogActions>
 			</Dialog>
+			)}
 
 			<FormControl variant="outlined" className="w-full">
 				<Stack direction="column" spacing={2}>
@@ -152,13 +129,18 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 						<RecipeInfoInput />
 					</FullCard>
 	
-				<Box sx={{ display: 'flex', flexDirection: { md: 'column', lg: 'row' }, gap: 2 }}>
+					<Box sx={{ display: 'flex', flexDirection: { md: 'column', lg: 'row' }, gap: 2 }}>
+							<FullCard className="w-1/2 md:w-full">
+								<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Ingredienser</Typography>
+								<IngredientsInput />
+							</FullCard>
+
 						<FullCard className="w-1/2 md:w-full">
-							<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Ingredienser</Typography>
-							<IngredientsInput />
+							<InstructionsInput />
 						</FullCard>
+					</Box>
 				</Stack>
-			</Stack>
-		</FormControl>
+			</FormControl>
+		</>
 	)
 }

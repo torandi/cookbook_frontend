@@ -6,6 +6,7 @@ export function getRecipeDraftKey(recipeId?: number) {
 		? `cookbook-editor-draft:recipe:edit:${recipeId}`
 		: 'cookbook-editor-draft:recipe:add';
 }
+
 export function loadRecipeDraft(key: string): RecipeEditorDraft | null {
 	if (typeof window === 'undefined') {
 		return null;
@@ -27,13 +28,16 @@ export function loadRecipeDraft(key: string): RecipeEditorDraft | null {
 		return null;
 	}
 }
+
 export function saveRecipeDraft(key: string, draft: RecipeEditorDraft) {
 	if (typeof window === 'undefined') {
 		return;
 	}
 
 	window.localStorage.setItem(key, JSON.stringify(draft));
-}export function clearRecipeDraft(recipeId?: number) {
+}
+
+export function clearRecipeDraft(recipeId?: number) {
 	if (typeof window === 'undefined') {
 		return;
 	}
