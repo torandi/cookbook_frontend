@@ -20,6 +20,7 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RemoveIcon from '@mui/icons-material/Remove'
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
+import ListItem from '@mui/material/ListItem'
 
 import IngredientAutocomplete from '@/app/components/ingredientAutocomplete'
 import FullCard from '@/app/components/fullcard'
@@ -192,7 +193,6 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 	const [editValue, setEditValue] = useState(meal.name)
 	const [recipeOpen, setRecipeOpen] = useState(false)
 	const [extraIngredientOpen, setExtraIngredientOpen] = useState(false)
-	const [removeExtraIngredientIndex, setRemoveExtraIngredientIndex] = useState<number | null>(null)
 
 	const renameMeal = usePlanEditorStore((s) => s.renameMeal)
 	const setComment = usePlanEditorStore((s) => s.setComment)
@@ -217,9 +217,6 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 		setEditing(true)
 	}
 
-	const extraIngredientToRemove = removeExtraIngredientIndex === null
-		? null
-		: meal.extraIngredients[removeExtraIngredientIndex]
 
 	return (
 		<Stack spacing={0.75}>
@@ -266,10 +263,37 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 					label="Tillbehör"
 					value={meal.comment ?? ''}
 					onChange={(e) => setComment(dayLocalId, meal.localId, e.target.value)}
-					className="flex-1"
+					className="flex-1/4"
 				/>
 
-				<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
+				<Stack
+					direction="row"
+					spacing={0.75}
+					className="flex-none"
+					sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+					{meal.extraIngredients.map((extraIngredient, index) => (
+						<Chip
+							key={`${extraIngredient.ingredient.id ?? extraIngredient.ingredient.name}-${index}`}
+							sx={{ mb: 10 }}
+							size="small"
+							label={formatExtraIngredientChipLabel(extraIngredient)}
+							onDelete={() => {
+								removeExtraIngredient(dayLocalId, meal.localId, index)
+							}}
+						/>
+					))}
+					<Chip
+						size="small"
+						icon={<AddIcon fontSize="small" />}
+						label="Lägg till ingrediens"
+						sx={{ mb: 10 }}
+						variant="outlined"
+						onClick={() => setExtraIngredientOpen(true)}
+					/>
+				</Stack>
+
+
+				<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }} className="flex-1/4">
 					<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions - 1)}>
 						<RemoveIcon fontSize="small" />
 					</IconButton>
@@ -286,7 +310,8 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 					>
 						<DeleteIcon fontSize="small" />
 					</IconButton>
-		</Stack>
+				</Stack>
+			</Stack>
 
 			<RecipePickDialog
 				open={recipeOpen}
@@ -294,6 +319,13 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 				currentRecipe={meal.recipe}
 				onSelect={(recipe: RecipeSummaryType | null) => setRecipe(dayLocalId, meal.localId, recipe)}
 			/>
+
+			<MealExtraIngredientDialog
+				open={extraIngredientOpen}
+				onClose={() => setExtraIngredientOpen(false)}
+				onAdd={(extraIngredient) => addExtraIngredient(dayLocalId, meal.localId, extraIngredient)}
+			/>
+
 		</Stack>
 	)
 }

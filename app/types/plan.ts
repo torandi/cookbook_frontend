@@ -4,7 +4,7 @@ import { RecipeSummaryType } from './recipe'
 
 export interface MealExtraIngredientType {
 	ingredient: IngredientType
-	quantity: number
+	quantity?: number
 	unit: VolumeType | 'g' | 'st'
 }
 

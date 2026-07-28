@@ -30,8 +30,8 @@ function formatDate(dateStr: string): string {
 	})
 }
 
-function formatQuantity(quantity: number | null, unit: string | null): string {
-	if (quantity == null && unit == null) return ''
+function formatQuantity(quantity: number | null | undefined, unit: string | null): string {
+	if (quantity == null && unit == null || quantity === undefined) return ''
 	if (quantity == null) return unit ?? ''
 	if (unit == null) return String(quantity)
 	return `${quantity} ${unit}`

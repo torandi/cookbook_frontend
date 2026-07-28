@@ -55,8 +55,8 @@ export function capitalize(str : string) : string {
 	return str[0].toUpperCase() + str.slice(1)
 }
 
-export function formatQuantity(value: number | null, unit: string | null) {
-	if (value === null || unit === null) {
+export function formatQuantity(value?: number | null, unit?: string | null) {
+	if (value === null || value === undefined || unit === null || unit === undefined) {
 		return "-"
 	}
 
