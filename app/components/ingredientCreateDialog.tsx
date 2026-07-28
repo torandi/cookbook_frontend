@@ -19,6 +19,7 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
@@ -131,8 +132,10 @@ export default function IngredientCreateDialog({
 		onClose()
 	}
 
+	const searchQuery = `Vad väger ${dialogValue.unit === 'count' ? `1 ${dialogValue.name}` : `1 dl ${dialogValue.name}`}?`
+
 	return (
-		<Dialog open={open} onClose={handleClose}>
+		<Dialog open={open} onClose={handleClose} fullWidth>
 			{isSubmitting && <CircularProgress />}
 			{!isSubmitting && (
 				<form onSubmit={handleSubmit}>
@@ -187,16 +190,39 @@ export default function IngredientCreateDialog({
 										))}
 									</Select>
 								</FormControl>
-								<TextField
-									id="ingredient-create-weight-per-unit"
-									value={dialogValue.weightPerUnit}
-									onChange={(event) => setDialogValue({ ...dialogValue, weightPerUnit: event.target.value })}
-									label={dialogValue.unit === 'count' ? 'Vikt per styck' : 'Vikt per dl'}
-									sx={{ display: isWeightType ? 'none' : 'flex' }}
-									slotProps={{
-										input: { endAdornment: <InputAdornment position="end">g</InputAdornment> },
-									}}
-								/>
+								<Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+									<TextField
+										id="ingredient-create-weight-per-unit"
+										value={dialogValue.weightPerUnit}
+										onChange={(event) => setDialogValue({ ...dialogValue, weightPerUnit: event.target.value })}
+										label={dialogValue.unit === 'count' ? 'Vikt per styck' : 'Vikt per dl'}
+										className="flex-1"
+										sx={{ display: isWeightType ? 'none' : 'flex' }}
+										slotProps={{
+											input: { endAdornment: <InputAdornment position="end">g</InputAdornment> },
+										}}
+									/>
+									<Button
+										variant="outlined"
+										color="info" sx={{ display: isWeightType ? 'none' : 'flex' }}
+										className="flex-none"
+										onClick={() => {
+											const query = new URLSearchParams()
+											query.set('q', searchQuery)
+											window.open(`https://www.google.com/search?${query.toString()}`, '_blank')
+										}}>
+										Sök
+									</Button>
+									<Button
+										variant="outlined"
+										color="info" sx={{ display: isWeightType ? 'none' : 'flex' }}
+										className="flex-none"
+										onClick={() => {
+											navigator.clipboard.writeText(searchQuery)
+										}}>
+										Kopiera sökning
+									</Button>
+								</Box>
 								<TextField
 									id="ingredient-create-calories"
 									value={dialogValue.calories}
