@@ -15,15 +15,18 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import MenuItem from '@mui/material/MenuItem'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RemoveIcon from '@mui/icons-material/Remove'
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
 
+import IngredientAutocomplete from '@/app/components/ingredientAutocomplete'
 import FullCard from '@/app/components/fullcard'
 import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
 import { addPlan, updatePlan } from '@/app/backend/plan'
-import { PlanType } from '@/app/types/plan'
+import { MealExtraIngredientType, PlanType } from '@/app/types/plan'
+import { IngredientType, defaultIngredientUnit, volumeTypes } from '@/app/types/ingredient'
 import { RecipeSummaryType } from '@/app/types/recipe'
 import {
 	usePlanEditorStore,
@@ -36,6 +39,7 @@ import AddDaysDialog from './addDaysDialog'
 import RecipePickDialog from './recipePickDialog'
 import { getPlanDraftKey, loadPlanDraft, clearPlanDraft, savePlanDraft } from './draft'
 import { useUnload } from '@/app/lifetimeHooks'
+import { evalNumberExpression, formatQuantity } from '@/app/utils'
 
 type PlanEditorPageProps = {
 	title: string
@@ -57,16 +61,146 @@ type MealRowProps = {
 	meal: EditorMeal
 }
 
+type MealExtraIngredientDialogProps = {
+	open: boolean
+	onClose: () => void
+	onAdd: (ingredient: MealExtraIngredientType) => void
+}
+
+type ExtraIngredientUnit = 'st' | 'g' | typeof volumeTypes[number]
+
+function unitOptionsForIngredient(ingredient: IngredientType | null): ExtraIngredientUnit[] {
+	if (!ingredient) {
+		return []
+	}
+
+	const hasWeightOption = (ingredient.weightPerUnit ?? 0) > 0
+
+	switch (ingredient.unit) {
+		case 'volume':
+			return hasWeightOption ? ['g', ...volumeTypes] : [...volumeTypes]
+		case 'count':
+			return hasWeightOption ? ['st', 'g'] : ['st']
+		case 'weight':
+			return ['g']
+	}
+}
+
+function formatExtraIngredientChipLabel(extraIngredient: MealExtraIngredientType) {
+	return `${formatQuantity(extraIngredient.quantity, extraIngredient.unit)} ${extraIngredient.ingredient.name}`
+}
+
+function MealExtraIngredientDialog({ open, onClose, onAdd }: MealExtraIngredientDialogProps) {
+	const [ingredient, setIngredient] = useState<IngredientType | null>(null)
+	const [quantityInput, setQuantityInput] = useState('')
+	const [unit, setUnit] = useState<ExtraIngredientUnit | ''>('')
+
+	useEffect(() => {
+		if (!open) {
+			return
+		}
+
+		setIngredient(null)
+		setQuantityInput('')
+		setUnit('')
+	}, [open])
+
+	const unitOptions = unitOptionsForIngredient(ingredient)
+
+	useEffect(() => {
+		if (!ingredient) {
+			setUnit('')
+			return
+		}
+
+		const defaultUnit = defaultIngredientUnit(ingredient)
+		if (!defaultUnit || !unitOptions.includes(defaultUnit)) {
+			setUnit(unitOptions[0] ?? '')
+			return
+		}
+
+		setUnit(defaultUnit)
+	}, [ingredient])
+
+	function handleAdd() {
+		if (!ingredient) {
+			showErrorAlert('Välj en ingrediens')
+			return
+		}
+
+		const quantity = evalNumberExpression(quantityInput, null)
+		if (quantity === null) {
+			showErrorAlert('Ange en giltig mängd')
+			return
+		}
+
+		if (!unit) {
+			showErrorAlert('Välj en enhet')
+			return
+		}
+
+		onAdd({
+			ingredient,
+			quantity,
+			unit,
+		})
+		onClose()
+	}
+
+	return (
+		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+			<DialogTitle>Lägg till ingrediens</DialogTitle>
+			<DialogContent>
+				<Stack spacing={2} sx={{ pt: 1 }}>
+					<IngredientAutocomplete
+						id="meal-extra-ingredient"
+						value={ingredient}
+						onChange={setIngredient}
+					/>
+					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+						<TextField
+							label="Mängd"
+							value={quantityInput}
+							onChange={(event) => setQuantityInput(event.target.value)}
+							className="flex-1"
+						/>
+						<TextField
+							label="Enhet"
+							value={unit}
+							onChange={(event) => setUnit(event.target.value as ExtraIngredientUnit)}
+							select
+							className="flex-1"
+							disabled={unitOptions.length === 0}
+						>
+							{unitOptions.map((value) => (
+								<MenuItem key={value} value={value}>{value}</MenuItem>
+							))}
+						</TextField>
+					</Stack>
+				</Stack>
+			</DialogContent>
+			<DialogActions>
+				<Button onClick={onClose}>Avbryt</Button>
+				<Button variant="contained" onClick={handleAdd}>Lägg till</Button>
+			</DialogActions>
+		</Dialog>
+	)
+}
+
 function MealRow({ dayLocalId, meal }: MealRowProps) {
 	const [editing, setEditing] = useState(false)
 	const [editValue, setEditValue] = useState(meal.name)
 	const [recipeOpen, setRecipeOpen] = useState(false)
+	const [extraIngredientOpen, setExtraIngredientOpen] = useState(false)
+	const [removeExtraIngredientIndex, setRemoveExtraIngredientIndex] = useState<number | null>(null)
 
 	const renameMeal = usePlanEditorStore((s) => s.renameMeal)
 	const setComment = usePlanEditorStore((s) => s.setComment)
 	const removeMeal = usePlanEditorStore((s) => s.removeMeal)
 	const setRecipe = usePlanEditorStore((s) => s.setRecipe)
 	const setPortions = usePlanEditorStore((s) => s.setPortions)
+	const addExtraIngredient = usePlanEditorStore((s) => s.addExtraIngredient)
+	const removeExtraIngredient = usePlanEditorStore((s) => s.removeExtraIngredient)
 
 	function commitRename() {
 		const trimmed = editValue.trim()
@@ -83,70 +217,75 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 		setEditing(true)
 	}
 
+	const extraIngredientToRemove = removeExtraIngredientIndex === null
+		? null
+		: meal.extraIngredients[removeExtraIngredientIndex]
+
 	return (
-		<Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-			{editing ? (
+		<Stack spacing={0.75}>
+			<Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
+				{editing ? (
+					<TextField
+						size="small"
+						value={editValue}
+						onChange={(e) => setEditValue(e.target.value)}
+						onBlur={commitRename}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') commitRename()
+							if (e.key === 'Escape') { setEditValue(meal.name); setEditing(false) }
+						}}
+						autoFocus
+						sx={{ width: 130 }}
+					/>
+				) : (
+					<Typography
+						variant="body2"
+						onClick={startEditing}
+						sx={{
+							fontWeight: 600,
+							minWidth: 60,
+							cursor: 'pointer',
+							'&:hover': { textDecoration: 'underline' },
+						}}
+					>
+						{meal.name.trim() ? meal.name : '(namnlös måltid)'}
+					</Typography>
+				)}
+
+				<Chip
+					label={meal.recipe?.name ?? 'Inget recept'}
+					size="small"
+					icon={<RestaurantMenuRoundedIcon fontSize="small" />}
+					variant={meal.recipe ? 'filled' : 'outlined'}
+					onClick={() => setRecipeOpen(true)}
+					sx={{ cursor: 'pointer', maxWidth: 260 }}
+				/>
+
 				<TextField
 					size="small"
-					value={editValue}
-					onChange={(e) => setEditValue(e.target.value)}
-					onBlur={commitRename}
-					onKeyDown={(e) => {
-						if (e.key === 'Enter') commitRename()
-						if (e.key === 'Escape') { setEditValue(meal.name); setEditing(false) }
-					}}
-					autoFocus
-					sx={{ width: 130 }}
+					label="Tillbehör"
+					value={meal.comment ?? ''}
+					onChange={(e) => setComment(dayLocalId, meal.localId, e.target.value)}
+					className="flex-1"
 				/>
-			) : (
-				<Typography
-					variant="body2"
-					onClick={startEditing}
-					sx={{
-						fontWeight: 600,
-						minWidth: 60,
-						cursor: 'pointer',
-						'&:hover': { textDecoration: 'underline' },
-					}}
-				>
-					{meal.name.trim() ? meal.name : '(namnlös måltid)'}
-				</Typography>
-			)}
 
-			<Chip
-				label={meal.recipe?.name ?? 'Inget recept'}
-				size="small"
-				icon={<RestaurantMenuRoundedIcon fontSize="small" />}
-				variant={meal.recipe ? 'filled' : 'outlined'}
-				onClick={() => setRecipeOpen(true)}
-				sx={{ cursor: 'pointer', maxWidth: 260 }}
-			/>
-
-			<TextField
-				size="small"
-				label="Tillbehör"
-				value={meal.comment ?? ''}
-				onChange={(e) => setComment(dayLocalId, meal.localId, e.target.value)}
-				sx={{ minWidth: 220, flex: 1 }}
-			/>
-
-		<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
-			<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions - 1)}>
-				<RemoveIcon fontSize="small" />
-			</IconButton>
-			<Typography variant="body2" sx={{ minWidth: 20, textAlign: 'center' }}>
-				{meal.portions}
-			</Typography>
-			<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions + 1)}>
-				<AddIcon fontSize="small" />
-			</IconButton>
-			<IconButton
-				size="small"
-				color="error"
-				onClick={() => removeMeal(dayLocalId, meal.localId)}
-			>
-				<DeleteIcon fontSize="small" />
-			</IconButton>
+				<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
+					<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions - 1)}>
+						<RemoveIcon fontSize="small" />
+					</IconButton>
+					<Typography variant="body2" sx={{ minWidth: 20, textAlign: 'center' }}>
+						{meal.portions}
+					</Typography>
+					<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions + 1)}>
+						<AddIcon fontSize="small" />
+					</IconButton>
+					<IconButton
+						size="small"
+						color="error"
+						onClick={() => removeMeal(dayLocalId, meal.localId)}
+					>
+						<DeleteIcon fontSize="small" />
+					</IconButton>
 		</Stack>
 
 			<RecipePickDialog

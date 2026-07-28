@@ -143,6 +143,22 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 														{meal.comment}
 													</Typography>
 												) : null}
+												{meal.extraIngredients && meal.extraIngredients.length > 0 ? (
+													<Stack
+														direction="row"
+														spacing={0.5}
+														sx={{ gridColumn: '2 / 4', flexWrap: 'wrap' }}
+													>
+														{meal.extraIngredients.map((extraIngredient, index) => (
+															<Chip
+																key={`${extraIngredient.ingredient.id ?? extraIngredient.ingredient.name}-${index}`}
+																size="small"
+																variant="outlined"
+																label={`${formatQuantity(extraIngredient.quantity, extraIngredient.unit)} ${extraIngredient.ingredient.name}`}
+															/>
+														))}
+													</Stack>
+												) : null}
 											</Box>
 										</Stack>
 									))}

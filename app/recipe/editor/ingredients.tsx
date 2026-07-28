@@ -1,20 +1,18 @@
 'use client'
 
-import { useState, useEffect, ChangeEvent, SyntheticEvent } from 'react';
+import { useEffect, ChangeEvent } from 'react';
 
 import { defaultIngredientEntry, useRecipeEditorStore } from './state';
 
 import { IngredientType, RecipeIngredientType, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
-import { useIngredients } from '@/app/backend/ingredient'
 import { SortableList } from '@/app/components/sortableList'
-import IngredientCreateDialog from '@/app/components/ingredientCreateDialog'
+import IngredientAutocomplete from '@/app/components/ingredientAutocomplete'
 
 import { useSortable } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
@@ -30,8 +28,6 @@ import { AddGroupButton, GroupEditRow } from './groups';
 import { evalNumberExpression } from '@/app/utils';
 
 const ingredientSpacing = 1;
-
-type IngredientOrNewType = IngredientType | { inputValue: string, title: string };
 
 function IngredientEntryInput({ id, groupId, isLastItem } : {
 	id: number,
@@ -154,108 +150,25 @@ function IngredientSelectBox({id, value, setValue} : {
 	value: RecipeIngredientType | null,
 	setValue: Function
 }) {
-	const { ingredients, isLoading } = useIngredients();
+	const handleOnChange = (newValue : IngredientType | null) => {
+		const currentOptional = value?.optional ?? false
 
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [dialogInitialName, setDialogInitialName] = useState('');
-
-	const filter = createFilterOptions<IngredientOrNewType>({
-		limit: 100, /* only show 100 first items */
-	});
-	// Add "Skapa ny" option to ingredient list
-	const generateOptions = (options : IngredientOrNewType[], params : any) => {
-		const filtered = filter(options, params);
-
-		const { inputValue } = params;
-
-		// Suggest the creation of a new value
-		const isExisting = options.some((option) => "title" in option && inputValue === option.title);
-		if (inputValue !== '' && !isExisting) {
-			filtered.push({
-				inputValue,
-				title: `Skapa ny ingrediens "${inputValue}"`,
-			});
-		}
-		return filtered;
-	}
-
-	const handleOnChange = (event : SyntheticEvent, newValue : IngredientOrNewType | null) => {
-		if(newValue && "inputValue" in newValue && newValue.inputValue) {
-			setDialogInitialName(newValue.inputValue);
-			setDialogOpen(true);
-		} else {
-			const currentOptional = value?.optional ?? false
-
-			setValue({
-				...defaultIngredientEntry,
-				ingredient: newValue as IngredientType,
-				unit: defaultIngredientUnit(newValue as IngredientType),
-				optional: currentOptional, // have to override, to not reset optional when changing ingredient (as optional is not null in default)
-			});
-		}
+		setValue({
+			...defaultIngredientEntry,
+			ingredient: newValue,
+			unit: newValue ? defaultIngredientUnit(newValue) : null,
+			optional: currentOptional, // have to override, to not reset optional when changing ingredient (as optional is not null in default)
+		});
 	}
 
 	return (
-		<>
-			<Autocomplete
-				id = {`ingredient-type-${id}`}
-				className = "flex-3"
-				sx={{mr: ingredientSpacing}}
-				loading={ isLoading }
-				options={ ingredients ?? [] }
-				getOptionLabel = { (option : IngredientOrNewType ) => {
-					// Dynamically created option
-					if ("inputValue" in option && option.inputValue) {
-						return option.title;
-					} else if ("name" in option) {
-						return option.name
-					}
-					return ""
-				}}
-				isOptionEqualToValue = { (option, value) => (option as IngredientType).name === (value as IngredientType).name }
-				value={value?.ingredient ?? null}
-				onChange={handleOnChange}
-				clearOnEscape
-				autoSelect
-				autoHighlight
-				selectOnFocus
-				handleHomeEndKeys
-				filterOptions={generateOptions}
-				renderInput={(params) => (
-					<TextField
-						{...params}
-						label="Ingrediens"
-						slotProps={{
-							...params.slotProps,
-							input: {
-								...params.slotProps.input,
-								endAdornment: (
-									<>
-										{isLoading ? <CircularProgress color="inherit" size={20} /> : null}
-										{params.slotProps.input.endAdornment}
-									</>
-								),
-							},
-						}}
-					/>
-				)}
-			/>
-
-			<IngredientCreateDialog
-				open={dialogOpen}
-				initialName={dialogInitialName}
-				onClose={() => setDialogOpen(false)}
-				onCreated={(ingredient) => {
-					const currentOptional = value?.optional ?? false;
-					setValue({
-						...defaultIngredientEntry,
-						ingredient,
-						unit: defaultIngredientUnit(ingredient),
-						optional: currentOptional,
-					});
-				}}
-			/>
-		</>
+		<IngredientAutocomplete
+			id={`ingredient-type-${id}`}
+			className="flex-3"
+			sx={{mr: ingredientSpacing}}
+			value={value?.ingredient ?? null}
+			onChange={handleOnChange}
+		/>
 	)
 }
 

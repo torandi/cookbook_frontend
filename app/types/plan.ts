@@ -1,12 +1,19 @@
 import { DbObject } from './dbobject'
+import { IngredientType, VolumeType } from './ingredient'
 import { RecipeSummaryType } from './recipe'
+
+export interface MealExtraIngredientType {
+	ingredient: IngredientType
+	quantity: number
+	unit: VolumeType | 'g' | 'st'
+}
 
 export interface MealType extends DbObject {
 	name: string
 	recipe: RecipeSummaryType | null
 	portions: number
 	comment: string | null
-	// todo: extra ingredients
+	extraIngredients?: MealExtraIngredientType[]
 }
 
 export interface PlanDayType extends DbObject {
