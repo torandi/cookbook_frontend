@@ -42,10 +42,6 @@ export function clearRecipeDraft(recipeId?: number) {
 		return;
 	}
 
-	const draftKey = recipeId !== undefined
-		? `cookbook-editor-draft:recipe:edit:${recipeId}`
-		: 'cookbook-editor-draft:recipe:add';
-
-	window.localStorage.removeItem(draftKey);
+	window.localStorage.removeItem(getRecipeDraftKey(recipeId));
 }
 

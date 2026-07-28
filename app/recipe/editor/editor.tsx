@@ -33,11 +33,22 @@ type RecipeEditorPageProps = {
 }
 
 export default function RecipeEditorPage({ title, recipeId, initialRecipe }: RecipeEditorPageProps) {
-	const resetState = useRecipeEditorStore((state) => state.reset)
 	const setFromRecipe = useRecipeEditorStore((state) => state.setFromRecipe)
 	const router = useRouter()
 	const draftKey = getRecipeDraftKey(recipeId)
 	const [pendingDraft, setPendingDraft] = useState<RecipeEditorDraft | null>(null)
+	const resetState = useRecipeEditorStore((state) => state.reset)
+
+	const abortEdit = () => {
+		clearRecipeDraft(recipeId)
+		resetState()
+		if (recipeId !== undefined) {
+			router.push(`/recipe/${recipeId}`)
+		} else {
+			router.push('/recipe')
+		}
+	}
+	
 
 	function handleRestoreDraft() {
 		const draft = loadRecipeDraft(draftKey) as RecipeEditorDraft | null
@@ -93,16 +104,16 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 					<DialogContentText>
 						{recipeId !== undefined ? 
 						`Det finns ett sparat utkast för detta recept. Vill du återställa det?`
-						: `Det finns ett sparat utkast för ${pendingDraft.name}. Vill du återställa det?`
+						: `Det finns ett sparat utkast för ${pendingDraft.recipe.name}. Vill du återställa det?`
 						}
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
+					<Button onClick={handleDiscardDraft} color="inherit">
+						Ta bort utkast
+					</Button>
 					<Button onClick={handleRestoreDraft} variant="contained" autoFocus>
 						Återställ utkast
-					</Button>
-					<Button onClick={handleDiscardDraft} color="inherit">
-						Avbryt & radera utkast
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -112,17 +123,12 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 				<Stack direction="column" spacing={2}>
 					<FullCard className="w-full">
 						<Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
-							{recipeId !== undefined && (
-								<Button
-									variant="outlined"
-									onClick={() => {
-										clearRecipeDraft(recipeId)
-										router.push(`/recipe/${recipeId}`)
-									}}
-								>
-									Avbryt
-								</Button>
-							)}
+							<Button
+								variant="outlined"
+								onClick={abortEdit}
+							>
+								Avbryt
+							</Button>
 							<SaveButton recipeId={recipeId} />
 						</Stack>
 						<Typography variant="h4" component="h1" sx={{ mb: 2 }}>{title}</Typography>

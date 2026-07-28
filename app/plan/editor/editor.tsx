@@ -34,53 +34,13 @@ import {
 } from './state'
 import AddDaysDialog from './addDaysDialog'
 import RecipePickDialog from './recipePickDialog'
+import { getPlanDraftKey, loadPlanDraft, clearPlanDraft, savePlanDraft } from './draft'
+import { useUnload } from '@/app/lifetimeHooks'
 
 type PlanEditorPageProps = {
 	title: string
 	planId?: number
 	initialPlan?: PlanType
-}
-
-function getPlanDraftKey(planId?: number) {
-	return planId !== undefined
-		? `cookbook-editor-draft:plan:edit:${planId}`
-		: 'cookbook-editor-draft:plan:add'
-}
-
-function loadPlanDraft(key: string): PlanEditorDraft | null {
-	if (typeof window === 'undefined') {
-		return null
-	}
-
-	try {
-		const raw = window.localStorage.getItem(key)
-		if (!raw) {
-			return null
-		}
-		const parsed = JSON.parse(raw) as PlanEditorDraft
-		if (!parsed || !Array.isArray(parsed.days) || typeof parsed.name !== 'string' || typeof parsed.nextLocalId !== 'number') {
-			return null
-		}
-		return parsed
-	} catch {
-		return null
-	}
-}
-
-function savePlanDraft(key: string, draft: PlanEditorDraft) {
-	if (typeof window === 'undefined') {
-		return
-	}
-
-	window.localStorage.setItem(key, JSON.stringify(draft))
-}
-
-function clearPlanDraft(key: string) {
-	if (typeof window === 'undefined') {
-		return
-	}
-
-	window.localStorage.removeItem(key)
 }
 
 function formatDate(dateStr: string): string {
@@ -240,73 +200,70 @@ export default function PlanEditorPage({ title, planId, initialPlan }: PlanEdito
 	const [addDaysOpen, setAddDaysOpen] = useState(false)
 	const [saving, setSaving] = useState(false)
 	const [pendingDraft, setPendingDraft] = useState<PlanEditorDraft | null>(null)
-	const [draftDecisionResolved, setDraftDecisionResolved] = useState(false)
 	const router = useRouter()
 	const draftKey = getPlanDraftKey(planId)
 
 	const name = usePlanEditorStore((s) => s.name)
 	const days = usePlanEditorStore((s) => s.days)
-	const nextLocalId = usePlanEditorStore((s) => s.nextLocalId)
 	const setName = usePlanEditorStore((s) => s.setName)
 	const addDays = usePlanEditorStore((s) => s.addDays)
-	const reset = usePlanEditorStore((s) => s.reset)
 	const setFromPlan = usePlanEditorStore((s) => s.setFromPlan)
+	const resetState = usePlanEditorStore((state) => state.reset)
 
-	useEffect(() => {
-		setDraftDecisionResolved(false)
-		setPendingDraft(null)
-
-		const draft = loadPlanDraft(draftKey)
-		if (draft) {
-			setPendingDraft(draft)
-			return
-		}
-
-		if (initialPlan) {
-			setFromPlan(initialPlan)
-			setDraftDecisionResolved(true)
+	const abortEdit = () => {
+		clearPlanDraft(planId)
+		resetState()
+		if (planId !== undefined) {
+			router.push(`/plan/${planId}`)
 		} else {
-			reset()
-			setDraftDecisionResolved(true)
+			router.push('/plan')
 		}
-	}, [draftKey, initialPlan?.id, reset, setFromPlan])
+	}
 
 	function handleRestoreDraft() {
-		if (pendingDraft) {
-			usePlanEditorStore.setState({
-				name: pendingDraft.name,
-				days: pendingDraft.days,
-				nextLocalId: pendingDraft.nextLocalId,
-			})
+		const draft = loadPlanDraft(draftKey)
+		if (draft) {
+			usePlanEditorStore.setState(draft)
 		}
+		clearPlanDraft(planId)
 		setPendingDraft(null)
-		setDraftDecisionResolved(true)
 	}
 
 	function handleDiscardDraft() {
-		clearPlanDraft(draftKey)
+		clearPlanDraft(planId)
 		setPendingDraft(null)
 
 		if (initialPlan) {
 			setFromPlan(initialPlan)
-		} else {
-			reset()
 		}
-
-		setDraftDecisionResolved(true)
 	}
 
-	useEffect(() => {
-		if (!draftDecisionResolved) {
+	const saveDraft = () => {
+		const state = usePlanEditorStore.getState()
+		if (state.name.trim() === '' && state.days.length === 0) {
+			// don't save if plan is empty
 			return
 		}
+		savePlanDraft(draftKey, state as PlanEditorDraft)
+	}
 
-		savePlanDraft(draftKey, { name, days, nextLocalId })
-	}, [draftDecisionResolved, draftKey, name, days, nextLocalId])
+	// Save draft if tab is closed or page is refreshed
+	useUnload((event: BeforeUnloadEvent) => {
+		saveDraft()
+	})
+
+	useEffect(() => {
+		const draft = loadPlanDraft(draftKey)
+		if (draft !== null) {
+			setPendingDraft(draft)
+		} else if (initialPlan) {
+			setFromPlan(initialPlan)
+		}
+	}, [draftKey, initialPlan?.id, setFromPlan])
 
 	async function handleSave() {
 		if (!name.trim()) {
-			showErrorAlert('Planens namn saknas')
+			showErrorAlert('Planen saknar namn')
 			return
 		}
 		setSaving(true)
@@ -322,7 +279,7 @@ export default function PlanEditorPage({ title, planId, initialPlan }: PlanEdito
 		}
 
 		showSuccessAlert('Planen sparades')
-		clearPlanDraft(draftKey)
+		clearPlanDraft(planId)
 		router.push(data?.id ? `/plan/${data.id}` : '/plan')
 	}
 
@@ -332,7 +289,10 @@ export default function PlanEditorPage({ title, planId, initialPlan }: PlanEdito
 				<DialogTitle>Återställ utkast</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Det finns ett sparat utkast för den här planen. Vill du återställa det?
+						{ planId !== undefined ?
+						`Det finns ett sparat utkast för denna plan. Vill du återställa det?`
+						: `Det finns ett sparat utkast för ${pendingDraft?.name ?? 'planen'}. Vill du återställa det?`
+						}
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
@@ -349,10 +309,7 @@ export default function PlanEditorPage({ title, planId, initialPlan }: PlanEdito
 				<Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end', mb: 2 }}>
 					<Button
 						variant="outlined"
-						onClick={() => {
-							clearPlanDraft(draftKey)
-							router.push(planId ? `/plan/${planId}` : '/plan')
-						}}
+						onClick={abortEdit}
 					>
 						Avbryt
 					</Button>
