@@ -26,9 +26,76 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
+import { IngredientGroupType, InstructionGroupType, RecipeType } from '@/app/types/recipe'
 
 type RecipeDisplayProps = {
 	recipeId: number
+}
+
+function IngredientGroup({ group, showWeight, namePrefix }: { group: IngredientGroupType, showWeight: boolean, namePrefix?: string }) {
+	return (
+		<Box sx={{ mb: 2 }}>
+			{group.name || namePrefix ? (
+				<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+					{namePrefix ? (group.name ? `${namePrefix}: ${group.name}` : namePrefix) : group.name}
+				</Typography>
+			) : null}
+			<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
+				{group.ingredients.map((item, index) => (
+					<IngredientItem
+						key={item.id}
+						ingredient={item}
+						showWeight={showWeight}
+						index={index}
+					/>
+				))}
+			</Box>
+		</Box>
+	)
+}
+
+function InstructionGroup({ group, currentPortions }: { group: InstructionGroupType, currentPortions: number }) {
+	return (
+		<Box sx={{ mb: 2 }}>
+			{group.name ? (
+				<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+					{group.name}
+				</Typography>
+			) : null}
+			<Box component="ol" sx={{ m: 0, pl: 3 }}>
+				{group.instructions.map((step, stepIndex) => (
+					<Box component="li" key={stepIndex} sx={{ mb: 1 }}>
+						<MarkdownText
+							text={step.replaceAll('{portions}', String(currentPortions))}
+						/>
+					</Box>
+				))}
+			</Box>
+		</Box>
+	)
+}
+
+function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeType, showWeight: boolean, isPrimary: boolean }) {
+	return (
+		<>
+			{ recipe.subRecipes.map((subRecipe, index) => (
+				<RecipeIngredients
+					key={`sub-recipe-${index}`}
+					recipe={subRecipe}
+					showWeight={showWeight}
+					isPrimary={false}
+				/>
+			))}
+			{ recipe.ingredients.map((group, groupIndex) => (
+				<IngredientGroup
+					key={`ingredient-group-${groupIndex}`}
+					group={group}
+					showWeight={showWeight}
+					namePrefix={isPrimary ? undefined : recipe.name}
+				/>
+			))}
+		</>
+	)
 }
 
 function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, showWeight: boolean, index: number }) {
@@ -83,7 +150,7 @@ function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, sh
 						) : null}
 					</Box>
 				</Box>
-				<Typography sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
+				<Box sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
 					{ ingredient.quantity != null ? (
 						<>
 							{primaryQuantity}
@@ -106,7 +173,7 @@ function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, sh
 						</>
 					) : (ingredient.comment && ingredient.comment.trim())
 					}
-				</Typography>
+				</Box>
 			</Box>
 		</Box>
 	)
@@ -279,25 +346,11 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Ingredienser
 					</Typography>
-					{ recipe.ingredients.map((group, groupIndex) => (
-						<Box key={`ingredient-group-${groupIndex}`} sx={{ mb: 2 }}>
-							{group.name ? (
-								<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
-									{group.name}
-								</Typography>
-							) : null}
-							<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-								{group.ingredients.map((item, index) => (
-									<IngredientItem
-										key={item.id}
-										ingredient={item}
-										showWeight={showWeight || false}
-										index={index}
-									/>
-								))}
-							</Box>
-						</Box>
-					))}
+					<RecipeIngredients
+						recipe={recipe}
+						showWeight={showWeight || false}
+						isPrimary={true}
+					/>
 				</FullCard>
 
 				<FullCard className="w-full">
@@ -305,22 +358,13 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						Instruktioner
 					</Typography>
 					{ recipe.instructions.map((group, groupIndex) => (
-						<Box key={`instruction-group-${groupIndex}`} sx={{ mb: 2 }}>
-							{group.name ? (
-								<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
-									{group.name}
-								</Typography>
-							) : null}
-							<Box component="ol" sx={{ m: 0, pl: 3 }}>
-								{group.instructions.map((step, stepIndex) => (
-									<Box component="li" key={stepIndex} sx={{ mb: 1 }}>
-										<MarkdownText
-											text={step.replaceAll('{portions}', String(currentPortions))}
-										/>
-									</Box>
-								))}
-							</Box>
-						</Box>
+						<InstructionGroup
+							key={`instruction-group-${groupIndex}`}
+							group={group}
+							currentPortions={currentPortions}
+						/>
+
+	
 					))}
 				</FullCard>
 				
