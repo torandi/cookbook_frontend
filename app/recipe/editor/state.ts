@@ -1,6 +1,6 @@
 import { RecipeIngredientType } from '@/app/types/ingredient'
 
-import { RecipeType } from '@/app/types/recipe'
+import { RecipeSummaryType, RecipeType } from '@/app/types/recipe'
 
 import { create, StateCreator } from 'zustand'
 
@@ -26,6 +26,7 @@ const defaultRecipeState: RecipeType = {
 	activeTime: null,
 	ingredients: [],
 	instructions: [],
+	subRecipes: [],
 }
 
 const createDefaultEditorState = () => ({
@@ -101,6 +102,7 @@ interface RecipeSlice {
 	setDefaultWeight: (value : boolean) => void
 	setActiveTime: (time : number | null) => void
 	setTotalTime: (time : number | null) => void
+	setSubRecipes: (subRecipes: RecipeSummaryType[]) => void
 }
 
 interface ReadSlice {
@@ -359,6 +361,12 @@ const createRecipeSlice : StateCreator<
 			recipe: {
 				...state.recipe,
 				defaultWeight: value,
+			}
+		})),
+		setSubRecipes: (subRecipes: RecipeSummaryType[]) => set( state => ({
+			recipe: {
+				...state.recipe,
+				subRecipes: subRecipes as RecipeType[],
 			}
 		})),
 	})

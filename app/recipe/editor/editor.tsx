@@ -25,7 +25,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import { useRouter } from 'next/navigation'
 import { getRecipeDraftKey, loadRecipeDraft, saveRecipeDraft, clearRecipeDraft } from './draft'
 import { RecipeIngredientType } from '@/app/types/ingredient'
-import RecipePickDialog from '@/app/components/recipePicker'
+import { RecipeMultiPicker } from '@/app/components/recipePicker'
 
 type RecipeEditorPageProps = {
 	title: string
@@ -39,7 +39,8 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 	const draftKey = getRecipeDraftKey(recipeId)
 	const [pendingDraft, setPendingDraft] = useState<RecipeEditorDraft | null>(null)
 	const resetState = useRecipeEditorStore((state) => state.reset)
-	const [subRecipeDialogOpen, setSubRecipeDialogOpen] = useState(false)
+	const subRecipes = useRecipeEditorStore((state) => state.recipe.subRecipes)
+	const setSubRecipes = useRecipeEditorStore((state) => state.setSubRecipes)
 
 	const abortEdit = () => {
 		clearRecipeDraft(recipeId)
@@ -136,25 +137,14 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 						<Typography variant="h4" component="h1" sx={{ mb: 2 }}>{title}</Typography>
 						<RecipeInfoInput />
 					</FullCard>
-				{/*
 					<FullCard className="w-full">
-						<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Sub-recept</Typography>
-						<Typography variant="body2" component="p" sx={{ mb: 2 }}>Om du vill använda ett annat recept som ingrediens i detta recept, kan du lägga till det här.</Typography>
-						<RecipePickDialog
-							open={subRecipeDialogOpen}
-							onClose={() => setSubRecipeDialogOpen(false)}
-							onSelect={(recipe) => {
-								useRecipeEditorStore.getState().addSubRecipe(recipe)
-								setSubRecipeDialogOpen(false)
-							}}
+						<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Subrecept</Typography>
+						<Typography variant="body2" color="textSecondary" component="p" sx={{ mb: 2 }}>Subrecept är recept som inkluderas som en del av detta.</Typography>
+						<RecipeMultiPicker
+							setRecipies={setSubRecipes}
+							recipes={subRecipes}
 						/>
-						<Button
-							variant="outlined"
-							onClick={() => setSubRecipeDialogOpen(true)}
-						>
-							Lägg till sub-recept
-						</Button>
-					</FullCard>*/}
+					</FullCard>
 	
 					<Box sx={{ display: 'flex', flexDirection: { md: 'column', lg: 'row' }, gap: 2 }}>
 							<FullCard className="w-1/2 md:w-full">
