@@ -108,22 +108,30 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 												<Typography variant="body2" sx={{ fontWeight: 500 }}>
 													{meal.name.trimEnd() ? meal.name : 'Måltid'}
 												</Typography>
-												{meal.recipe ? (
-													<Link
-														href={`/recipe/${meal.recipe.id}`}
-														target="_blank"
-														rel="noopener noreferrer"
-														style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}
-													>
-														<RestaurantMenuRoundedIcon
-															fontSize="small"
-															sx={{ color: 'primary.main' }}
-														/>
-														<Typography variant="body2" color="primary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-															{meal.recipe.name}
-														</Typography>
-													</Link>
-												) : (
+												<Box sx={{ display: 'flex', flexDirection: 'row', gap: 0.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+													{meal.recipes.map((recipe, index) => (
+														<Link
+															key={index}
+															href={`/recipe/${recipe.id}`}
+															target="_blank"
+															rel="noopener noreferrer"
+															style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, marginBottom: 5 }}
+														>
+															<Chip
+																variant="filled"
+																size="small"
+																icon={
+																	<RestaurantMenuRoundedIcon
+																		fontSize="small"
+																		sx={{ color: 'primary.main' }}
+																	/>
+																}
+																label={recipe.name}
+															/>
+														</Link>
+													))}
+												</Box>
+												{meal.recipes.length === 0 && (
 													<Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
 														Inget recept
 													</Typography>

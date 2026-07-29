@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import Box from '@mui/material/Box'
@@ -19,8 +19,6 @@ import MenuItem from '@mui/material/MenuItem'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RemoveIcon from '@mui/icons-material/Remove'
-import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
-import ListItem from '@mui/material/ListItem'
 
 import IngredientAutocomplete from '@/app/components/ingredientAutocomplete'
 import FullCard from '@/app/components/fullcard'
@@ -37,8 +35,8 @@ import {
 	PlanEditorDraft,
 } from './state'
 import AddDaysDialog from './addDaysDialog'
-import RecipePickDialog from './recipePickDialog'
 import { getPlanDraftKey, loadPlanDraft, clearPlanDraft, savePlanDraft } from './draft'
+import { RecipeMultiPicker } from '@/app/components/recipePicker'
 import { useUnload } from '@/app/lifetimeHooks'
 import { evalNumberExpression, formatQuantity } from '@/app/utils'
 
@@ -191,13 +189,12 @@ function MealExtraIngredientDialog({ open, onClose, onAdd }: MealExtraIngredient
 function MealRow({ dayLocalId, meal }: MealRowProps) {
 	const [editing, setEditing] = useState(false)
 	const [editValue, setEditValue] = useState(meal.name)
-	const [recipeOpen, setRecipeOpen] = useState(false)
 	const [extraIngredientOpen, setExtraIngredientOpen] = useState(false)
 
 	const renameMeal = usePlanEditorStore((s) => s.renameMeal)
 	const setComment = usePlanEditorStore((s) => s.setComment)
 	const removeMeal = usePlanEditorStore((s) => s.removeMeal)
-	const setRecipe = usePlanEditorStore((s) => s.setRecipe)
+	const setRecipes = usePlanEditorStore((s) => s.setRecipes)
 	const setPortions = usePlanEditorStore((s) => s.setPortions)
 	const addExtraIngredient = usePlanEditorStore((s) => s.addExtraIngredient)
 	const removeExtraIngredient = usePlanEditorStore((s) => s.removeExtraIngredient)
@@ -220,7 +217,10 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 
 	return (
 		<Stack spacing={0.75}>
-			<Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
+			<Box sx={{
+				display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, justifyContent: 'space-between',
+				flexDirection: 'row'
+				}}>
 				{editing ? (
 					<TextField
 						size="small"
@@ -232,12 +232,14 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 							if (e.key === 'Escape') { setEditValue(meal.name); setEditing(false) }
 						}}
 						autoFocus
+						className="flex-1/4"
 						sx={{ width: 130 }}
 					/>
 				) : (
 					<Typography
 						variant="body2"
 						onClick={startEditing}
+						className="flex-none"
 						sx={{
 							fontWeight: 600,
 							minWidth: 60,
@@ -249,13 +251,11 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 					</Typography>
 				)}
 
-				<Chip
-					label={meal.recipe?.name ?? 'Inget recept'}
-					size="small"
-					icon={<RestaurantMenuRoundedIcon fontSize="small" />}
-					variant={meal.recipe ? 'filled' : 'outlined'}
-					onClick={() => setRecipeOpen(true)}
-					sx={{ cursor: 'pointer', maxWidth: 260 }}
+				<RecipeMultiPicker
+					key={`recipe-pick-${dayLocalId}-${meal.localId}`}
+					recipes={meal.recipes}
+					setRecipies={(recipes: RecipeSummaryType[]) => setRecipes(dayLocalId, meal.localId, recipes)}
+					sx={{ flex: 1}}
 				/>
 
 				<TextField
@@ -263,37 +263,15 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 					label="Tillbehör"
 					value={meal.comment ?? ''}
 					onChange={(e) => setComment(dayLocalId, meal.localId, e.target.value)}
-					className="flex-1/4"
+					className="flex-1/4 justify-self-end justify-content-end"
 				/>
+
 
 				<Stack
 					direction="row"
-					spacing={0.75}
-					className="flex-none"
-					sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-					{meal.extraIngredients.map((extraIngredient, index) => (
-						<Chip
-							key={`${extraIngredient.ingredient.id ?? extraIngredient.ingredient.name}-${index}`}
-							sx={{ mb: 10 }}
-							size="small"
-							label={formatExtraIngredientChipLabel(extraIngredient)}
-							onDelete={() => {
-								removeExtraIngredient(dayLocalId, meal.localId, index)
-							}}
-						/>
-					))}
-					<Chip
-						size="small"
-						icon={<AddIcon fontSize="small" />}
-						label="Lägg till ingrediens"
-						sx={{ mb: 10 }}
-						variant="outlined"
-						onClick={() => setExtraIngredientOpen(true)}
-					/>
-				</Stack>
-
-
-				<Stack direction="row" spacing={0} sx={{ alignItems: 'center' }} className="flex-1/4">
+					spacing={0}
+					sx={{ alignItems: 'center', justifySelf: 'end', gap: 0.5, justifyContent: 'flex-end' }}
+					className="flex-1/4">
 					<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions - 1)}>
 						<RemoveIcon fontSize="small" />
 					</IconButton>
@@ -311,14 +289,33 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 						<DeleteIcon fontSize="small" />
 					</IconButton>
 				</Stack>
-			</Stack>
+			</Box>
 
-			<RecipePickDialog
-				open={recipeOpen}
-				onClose={() => setRecipeOpen(false)}
-				currentRecipe={meal.recipe}
-				onSelect={(recipe: RecipeSummaryType | null) => setRecipe(dayLocalId, meal.localId, recipe)}
-			/>
+			<Stack
+				direction="row"
+				spacing={0.75}
+				className="flex-none"
+				sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+				{meal.extraIngredients.map((extraIngredient, index) => (
+					<Chip
+						key={`${extraIngredient.ingredient.id ?? extraIngredient.ingredient.name}-${index}`}
+						sx={{ mb: 10 }}
+						size="small"
+						label={formatExtraIngredientChipLabel(extraIngredient)}
+						onDelete={() => {
+							removeExtraIngredient(dayLocalId, meal.localId, index)
+						}}
+					/>
+				))}
+				<Chip
+					size="small"
+					icon={<AddIcon fontSize="small" />}
+					label="Lägg till ingrediens"
+					sx={{ mb: 10 }}
+					variant="outlined"
+					onClick={() => setExtraIngredientOpen(true)}
+				/>
+			</Stack>
 
 			<MealExtraIngredientDialog
 				open={extraIngredientOpen}
@@ -349,9 +346,12 @@ function DayCard({ day }: DayCardProps) {
 				</IconButton>
 			</Stack>
 
-			<Stack spacing={0.75}>
-				{day.meals.map((meal) => (
-					<MealRow key={meal.localId} dayLocalId={day.localId} meal={meal} />
+			<Stack spacing={4}>
+				{day.meals.map((meal, index) => (
+					<Fragment key={meal.localId}>
+						<MealRow dayLocalId={day.localId} meal={meal} />
+						{ index != day.meals.length - 1 && <Box sx={{ borderBottom: '1px solid', borderColor: 'divider', my: 1 }} /> }
+					</Fragment>
 				))}
 			</Stack>
 

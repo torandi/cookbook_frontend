@@ -8,7 +8,7 @@ export interface EditorMeal {
 	localId: number
 	dbId: number | null
 	name: string
-	recipe: RecipeSummaryType | null
+	recipes: RecipeSummaryType[]
 	portions: number
 	comment: string | null
 	extraIngredients: MealExtraIngredientType[]
@@ -33,7 +33,7 @@ interface PlanEditorState {
 	removeMeal: (dayLocalId: number, mealLocalId: number) => void
 	renameMeal: (dayLocalId: number, mealLocalId: number, name: string) => void
 	setComment: (dayLocalId: number, mealLocalId: number, comment: string) => void
-	setRecipe: (dayLocalId: number, mealLocalId: number, recipe: RecipeSummaryType | null) => void
+	setRecipes: (dayLocalId: number, mealLocalId: number, recipes: RecipeSummaryType[]) => void
 	setPortions: (dayLocalId: number, mealLocalId: number, portions: number) => void
 	addExtraIngredient: (dayLocalId: number, mealLocalId: number, extraIngredient: MealExtraIngredientType) => void
 	removeExtraIngredient: (dayLocalId: number, mealLocalId: number, ingredientIndex: number) => void
@@ -71,7 +71,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 					localId: state.nextLocalId++,
 					dbId: null,
 					name: mealName,
-					recipe: null,
+					recipes: [],
 					portions,
 					comment: null,
 					extraIngredients: [],
@@ -92,7 +92,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 				localId: state.nextLocalId++,
 				dbId: null,
 				name: mealName,
-				recipe: null,
+				recipes: [],
 				portions: 2,
 				comment: null,
 				extraIngredients: [],
@@ -121,11 +121,11 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 			if (meal) meal.comment = comment
 		}),
 
-		setRecipe: (dayLocalId, mealLocalId, recipe) => set((state) => {
+		setRecipes: (dayLocalId, mealLocalId, recipes) => set((state) => {
 			const day = state.days.find((d) => d.localId === dayLocalId)
 			if (!day) return
 			const meal = day.meals.find((m) => m.localId === mealLocalId)
-			if (meal) meal.recipe = recipe
+			if (meal) meal.recipes = recipes
 		}),
 
 		setPortions: (dayLocalId, mealLocalId, portions) => set((state) => {
@@ -168,7 +168,7 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 					localId: state.nextLocalId++,
 					dbId: meal.id,
 					name: meal.name,
-					recipe: meal.recipe,
+					recipes: meal.recipes,
 					portions: meal.portions ?? 2,
 					comment: meal.comment,
 					extraIngredients: meal.extraIngredients ?? [],
@@ -192,7 +192,7 @@ export function editorStateToPlan(
 			meals: day.meals.map((meal) => ({
 				id: meal.dbId,
 				name: meal.name,
-				recipe: meal.recipe,
+				recipes: meal.recipes,
 				portions: meal.portions,
 				comment: meal.comment,
 				extraIngredients: meal.extraIngredients,

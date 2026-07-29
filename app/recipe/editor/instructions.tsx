@@ -23,7 +23,7 @@ import Typography from '@mui/material/Typography';
 import { AddGroupButton, GroupEditRow } from './groups';
 
 function InstructionStepInput({ id, groupId,index, isLastItem } :
-															{
+{
 	id : number,
 	groupId: number,
 	index: number,

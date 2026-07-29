@@ -10,7 +10,7 @@ export interface MealExtraIngredientType {
 
 export interface MealType extends DbObject {
 	name: string
-	recipe: RecipeSummaryType | null
+	recipes: RecipeSummaryType[]
 	portions: number
 	comment: string | null
 	extraIngredients?: MealExtraIngredientType[]
