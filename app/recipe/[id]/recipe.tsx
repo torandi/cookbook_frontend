@@ -21,6 +21,7 @@ import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
+import Link from 'next/link'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
@@ -32,12 +33,17 @@ type RecipeDisplayProps = {
 	recipeId: number
 }
 
-function IngredientGroup({ group, showWeight, namePrefix }: { group: IngredientGroupType, showWeight: boolean, namePrefix?: string }) {
+function IngredientGroup({ group, showWeight, recipeSource }: { group: IngredientGroupType, showWeight: boolean, recipeSource?: RecipeType}) {
 	return (
 		<Box sx={{ mb: 2 }}>
-			{group.name || namePrefix ? (
+			{group.name || recipeSource !== undefined ? (
 				<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
-					{namePrefix ? (group.name ? `${namePrefix}: ${group.name}` : namePrefix) : group.name}
+					{recipeSource ? 
+						(<Link href={`/recipe/${recipeSource.id}`} className="hover:underline">
+							{group.name ? `${recipeSource.name}: ${group.name}` : recipeSource.name}
+						</Link>) :
+						(group.name ? `${group.name}` : '')
+					}
 				</Typography>
 			) : null}
 			<Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
@@ -91,7 +97,7 @@ function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeTy
 					key={`ingredient-group-${groupIndex}`}
 					group={group}
 					showWeight={showWeight}
-					namePrefix={isPrimary ? undefined : recipe.name}
+					recipeSource={isPrimary ? undefined : recipe}
 				/>
 			))}
 		</>
