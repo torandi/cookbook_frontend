@@ -147,8 +147,7 @@ export function ExtractGroupDialog({
 
     const getProportions = () => {
         if (typeof proportions === 'number') return proportions
-        const parsed = evalNumberExpression(proportions, null)
-        return parsed ?? 1
+        return evalNumberExpression(proportions, 1) as number
     }
 
     return (
