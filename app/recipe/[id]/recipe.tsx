@@ -97,7 +97,10 @@ function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeTy
 					key={`ingredient-group-${groupIndex}`}
 					group={group}
 					showWeight={showWeight}
-					recipeSource={isPrimary ? undefined : recipe}
+					/* Show recipe name even for "primary" if this is the first group and we had sub recipes
+					 to get a clear separation
+					 */
+					recipeSource={isPrimary && !(groupIndex == 0 && recipe.subRecipes.length > 0) ? undefined : recipe}
 				/>
 			))}
 		</>
