@@ -60,12 +60,17 @@ function IngredientGroup({ group, showWeight, recipeSource }: { group: Ingredien
 	)
 }
 
-function InstructionGroup({ group, currentPortions }: { group: InstructionGroupType, currentPortions: number }) {
+function InstructionGroup({ group, currentPortions, recipeSource }: { group: InstructionGroupType, currentPortions: number, recipeSource?: RecipeType }) {
 	return (
 		<Box sx={{ mb: 2 }}>
-			{group.name ? (
+			{group.name || recipeSource !== undefined ? (
 				<Typography variant="h6" component="h3" sx={{ mb: 1 }}>
-					{group.name}
+					{recipeSource ? 
+						(<Link href={`/recipe/${recipeSource.id}`} className="hover:underline">
+							{group.name ? `${recipeSource.name}: ${group.name}` : recipeSource.name}
+						</Link>) :
+						(group.name ? `${group.name}` : '')
+					}
 				</Typography>
 			) : null}
 			<Box component="ol" sx={{ m: 0, pl: 3 }}>
@@ -106,6 +111,31 @@ function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeTy
 		</>
 	)
 }
+
+function RecipeInstructions({ recipe, currentPortions, isPrimary }: { recipe: RecipeType, currentPortions: number, isPrimary: boolean }) {
+	return (
+		<>
+			{ recipe.subRecipes.map((subRecipe, index) => (
+				<RecipeInstructions
+					key={`sub-recipe-${index}`}
+					recipe={subRecipe}
+					currentPortions={currentPortions}
+					isPrimary={false}
+				/>
+			))}
+			{ recipe.instructions.map((group, groupIndex) => (
+				<InstructionGroup
+					key={`instruction-group-${groupIndex}`}
+					group={group}
+					currentPortions={currentPortions}
+					recipeSource={isPrimary && !(groupIndex == 0 && recipe.subRecipes.length > 0) ? undefined : recipe}
+				/>
+			))}
+		</>
+	)
+
+}
+
 
 function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, showWeight: boolean, index: number }) {
 	const showWeightValue = showWeight && ingredient.weight != null
@@ -366,15 +396,11 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					<Typography variant="h5" component="h2" sx={{ mb: 2 }}>
 						Instruktioner
 					</Typography>
-					{ recipe.instructions.map((group, groupIndex) => (
-						<InstructionGroup
-							key={`instruction-group-${groupIndex}`}
-							group={group}
-							currentPortions={currentPortions}
+					<RecipeInstructions
+						recipe={recipe}
+						currentPortions={currentPortions}
+						isPrimary={true}
 						/>
-
-	
-					))}
 				</FullCard>
 				
 				
