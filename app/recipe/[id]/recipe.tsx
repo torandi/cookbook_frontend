@@ -293,7 +293,7 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 	return (
 		<Stack direction="column" spacing={2}>
 			<FullCard className="w-full">
-				<Stack spacing={2}>
+				<Stack direction="column" spacing={2}>
 					<Box>
 						<Typography variant="h4" component="h1" sx={{ mb: 1 }}>
 							{recipe.name}
