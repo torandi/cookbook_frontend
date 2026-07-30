@@ -68,7 +68,7 @@ export function RecipePicker({
 		onClose()
 	}
 	
-	const label = currentRecipe ? ( proportion !== undefined ? `(${displayFraction(proportion, "1")}) ${currentRecipe.name}` : currentRecipe.name ) : 'Lägg till recept'
+	const label = currentRecipe ? ( proportion !== undefined ? `${displayFraction(proportion, "1")} ${currentRecipe.name}` : currentRecipe.name ) : 'Lägg till recept'
 
 	return (
 		<>
