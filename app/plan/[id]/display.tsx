@@ -31,8 +31,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatQuantity(quantity: number | null | undefined, unit: string | null): string {
-	if (quantity == null && unit == null || quantity === undefined) return ''
-	if (quantity == null) return unit ?? ''
+	if ((quantity ?? null) == null) return ''
 	if (unit == null) return String(quantity)
 	return `${quantity} ${unit}`
 }
@@ -218,7 +217,8 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 									secondary={item.comment ?? undefined}
 								/>
 								<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-									{formatQuantity(item.quantity, item.unit)}
+									{ formatQuantity(item.quantity, item.unit) }
+									{ ((item.quantity ?? null) != null && item.extra) && "+" }
 								</Typography>
 							</ListItem>
 						))}
