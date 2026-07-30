@@ -1,6 +1,6 @@
 import { RecipeIngredientType } from '@/app/types/ingredient'
 
-import { RecipeBackendType, RecipeSummaryType, RecipeType } from '@/app/types/recipe'
+import { InstructionGroupType, IngredientGroupType, RecipeBackendType, RecipeSummaryType, RecipeType } from '@/app/types/recipe'
 
 import { create, StateCreator } from 'zustand'
 
@@ -110,6 +110,8 @@ interface RecipeSlice {
 
 interface ReadSlice {
 	getForBackend: () => RecipeBackendType
+	getIngredientGroup: (groupId: number) => IngredientGroupType
+	getInstructionGroup: (groupId: number) => InstructionGroupType
 }
 
 interface InitSlice {
@@ -385,28 +387,30 @@ const createReadSlice : StateCreator<
 	[],
 	ReadSlice
 	> = (set, get) => ({
+		getIngredientGroup: (groupId) => {
+			const ingredientIds = get().ingredientsOrder[groupId];
+			return {
+				name: get().ingredientGroups[Number(groupId)] ?? '',
+				ingredients: ingredientIds.map(id => 
+					get().ingredients[id]).filter(i => 
+						i != null && i.ingredient != null) as RecipeIngredientType[],
+			} as IngredientGroupType
+		},
+		getInstructionGroup: (groupId) => {
+			const instructionIds = get().instructionsOrder[groupId];
+			return {
+				name: get().instructionGroups[Number(groupId)] ?? '',
+				instructions: instructionIds.map(id => get().instructions[id]).filter(i => i != null && i.trim() != '') as string[],
+			}
+		},
 		getForBackend: () => ({
 			...get().recipe,
 			subRecipes: get().recipe.subRecipes.map((subRecipe, index) => ({
 				id: subRecipe.id ?? -1,
 				proportions: get().subRecipeProportions[index] ?? 1,
 			})),
-			ingredients: get().ingredientGroupOrder.map((groupId) => {
-				const ingredientIds = get().ingredientsOrder[groupId];
-				return {
-					name: get().ingredientGroups[Number(groupId)] ?? '',
-					ingredients: ingredientIds.map(id => 
-						get().ingredients[id]).filter(i => 
-							i != null && i.ingredient != null) as RecipeIngredientType[],
-				}
-			}),
-			instructions: get().instructionGroupOrder.map((groupId) => {
-				const instructionIds = get().instructionsOrder[groupId];
-				return {
-					name: get().instructionGroups[Number(groupId)] ?? '',
-					instructions: instructionIds.map(id => get().instructions[id]).filter(i => i != null && i.trim() != '') as string[],
-				}
-			})
+			ingredients: get().ingredientGroupOrder.map((groupId) => get().getIngredientGroup(groupId)),
+			instructions: get().instructionGroupOrder.map((groupId) => get().getInstructionGroup(groupId)),
 		})
 	})
 
@@ -482,7 +486,7 @@ const createInitSlice : StateCreator<
 				ingredientsOrder: ingredientOrder,
 				instructions,
 				instructionsOrder,
-				instructionGroupEntries,
+				instructionGroups: instructionGroupEntries,
 				instructionGroupOrder,
 				nextInstructionGroupId: recipe.instructions.length,
 				nextInstructionId,

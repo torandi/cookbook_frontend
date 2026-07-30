@@ -37,6 +37,5 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 				Spara
 			</Button>
 	)
-
 }
 

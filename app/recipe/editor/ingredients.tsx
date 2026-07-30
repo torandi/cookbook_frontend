@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent } from 'react';
 
 import { defaultIngredientEntry, useRecipeEditorStore } from './state';
 
 import { IngredientType, RecipeIngredientType, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
+import { RecipeBackendType } from '@/app/types/recipe'
 import { SortableList } from '@/app/components/sortableList'
 import IngredientAutocomplete from '@/app/components/ingredientAutocomplete'
 
@@ -24,8 +25,10 @@ import IconButton from '@mui/material/IconButton'
 
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { AddGroupButton, GroupEditRow } from './groups';
+import { AddGroupButton, ExtractGroupDialog, GroupEditRow } from './groups';
 import { evalNumberExpression } from '@/app/utils';
+import { showSuccessAlert, showErrorAlert } from '@/app/ui/alert-state'
+import { addRecipe } from '@/app/backend/recipe'
 
 const ingredientSpacing = 1;
 
@@ -264,8 +267,79 @@ export const IngredientsInput = () => {
 	const setIngredientGroupOrder = useRecipeEditorStore( state => state.setIngredientGroupOrder )
 	const setIngredientGroupName = useRecipeEditorStore( state => state.setIngredientGroupName )
 	const addIngredientGroup = useRecipeEditorStore( state => state.addIngredientGroup )
+	const instructionsGroupOptions = useRecipeEditorStore( state => state.instructionGroups )
+	const getIngredientGroup = useRecipeEditorStore( state => state.getIngredientGroup )
+	const getInstructionGroup = useRecipeEditorStore( state => state.getInstructionGroup )
+	const recipe = useRecipeEditorStore( state => state.recipe )
 
-	// todo: support right click to move to another group
+	// Group extraction logic
+	const [extractingGroupId, setExtractingGroupId] = useState<number | null>(null)	
+
+	const setInstructionGroupOrder = useRecipeEditorStore((state) => state.setInstructionGroupOrder)
+	const subRecipes = useRecipeEditorStore((state) => state.recipe.subRecipes)
+	const setSubRecipes = useRecipeEditorStore((state) => state.setSubRecipes)
+	const subRecipeProportions = useRecipeEditorStore((state) => state.subRecipeProportions)
+	const setSubRecipeProportions = useRecipeEditorStore((state) => state.setSubRecipeProportions)
+	const instructionGroupOrder = useRecipeEditorStore((state) => state.instructionGroupOrder)
+
+	const onExtractGroup = (ingredientGroupId: number, instructionGroupId: number | null, proportions: number, portions: number) => {
+		const ingredientGroup = getIngredientGroup(ingredientGroupId)
+		ingredientGroup.name = null; // remove name (handled by recipe name)
+
+		// scale ingredients with inverse proportions
+		if (proportions !== 1) {
+			ingredientGroup.ingredients.forEach((ingredient) => {
+				if (typeof ingredient.quantity === 'number') {
+					ingredient.quantity = ingredient.quantity / proportions
+				}
+			})
+		}
+
+		const instructionGroup = instructionGroupId !== null ? getInstructionGroup(instructionGroupId) : null
+		if (instructionGroup) instructionGroup.name = null
+		const newRecipe = {
+			id: null,
+			name: groups[ingredientGroupId] ?? "",
+			description: "",
+			defaultWeight: recipe.defaultWeight,
+			portions: portions,
+			portionName: "portioner",
+			activeTime: null,
+			totalTime: null,
+			ingredients: [ ingredientGroup ],
+			instructions: [ instructionGroup ].filter(g => g !== null),
+			subRecipes: [],
+		} as RecipeBackendType
+
+		addRecipe(newRecipe)
+			.then(({ data: recipeData, error }) => {
+				if (recipeData) {
+					setSubRecipes([...subRecipes, 
+					{
+						id: recipeData.id,
+						name: recipeData.name,
+						description: recipeData.description,
+						activeTime: recipeData.activeTime,
+						totalTime: recipeData.totalTime
+					}])
+					setSubRecipeProportions([...subRecipeProportions, proportions])
+					setIngredientGroupOrder(
+						ingredientGroupOrder.filter((id) => id !== ingredientGroupId)
+					)
+					if (instructionGroupId !== null) {
+						setInstructionGroupOrder(
+							instructionGroupOrder.filter((id) => id !== instructionGroupId)
+						)
+					}
+					showSuccessAlert(`Skapade recept "${recipeData.name}"`)
+				} else {
+					showErrorAlert(error ?? 'Misslyckades att extrahera sektion', 10000)
+				}
+			})
+	
+		setExtractingGroupId(null)
+	}
+
 	return (
 		<Box sx={{marginBottom: 5}} >
 			{ ingredientGroupOrder.map((groupId : number) => {
@@ -279,6 +353,9 @@ export const IngredientsInput = () => {
 							groupOrder={ingredientGroupOrder}
 							setGroupOrder={setIngredientGroupOrder}
 							setGroupName={setIngredientGroupName}
+							onExtractGroup={(groupId) => {
+								setExtractingGroupId(groupId)
+							}}
 						/>
 						
 						<SortableList
@@ -302,6 +379,19 @@ export const IngredientsInput = () => {
 			<Box sx={{marginTop: 2}}>
 				<AddGroupButton onClick={addIngredientGroup} />
 			</Box>
+
+			<ExtractGroupDialog
+				open={extractingGroupId !== null}
+				groupId={extractingGroupId ?? 0}
+				groupName={extractingGroupId !== null ? groups[extractingGroupId] ?? "" : ""}
+				otherGroupCategoryName="Instruktion"
+				otherGroupOptions={instructionsGroupOptions}
+				onExtractGroup={onExtractGroup}
+				onClose={() => {
+					setExtractingGroupId(null)
+				}}
+			/>
 		</Box>
+
 	)
 }
