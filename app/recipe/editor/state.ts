@@ -1,6 +1,6 @@
 import { RecipeIngredientType } from '@/app/types/ingredient'
 
-import { RecipeSummaryType, RecipeType } from '@/app/types/recipe'
+import { RecipeBackendType, RecipeSummaryType, RecipeType } from '@/app/types/recipe'
 
 import { create, StateCreator } from 'zustand'
 
@@ -33,6 +33,7 @@ const createDefaultEditorState = () => ({
 	recipe: {
 		...defaultRecipeState,
 	},
+	subRecipeProportions: [] as number[],
 	ingredientGroups: { 0: null } as { [id: number]: string | null }, // name for each group
 	ingredients: { 0: null } as { [id: number]: RecipeIngredientType | null },
 	ingredientGroupOrder: [0],
@@ -95,6 +96,7 @@ interface InstructionsSlice {
 
 interface RecipeSlice {
 	recipe: RecipeType // ignoring instruction/ingredients fields
+	subRecipeProportions: number[] // indexed by subRecipes index
 	setName: (title: string) => void
 	setDescription: (description: string) => void
 	setPortions: (count: number | null) => void
@@ -103,10 +105,11 @@ interface RecipeSlice {
 	setActiveTime: (time : number | null) => void
 	setTotalTime: (time : number | null) => void
 	setSubRecipes: (subRecipes: RecipeSummaryType[]) => void
+	setSubRecipeProportions: (proportions: number[]) => void
 }
 
 interface ReadSlice {
-	getAll: () => RecipeType
+	getForBackend: () => RecipeBackendType
 }
 
 interface InitSlice {
@@ -321,6 +324,7 @@ const createRecipeSlice : StateCreator<
 		recipe: {
 			...defaultRecipeState,
 		},
+		subRecipeProportions: [],
 		setName: (name: string) => set( state => ({
 			recipe: {
 				...state.recipe,
@@ -369,6 +373,9 @@ const createRecipeSlice : StateCreator<
 				subRecipes: subRecipes as RecipeType[],
 			}
 		})),
+		setSubRecipeProportions: (proportions: number[]) => set(state => ({
+			subRecipeProportions: proportions,
+		})),
 	})
 
 
@@ -378,8 +385,12 @@ const createReadSlice : StateCreator<
 	[],
 	ReadSlice
 	> = (set, get) => ({
-		getAll: () => ({
+		getForBackend: () => ({
 			...get().recipe,
+			subRecipes: get().recipe.subRecipes.map((subRecipe, index) => ({
+				id: subRecipe.id ?? -1,
+				proportions: get().subRecipeProportions[index] ?? 1,
+			})),
 			ingredients: get().ingredientGroupOrder.map((groupId) => {
 				const ingredientIds = get().ingredientsOrder[groupId];
 				return {

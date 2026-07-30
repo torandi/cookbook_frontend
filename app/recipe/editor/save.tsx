@@ -10,7 +10,7 @@ import { clearRecipeDraft } from './draft';
 
 export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 	const router = useRouter()
-	const getData = useRecipeEditorStore( state => state.getAll )
+	const getData = useRecipeEditorStore( state => state.getForBackend )
 
 
 	const saveRecipe = async () => {

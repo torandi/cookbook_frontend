@@ -33,9 +33,11 @@ function readStoredAuth(): StoredAuth | null {
 			if (parsed?.accessToken) {
 				return parsed
 			}
+			console.log("Auth: no access token found in stored auth data")
 		}
 	} catch {
 		// Ignore invalid persisted auth data
+		console.log("Auth: Failed to read stored auth data")
 	}
 
 	try {
@@ -47,6 +49,7 @@ function readStoredAuth(): StoredAuth | null {
 			.join('=')
 
 		if (!cookieValue) {
+			console.log("Auth: no cookie found")
 			return null
 		}
 
@@ -54,10 +57,13 @@ function readStoredAuth(): StoredAuth | null {
 		if (parsed?.accessToken) {
 			return parsed
 		}
+		console.log("Auth: no access token found in cookie")
 	} catch {
 		// Ignore invalid persisted auth data
+		console.log("Auth: failed to read auth data from cookie")
 	}
 
+	console.log("Auth: fell through")
 	return null
 }
 
@@ -124,10 +130,17 @@ export async function validateAuth() {
         try
         {
             const valid = await refreshToken()
+
+			if (!valid) {
+				console.log("Auth: refresh token failed, clearing auth")
+				showErrorAlert("Du har blivit utloggad. Logga in igen.")
+				setAuthToken(null)
+			}
             return valid
         }
         catch (error)
         {
+			console.log("Auth: refresh token threw, clearing auth")
 			showErrorAlert("Du har blivit utloggad. Logga in igen.")
             setAuthToken(null)
             return false

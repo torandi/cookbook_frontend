@@ -1,6 +1,6 @@
 import { useBackend, postBackend } from './backend'
 
-import { RecipeType, RecipeSummaryType } from '@/app/types/recipe'
+import { RecipeType, RecipeSummaryType, RecipeBackendType } from '@/app/types/recipe'
 
 export function useRecipes() {
 	const { data, error, isLoading } = useBackend<RecipeSummaryType[]>('recipes/')
@@ -33,11 +33,11 @@ export function useRecipeSummary(id: number) {
 	return { recipe: data, error, isLoading }
 }
 
-export function addRecipe(recipe : RecipeType ) {
+export function addRecipe(recipe : RecipeBackendType ) {
 	return postBackend<RecipeType>(`recipes/`, recipe, { includeAuth: true })
 }
 
-export function updateRecipe(id: number, recipe: RecipeType) {
+export function updateRecipe(id: number, recipe: RecipeBackendType) {
 	return postBackend<RecipeType>(`recipes/${id}`, recipe, { includeAuth: true, method: 'PUT' })
 }
 

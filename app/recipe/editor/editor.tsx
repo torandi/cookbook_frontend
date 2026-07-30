@@ -41,6 +41,8 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 	const resetState = useRecipeEditorStore((state) => state.reset)
 	const subRecipes = useRecipeEditorStore((state) => state.recipe.subRecipes)
 	const setSubRecipes = useRecipeEditorStore((state) => state.setSubRecipes)
+	const subRecipeProportions = useRecipeEditorStore((state) => state.subRecipeProportions)
+	const setSubRecipeProportions = useRecipeEditorStore((state) => state.setSubRecipeProportions)
 
 	const abortEdit = () => {
 		clearRecipeDraft(recipeId)
@@ -143,6 +145,8 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 						<RecipeMultiPicker
 							setRecipies={setSubRecipes}
 							recipes={subRecipes}
+							setProportions={setSubRecipeProportions}
+							proportions={subRecipeProportions}
 						/>
 					</FullCard>
 	

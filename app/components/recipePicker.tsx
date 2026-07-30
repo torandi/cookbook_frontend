@@ -16,23 +16,34 @@ import ListItemText from '@mui/material/ListItemText'
 import TextField from '@mui/material/TextField'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
+import { FormControl } from '@mui/material'
 
 import { useRecipes } from '@/app/backend/recipe'
 import { RecipeSummaryType } from '@/app/types/recipe'
+import { evalNumberExpression, displayFraction } from '@/app/utils'
 
 type RecipePickerProps = {
-	onSelect: (recipe: RecipeSummaryType | null) => void
+	onSelect: (recipe: RecipeSummaryType | null, priority: number | null) => void
 	currentRecipe: RecipeSummaryType | null
+	proportion?: number
 	sx?: React.CSSProperties
 }
 
 export function RecipePicker({
 	onSelect,
 	currentRecipe,
+	proportion,
 	sx
 }: RecipePickerProps) {
 	const [search, setSearch] = useState('')
 	const { recipes, isLoading } = useRecipes()
+	const [proportionValue, setProportionValue] = useState<number | string>(proportion ?? 1)
+
+	const getProportionValue = () => {
+		if (typeof proportionValue === 'number') return proportionValue
+		const parsed = evalNumberExpression(proportionValue, null)
+		return parsed ?? 1
+	}
 
 	const [recipeOpen, setRecipeOpen] = useState(false)
 
@@ -45,20 +56,29 @@ export function RecipePicker({
 	}
 
 	function handleSelect(recipe: RecipeSummaryType) {
-		onSelect(recipe)
+		onSelect(recipe, getProportionValue())
 		setSearch('')
 		onClose()
 	}
+	
+	const onSave = () => {
+		if (currentRecipe) {
+			onSelect(currentRecipe, getProportionValue())
+		}
+		onClose()
+	}
+	
+	const label = currentRecipe ? ( proportion !== undefined ? `(${displayFraction(proportion, "1")}) ${currentRecipe.name}` : currentRecipe.name ) : 'Lägg till recept'
 
 	return (
 		<>
 			<Chip
-				label={currentRecipe?.name ?? 'Lägg till recept'}
+				label={label}
 				size="small"
 				icon={<RestaurantMenuRoundedIcon fontSize="small" />}
 				variant={currentRecipe ? 'filled' : 'outlined'}
 				onClick={() => setRecipeOpen(true)}
-				onDelete={currentRecipe ? () => onSelect(null) : undefined}
+				onDelete={currentRecipe ? () => onSelect(null, null) : undefined}
 				sx={{ cursor: 'pointer', maxWidth: 260, ...sx }}
 			/>
 			<Dialog open={recipeOpen} onClose={onClose} fullWidth maxWidth="sm">
@@ -105,8 +125,20 @@ export function RecipePicker({
 							</ListItemButton>
 						))}
 					</List>
+					{ proportion !== undefined && (
+						<FormControl variant="outlined" size="small" sx={{ mt: 1, width: 100 }}>
+							<TextField
+								label="Proportion: "
+								value={proportionValue}
+								onChange={(event) => {
+									setProportionValue(evalNumberExpression(event.target.value, null) ?? event.target.value)
+								}}
+							/>
+						</FormControl>
+					)}	
 				</DialogContent>
 				<DialogActions>
+					{ proportion !== undefined && <Button onClick={onSave}>Spara</Button> }
 					<Button onClick={onClose}>Avbryt</Button>
 				</DialogActions>
 			</Dialog>
@@ -117,13 +149,17 @@ export function RecipePicker({
 export function RecipeMultiPicker({
 	setRecipies,
 	recipes,
-	sx
+	sx,
+	setProportions,
+	proportions
 }: {
 	setRecipies: (recipes: RecipeSummaryType[]) => void
 	recipes: RecipeSummaryType[]
 	sx?: React.CSSProperties
+	proportions?: number[]
+	setProportions?: (proportions: number[]) => void
 }) {
-
+	const showProportions = proportions !== undefined && setProportions !== undefined
 
 	return (
 		<Stack direction="row" sx={{ ...sx }}>
@@ -131,10 +167,16 @@ export function RecipeMultiPicker({
 				<RecipePicker
 					key={index}
 					currentRecipe={recipe}
-					onSelect={(selectedRecipe) => {
+					proportion={showProportions ? proportions[index] : undefined}
+					onSelect={(selectedRecipe: RecipeSummaryType | null, priority: number | null) => {
 						const tmpRecipes : (RecipeSummaryType | null)[] = [...recipes]
 						tmpRecipes[index] = selectedRecipe
 						setRecipies(tmpRecipes.filter((r) => r !== null))
+						if (showProportions) {
+							const tmpProportions : (number | null)[] = [...(proportions ?? [])]
+							tmpProportions[index] = priority
+							setProportions!(tmpProportions.filter(r => r !== null))
+						}
 					}}
 				/>
 			))}
@@ -142,9 +184,13 @@ export function RecipeMultiPicker({
 			<RecipePicker
 				key="add-recipe"
 				currentRecipe={null}
-				onSelect={(selectedRecipe) => {
+				proportion={showProportions ? 1 : undefined}
+				onSelect={(selectedRecipe: RecipeSummaryType | null, priority: number | null) => {
 					if (selectedRecipe === null) return
 					setRecipies([...recipes, selectedRecipe])
+					if (showProportions && priority !== null) {
+						setProportions!([...proportions, priority])
+					}
 				}}
 			/>
 		</Stack>

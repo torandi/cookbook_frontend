@@ -22,6 +22,7 @@
     "@tailgrids/icons": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fraction.js": "^5.3.4",
     "immer": "^11.1.15",
     "next": "16.2.10",
     "numeric-quantity": "^3.2.2",

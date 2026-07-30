@@ -24,6 +24,15 @@ export interface RecipeType extends DbObject {
 	subRecipes: RecipeType[];
 }
 
+export interface RecipeReferencType {
+	id: number;
+	proportions: number;
+}
+
+export type RecipeBackendType = Omit<RecipeType, 'subRecipes'> & {
+	subRecipes: RecipeReferencType[]; 
+};
+
 export interface RecipeSummaryType extends DbObject {
 	name : string;
 	description: string;

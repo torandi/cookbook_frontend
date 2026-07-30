@@ -1,4 +1,5 @@
 import { numericQuantity } from 'numeric-quantity'
+import Fraction from 'fraction.js'
 
 // Returns true if src contains search ignoring case
 export function containsIgnoreCase(src : string, search: string) : boolean {
@@ -33,11 +34,20 @@ export function evalNumberExpression(value: string | null, defaultValue: number 
 	}
 
 	const evaluated = numericQuantity(value)
+	console.log('evaluated', evaluated)
 	if (typeof evaluated === 'number' && !isNaN(evaluated)) {
 		return evaluated
 	}
 
 	return defaultValue
+}
+
+export function displayFraction(value: number | null, defaultValue: string = "-"): string {
+	if (value === null || value === undefined) {
+		return defaultValue
+	}
+
+	return new Fraction(value).toFraction()
 }
 
 export function intOrDefaultNoNull(value: string | null, defaultValue: number) : number {
