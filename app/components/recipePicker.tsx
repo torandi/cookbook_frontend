@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Dialog from '@mui/material/Dialog'
@@ -118,10 +119,27 @@ export function RecipePicker({
 								selected={currentRecipe?.id === recipe.id}
 								onClick={() => handleSelect(recipe)}
 							>
-								<ListItemText
-									primary={recipe.name}
-									secondary={recipe.description}
-								/>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, width: '100%' }}>
+									<ListItemText
+										primary={recipe.name}
+										secondary={recipe.description}
+									/>
+									{recipe.tags?.length ? (
+										<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+											{recipe.tags.map((tag) => (
+												<Chip
+													key={tag.id}
+													label={tag.name}
+													size="small"
+													sx={{
+														backgroundColor: tag.color,
+														color: (theme) => theme.palette.getContrastText(tag.color),
+													}}
+												/>
+											))}
+										</Box>
+									) : null}
+								</Box>
 							</ListItemButton>
 						))}
 					</List>
