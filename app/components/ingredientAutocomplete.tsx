@@ -7,6 +7,7 @@ import IngredientCreateDialog from '@/app/components/ingredientCreateDialog'
 import type { IngredientType } from '@/app/types/ingredient'
 
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
+import { matchSorter } from 'match-sorter'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import type { SxProps, Theme } from '@mui/material/styles'
@@ -41,13 +42,17 @@ export default function IngredientAutocomplete({
 	const [dialogOpen, setDialogOpen] = useState(false)
 	const [dialogInitialName, setDialogInitialName] = useState('')
 
-	const filter = createFilterOptions<IngredientAutocompleteOption>({
-		limit: 100,
-	})
+	const filter = (items: IngredientAutocompleteOption[], query: string) =>
+		matchSorter(items, query,
+			{
+				keys: ['name'],
+				threshold: matchSorter.rankings.CONTAINS,
+			}
+		)
 
 	const generateOptions = (options: IngredientAutocompleteOption[], params: any ) => {
-		const filtered = filter(options, params)
 		const inputValue = params.inputValue.trim()
+		const filtered = filter(options, inputValue)
 
 		const isExisting = options.some(
 			(option) => 'name' in option && option.name.toLowerCase() === inputValue.toLowerCase(),
@@ -96,7 +101,7 @@ export default function IngredientAutocomplete({
 						if (option.id !== null && selected.id !== null) {
 							return option.id === selected.id
 						}
-						return option.name === selected.name
+						return option.name.toLowerCase() === selected.name.toLowerCase()
 					}
 					return false
 				}}
