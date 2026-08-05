@@ -8,6 +8,7 @@ import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
 
 import { capitalize, formatQuantity, formatTime } from '@/app/utils'
 import { useRouter } from 'next/navigation'
+import { IngredientGroupType, InstructionGroupType, RecipeType } from '@/app/types/recipe'
 
 import FullCard from '@/app/components/fullcard'
 import Spinner from '@/app/components/spinner'
@@ -27,7 +28,7 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
-import { IngredientGroupType, InstructionGroupType, RecipeType } from '@/app/types/recipe'
+import { useWakeLock } from 'react-screen-wake-lock'
 
 type RecipeDisplayProps = {
 	recipeId: number
@@ -225,6 +226,10 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 	const [showWeight, setShowWeight] = useState<boolean | null>(null)
 	const [isDeleting, setIsDeleting] = useState(false)
 
+	const { isSupported, released, request, release } = useWakeLock({
+		reacquireOnPageVisible: true,
+  	});
+
 	const { recipe, error, isLoading } = useRecipe(recipeId, {
 		portions: portions ?? undefined,
 		allowCups,
@@ -238,6 +243,20 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 			setShowWeight(recipe.defaultWeight)
 		}
 	}, [recipe, portions, showWeight])
+
+
+	// keep screen on while viewing recipe
+	useEffect(() => {
+		if (isSupported && (released ?? true) === true) {
+			request()
+		}
+
+		return () => {
+			if (isSupported && (released ?? true) !== true) {
+				release()
+			}
+		}
+	}, [isSupported, released, request, release])
 
 	if (error) {
 		return (
