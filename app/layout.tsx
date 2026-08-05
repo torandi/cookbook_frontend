@@ -1,5 +1,6 @@
 import '@/app/ui/global.css'
 import type { Metadata, Viewport } from "next";
+import { Suspense } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -14,6 +15,7 @@ import { theme } from '@/app/ui/theme';
 import TopMenu from '@/app/ui/topmenu';
 import GlobalAlerts from '@/app/ui/global-alerts';
 import AuthGuard from '@/app/auth-guard';
+import Spinner from '@/app/components/spinner';
 
 export const metadata: Metadata = {
 	title: "Kokbok",
@@ -46,8 +48,10 @@ export default function RootLayout(
 						<AuthGuard>
 							<TopMenu/>
 							<Container maxWidth="xl" sx={{my: 4}}>
+								<Suspense fallback={<div><Spinner/></div>}>
 								<GlobalAlerts />
-								{children}
+									{children}
+								</Suspense>
 							</Container>
 						</AuthGuard>
 					</ThemeProvider>
