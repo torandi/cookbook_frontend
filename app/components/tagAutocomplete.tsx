@@ -98,7 +98,7 @@ export default function TagAutocomplete({
 				size={size}
 				loading={isLoading}
 				options={tags ?? []}
-				getOptionLabel={(option: TagAutocompleteOption) => {
+    			getOptionLabel={(option: TagAutocompleteOption) => {
 					if ('inputValue' in option && option.inputValue) {
 						return option.title
 					}
@@ -141,6 +141,30 @@ export default function TagAutocomplete({
 						)
 					})
 				}
+                renderOption={(props, option) => {
+                    if ('inputValue' in option && option.inputValue) {
+                        return (
+                            <li {...props} key={option.inputValue}>
+                                {option.title}
+                            </li>
+                        )
+                    }
+                    if ('name' in option) {
+                        return (
+                            <li {...props} key={option.id ?? option.name}>
+                                <Chip
+                                    label={option.name}
+                                    size={size}
+                                    sx={{
+                                        backgroundColor: option.color,
+                                        color: theme.palette.getContrastText(option.color),
+                                    }}
+                                />
+                            </li>
+                        )
+                    }
+                    return null
+                }}  
 				renderInput={(params) => (
 					<TextField
 						{...params}
