@@ -60,9 +60,9 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 	}
 
 	return (
-		<Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'flex-start' }}>
+		<Box className="flex flex-col md:flex-row gap-2 items-start">
 			{/* Left: days & meals */}
-			<FullCard sx={{ flex: 1 }}>
+			<FullCard className="w-full">
 				<Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
 					<Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
 						{plan.name}
@@ -177,7 +177,7 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 			</FullCard>
 
 			{/* Right: shopping list */}
-			<FullCard sx={{ flex: 1 }}>
+			<FullCard className="w-full">
 				<Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
 					<ShoppingCartIcon color="primary" />
 					<Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -225,6 +225,6 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 					</List>
 				)}
 			</FullCard>
-		</Stack>
+		</Box>
 	)
 }
