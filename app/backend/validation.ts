@@ -145,7 +145,7 @@ function formatRecipeLoc(rawLoc: Array<string | number> | undefined): string {
 		.join(' > ')
 }
 
-export function formatFastApiRecipeValidationError(error: unknown): string | null {
+export function formatRecipeValidationError(error: unknown): string | null {
 	const issues = toValidationIssues(error)
 	if (issues == null || issues.length === 0) {
 		return null
