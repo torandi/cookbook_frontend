@@ -25,6 +25,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
 
+
   useEffect(() => {
     const isPublic = isPublicRoute(pathname)
 

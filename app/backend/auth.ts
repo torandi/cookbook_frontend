@@ -123,6 +123,10 @@ export function clearAuthToken() {
 	setAuthToken(null)
 }
 
+export function hasAuthToken() {
+	return !!accessToken
+}
+
 export async function validateAuth() {
     const storedAuth = readStoredAuth()
     if (storedAuth) {

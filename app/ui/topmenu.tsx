@@ -14,6 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Image from 'next/image';
 
 import SearchBar from '@/app/ui/searchbar';
+import { hasAuthToken } from '../backend/auth';
 
 type Page = {
   url: string;
@@ -59,89 +60,93 @@ export default function TopMenu() {
               <Image src="/icon.png" alt="Cookbook icon" width={36} height={36} priority />
             </Box>
 
-            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-              {/* large screen menu */}
-              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                {pages.map((page : Page) => (
-                  <Button
-                    key={page.url}
-                    color="inherit"
-                    href={page.url}
-                  >
-                    {page.title}
-                  </Button>
-                ))}
-              </Box>
-
-              {/* small screen menu */}
-              <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 0.5 }}>
-                { /* hamburger dropdown */}
-                <IconButton
-                  size="small"
-                  aria-label="more menu items"
-                  aria-controls={isMobileMenuOpen ? 'topmenu-mobile-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={isMobileMenuOpen ? 'true' : undefined}
-                  onClick={openMobileMenu}
-                  color="inherit"
-                >
-                  <MenuIcon />
-                </IconButton>
-
-                { /* mobile visible buttons */ }
-                {mobileVisiblePages.map((page: Page) => (
-                  <Button
-                    key={page.url}
-                    color="inherit"
-                    href={page.url}
-                    size="small"
-                  >
-                    {page.title}
-                  </Button>
-                ))}
-
-                { /* mobile dropdown menu */ }
-                <Menu
-                  id="topmenu-mobile-menu"
-                  anchorEl={menuAnchor}
-                  open={isMobileMenuOpen}
-                  onClose={closeMobileMenu}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                  keepMounted
-                >
-                  {mobileDropdownPages.map((page: Page) => (
-                    <MenuItem key={page.url}>
+            { hasAuthToken() && (
+              <>
+                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                  {/* large screen menu */}
+                  <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                    {pages.map((page : Page) => (
                       <Button
+                        key={page.url}
+                        color="inherit"
                         href={page.url}
-                        onClick={closeMobileMenu}
                       >
                         {page.title}
                       </Button>
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </Box>
-            </Box>
+                    ))}
+                  </Box>
 
-            <Box
-              sx={{
-                width: { xs: '100%', sm: 'auto' },
-                display: 'flex',
-                justifyContent: { xs: 'stretch', sm: 'flex-end' },
-                '& > *': {
-                  width: { xs: '100%', sm: 'auto' },
-                },
-              }}
-            >
-              <SearchBar/>
-            </Box>
+                  {/* small screen menu */}
+                  <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 0.5 }}>
+                    { /* hamburger dropdown */}
+                    <IconButton
+                      size="small"
+                      aria-label="more menu items"
+                      aria-controls={isMobileMenuOpen ? 'topmenu-mobile-menu' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={isMobileMenuOpen ? 'true' : undefined}
+                      onClick={openMobileMenu}
+                      color="inherit"
+                    >
+                      <MenuIcon />
+                    </IconButton>
+
+                    { /* mobile visible buttons */ }
+                    {mobileVisiblePages.map((page: Page) => (
+                      <Button
+                        key={page.url}
+                        color="inherit"
+                        href={page.url}
+                        size="small"
+                      >
+                        {page.title}
+                      </Button>
+                    ))}
+
+                    { /* mobile dropdown menu */ }
+                    <Menu
+                      id="topmenu-mobile-menu"
+                      anchorEl={menuAnchor}
+                      open={isMobileMenuOpen}
+                      onClose={closeMobileMenu}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                      }}
+                      keepMounted
+                    >
+                      {mobileDropdownPages.map((page: Page) => (
+                        <MenuItem key={page.url}>
+                          <Button
+                            href={page.url}
+                            onClick={closeMobileMenu}
+                          >
+                            {page.title}
+                          </Button>
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </Box>
+                </Box>
+
+                <Box
+                  sx={{
+                    width: { xs: '100%', sm: 'auto' },
+                    display: 'flex',
+                    justifyContent: { xs: 'stretch', sm: 'flex-end' },
+                    '& > *': {
+                      width: { xs: '100%', sm: 'auto' },
+                    },
+                  }}
+                >
+                  <SearchBar/>
+                </Box>
+              </>
+            )}
           </Toolbar>
         </Container>
       </AppBar>
