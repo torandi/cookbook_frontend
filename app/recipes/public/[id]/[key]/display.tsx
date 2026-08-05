@@ -19,15 +19,7 @@ export default function PublicRecipeDisplay({ recipeId, shareKey } : { recipeId:
 		allowCups: allowCups
 	})
 
-	const footer = (
-		<FullCard className="w-full">
-			<Box sx={{ textAlign: 'center' }}>
-				<Typography color="text.secondary">
-					Det här är en delad länk - du kan inte redigera detta recept
-				</Typography>
-			</Box>
-		</FullCard>
-	)
+	const footer = (<></>)
 
 	return <RecipeDisplayContent
 		recipe={recipe}
