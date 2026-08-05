@@ -309,6 +309,7 @@ export const IngredientsInput = () => {
 			ingredients: [ ingredientGroup ],
 			instructions: [ instructionGroup ].filter(g => g !== null),
 			subRecipes: [],
+			tags: [],
 		} as RecipeBackendType
 
 		addRecipe(newRecipe)
