@@ -1,5 +1,6 @@
 import { DbObject } from '@/app/types/dbobject';
 import { RecipeIngredientType } from '@/app/types/ingredient';
+import { TagType } from '@/app/types/tag';
 
 export interface InstructionGroupType {
 	name: string | null;
@@ -22,6 +23,7 @@ export interface RecipeType extends DbObject {
 	ingredients : IngredientGroupType[];
 	instructions : InstructionGroupType[];
 	subRecipes: RecipeType[];
+	tags: TagType[];
 }
 
 export interface RecipeReferenceType {

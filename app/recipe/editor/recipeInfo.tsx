@@ -6,6 +6,8 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { capitalize, intOrDefault, intOrDefaultNoNull } from '@/app/utils'
 
+import TagAutocomplete from '@/app/components/tagAutocomplete'
+
 import Box from '@mui/material/Box';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
@@ -23,7 +25,8 @@ export const RecipeInfoInput = () => {
 		 defaultWeight: state.recipe.defaultWeight,
 		 activeTime: state.recipe.activeTime,
 		 totalTime: state.recipe.totalTime,
-		 portionName: state.recipe.portionName
+		 portionName: state.recipe.portionName,
+		 tags: state.recipe.tags,
 		}))
 	)
 	const setName = useRecipeEditorStore( state => state.setName )
@@ -33,11 +36,12 @@ export const RecipeInfoInput = () => {
 	const setActiveTime = useRecipeEditorStore( state => state.setActiveTime );
 	const setTotalTime = useRecipeEditorStore( state => state.setTotalTime );
 	const setDefaultWeight = useRecipeEditorStore( state => state.setDefaultWeight )
+	const setTags = useRecipeEditorStore( state => state.setTags )
 
-	// todo: tags, category etc, probably in a different component
+	// todo: category etc, probably in a different component
 	return (
 		<>
-			<Box>
+			<Box className="flex flex-row flex-wrap gap-2">
 				<TextField
 					label="Namn"
 					className="w-1/2"
@@ -81,9 +85,10 @@ export const RecipeInfoInput = () => {
 					sx={{ mt: 2, width: '100%' }}
 				/>
 			</Box>
-			<Box sx={{my: 2}}>
+			<Box sx={{my: 2}} className="flex flex-row gap-2">
 				<TextField
 					label="Total tid"
+					className="w-1/8"
 					value={ recipeInfo.totalTime ?? ""}
 					onChange={ (event) => setTotalTime(intOrDefault(event.target.value, null)) }
 					slotProps={{
@@ -94,15 +99,24 @@ export const RecipeInfoInput = () => {
 				/>
 				<TextField
 					label="Aktiv tid"
+					className="w-1/8"
 					value={ recipeInfo.activeTime ?? ""}
 					onChange={ (event) => setActiveTime(intOrDefault(event.target.value, null)) }
-					sx={{mx: 2}}
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>
 						}
 					}}
 				/>
+
+				<TagAutocomplete
+					className="w-full"
+					sx={{ ml: 5 }}
+					label="Taggar"
+					value={ recipeInfo.tags ?? [] }
+					onChange={ setTags }
+				/>
+
 			</Box>
 		</>
 	)

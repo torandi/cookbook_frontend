@@ -317,6 +317,21 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						<Typography variant="h4" component="h1" sx={{ mb: 1 }}>
 							{recipe.name}
 						</Typography>
+						{recipe.tags?.length ? (
+							<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+								{recipe.tags.map((tag) => (
+									<Chip
+										key={tag.id}
+										label={tag.name}
+										size="small"
+										sx={{
+											backgroundColor: tag.color,
+											color: (theme) => theme.palette.getContrastText(tag.color),
+										}}
+									/>
+								))}
+							</Box>
+						) : null}
 						{recipe.description?.trim() ? (
 							<Box sx={{ mt: 1 }}>
 								<MarkdownText text={recipe.description} />

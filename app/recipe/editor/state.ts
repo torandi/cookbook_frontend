@@ -1,4 +1,5 @@
 import { RecipeIngredientType } from '@/app/types/ingredient'
+import { TagType } from '@/app/types/tag'
 
 import { InstructionGroupType, IngredientGroupType, RecipeBackendType, RecipeSummaryType, RecipeType } from '@/app/types/recipe'
 
@@ -27,6 +28,7 @@ const defaultRecipeState: RecipeType = {
 	ingredients: [],
 	instructions: [],
 	subRecipes: [],
+	tags: [],
 }
 
 const createDefaultEditorState = () => ({
@@ -106,6 +108,7 @@ interface RecipeSlice {
 	setTotalTime: (time : number | null) => void
 	setSubRecipes: (subRecipes: RecipeSummaryType[]) => void
 	setSubRecipeProportions: (proportions: number[]) => void
+	setTags: (tags: TagType[]) => void
 }
 
 interface ReadSlice {
@@ -377,6 +380,12 @@ const createRecipeSlice : StateCreator<
 		})),
 		setSubRecipeProportions: (proportions: number[]) => set(state => ({
 			subRecipeProportions: proportions,
+		})),
+		setTags: (tags: TagType[]) => set( state => ({
+			recipe: {
+				...state.recipe,
+				tags,
+			}
 		})),
 	})
 
