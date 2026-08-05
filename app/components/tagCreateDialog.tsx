@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { addTag as createTag } from '@/app/backend/tag'
 import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
-import type { TagType } from '@/app/types/tag'
+import type { TagColorOption, TagType } from '@/app/types/tag'
 import { tagColors } from '@/app/types/tag'
 
 import Button from '@mui/material/Button'
@@ -18,6 +18,7 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
 import CheckIcon from '@mui/icons-material/Check'
 
 type TagDialogValue = {
@@ -36,7 +37,7 @@ type TagCreateDialogProps = {
 function createDefaultDialogValue(initialName = ''): TagDialogValue {
 	return {
 		name: initialName,
-		color: tagColors[0],
+		color: tagColors[0].color,
 	}
 }
 
@@ -109,29 +110,32 @@ export default function TagCreateDialog({
 										Färg
 									</Typography>
 									<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-										{tagColors.map((color) => (
-											<Box
-												key={color}
-												onClick={() => setDialogValue({ ...dialogValue, color })}
-												sx={{
-													width: 32,
-													height: 32,
-													borderRadius: '50%',
-													backgroundColor: color,
-													cursor: 'pointer',
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'center',
-													border: (theme) => dialogValue.color === color
-														? `2px solid ${theme.palette.text.primary}`
-														: '2px solid transparent',
-													boxShadow: 1,
-												}}
-											>
-												{dialogValue.color === color ? (
-													<CheckIcon sx={{ color: (theme) => theme.palette.getContrastText(color), fontSize: 18 }} />
-												) : null}
-											</Box>
+										{tagColors.map((tagColor) => (
+											<Tooltip
+												key={tagColor.color} title={tagColor.name ?? ''}>
+												<Box
+													key={tagColor.color}
+													onClick={() => setDialogValue({ ...dialogValue, color: tagColor.color })}
+													sx={{
+														width: 32,
+														height: 32,
+														borderRadius: '50%',
+														backgroundColor: tagColor.color,
+														cursor: 'pointer',
+														display: 'flex',
+														alignItems: 'center',
+														justifyContent: 'center',
+														border: (theme) => dialogValue.color === tagColor.color
+															? `2px solid ${theme.palette.text.primary}`
+															: (tagColor.name ? `2px dashed ${theme.palette.text.primary}` : '2px solid transparent'),
+														boxShadow: 1,
+													}}
+												>
+													{dialogValue.color === tagColor.color ? (
+														<CheckIcon sx={{ color: (theme) => theme.palette.getContrastText(tagColor.color), fontSize: 18 }} />
+													) : null}
+												</Box>
+											</Tooltip>
 										))}
 									</Box>
 								</Box>
