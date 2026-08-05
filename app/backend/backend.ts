@@ -82,6 +82,17 @@ function useBackend<Type>(url: string)
 	}
 }
 
+function useUnauthorizedBackend<Type>(url: string)
+{
+	const { data, error, isLoading } = useSWR<Type>(url, unauthorizedBackendCall)
+
+	return {
+		data,
+		isLoading,
+		error
+	}
+}
+
 async function postBackend<Type>(url: string, data: any, 
 	{ includeAuth = true, method = 'POST' }: { includeAuth?: boolean, method?: string } = {}) {
 
@@ -112,5 +123,5 @@ async function postBackend<Type>(url: string, data: any,
 	}
 }
 
-export { backendCall, unauthorizedBackendCall, useBackend, postBackend }
+export { backendCall, unauthorizedBackendCall, useBackend, useUnauthorizedBackend, postBackend }
 

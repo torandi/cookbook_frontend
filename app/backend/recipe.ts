@@ -1,4 +1,4 @@
-import { useBackend, postBackend } from './backend'
+import { useBackend, postBackend, useUnauthorizedBackend } from './backend'
 
 import { RecipeType, RecipeSummaryType, RecipeBackendType } from '@/app/types/recipe'
 
@@ -7,7 +7,7 @@ export function useRecipes() {
 	return { recipes: data ?? [], error, isLoading }
 }
 
-export function useRecipe(id : number, { portions, allowCups } : { portions?: number, allowCups?: boolean } = {}) {
+function buildRecipeUrl(portions?: number, allowCups?: boolean) {
 	const query = new URLSearchParams()
 
 	if (portions !== undefined) {
@@ -18,13 +18,37 @@ export function useRecipe(id : number, { portions, allowCups } : { portions?: nu
 		query.set('allow_cups', String(allowCups))
 	}
 
-	const url = query.toString() ? `recipes/${id}?${query.toString()}` : `recipes/${id}`
+	return query.toString()
+}
+
+export function useRecipe(id : number, { portions, allowCups } : { portions?: number, allowCups?: boolean } = {}) {
+	const queryUrl = buildRecipeUrl(portions, allowCups)
+
+	const url = queryUrl ? `recipes/${id}?${queryUrl}` : `recipes/${id}`
 	const { data, error, isLoading } = useBackend<RecipeType>(url)
 
 	return {
 		recipe: data,
 		error: error,
 		isLoading: isLoading
+	}
+}
+
+export function usePublicRecipe({recipeId, key, portions, allowCups }:
+	{
+		recipeId: number,
+		key: string,
+		portions?: number,
+		allowCups?: boolean
+	}) {
+	const queryUrl = buildRecipeUrl(portions, allowCups)
+	const url = queryUrl ? `recipes/public/${recipeId}?key=${key}&${queryUrl}` : `recipes/public/${recipeId}?key=${key}`
+
+	const { data, error, isLoading } = useUnauthorizedBackend<RecipeType>(url)
+	return {
+		recipe: data,
+		error,
+		isLoading
 	}
 }
 
@@ -41,4 +65,10 @@ export function updateRecipe(id: number, recipe: RecipeBackendType) {
 	return postBackend<RecipeType>(`recipes/${id}`, recipe, { includeAuth: true, method: 'PUT' })
 }
 
+export async function generateShareKey(recipeId: number) {
+	return postBackend<{ key: string }>(`recipes/${recipeId}/share`, {}, { includeAuth: true })
+}
 
+export async function deleteShareKey(recipeId: number) {
+	return postBackend<null>(`recipes/${recipeId}/share`, null, { includeAuth: true, method: 'DELETE' })
+}

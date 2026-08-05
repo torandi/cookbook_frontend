@@ -1,4 +1,4 @@
-import RecipeDisplay from './recipe'
+import RecipeDisplay from './display'
 
 type PageProps = {
 	params: Promise<{ id: string }>

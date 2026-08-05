@@ -24,6 +24,7 @@ export interface RecipeType extends DbObject {
 	instructions : InstructionGroupType[];
 	subRecipes: RecipeType[];
 	tags: TagType[];
+	shareKey?: string;
 }
 
 export interface RecipeReferenceType {

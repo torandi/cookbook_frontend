@@ -1,41 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { useRecipe } from '@/app/backend/recipe'
-import { postBackend } from '@/app/backend/backend'
-import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
-
-import { capitalize, formatQuantity, formatTime } from '@/app/utils'
-import { useRouter } from 'next/navigation'
-import { IngredientGroupType, InstructionGroupType, RecipeType } from '@/app/types/recipe'
-
-import FullCard from '@/app/components/fullcard'
+import { useState, useEffect } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
+import Stack from '@mui/material/Stack'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch'
+import IconButton from '@mui/material/IconButton'
+import Link from 'next/link'
+import Alert from '@mui/material/Alert'
 import Spinner from '@/app/components/spinner'
-import MarkdownText from '@/app/components/markdownText'
 
 import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
 import RemoveIcon from '@mui/icons-material/Remove'
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import Link from 'next/link'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import IconButton from '@mui/material/IconButton'
-import Stack from '@mui/material/Stack'
-import Switch from '@mui/material/Switch'
-import Typography from '@mui/material/Typography'
-import { useWakeLock } from 'react-screen-wake-lock'
+
+import { capitalize, formatQuantity, formatTime } from '@/app/utils'
+import { IngredientGroupType, InstructionGroupType, RecipeType } from '@/app/types/recipe'
 import { TagType } from '@/app/types/tag'
 
-type RecipeDisplayProps = {
-	recipeId: number
-}
+import FullCard from '@/app/components/fullcard'
+import MarkdownText from '@/app/components/markdownText'
 
-function IngredientGroup({ group, showWeight, recipeSource }: { group: IngredientGroupType, showWeight: boolean, recipeSource?: RecipeType}) {
+import { useWakeLock } from 'react-screen-wake-lock'
+
+function IngredientGroup({ group, showWeight, recipeSource }: { group: IngredientGroupType, showWeight: boolean, recipeSource?: RecipeType }) {
 	return (
 		<Box sx={{ mb: 2 }}>
 			{group.name || recipeSource !== undefined ? (
@@ -91,7 +80,7 @@ function InstructionGroup({ group, currentPortions, recipeSource }: { group: Ins
 function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeType, showWeight: boolean, isPrimary: boolean }) {
 	return (
 		<>
-			{ recipe.subRecipes.map((subRecipe, index) => (
+			{recipe.subRecipes.map((subRecipe, index) => (
 				<RecipeIngredients
 					key={`sub-recipe-${index}`}
 					recipe={subRecipe}
@@ -99,14 +88,11 @@ function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeTy
 					isPrimary={false}
 				/>
 			))}
-			{ recipe.ingredients.map((group, groupIndex) => (
+			{recipe.ingredients.map((group, groupIndex) => (
 				<IngredientGroup
 					key={`ingredient-group-${groupIndex}`}
 					group={group}
 					showWeight={showWeight}
-					/* Show recipe name even for "primary" if this is the first group and we had sub recipes
-					 to get a clear separation
-					 */
 					recipeSource={isPrimary && !(groupIndex == 0 && recipe.subRecipes.length > 0) ? undefined : recipe}
 				/>
 			))}
@@ -117,7 +103,7 @@ function RecipeIngredients({ recipe, showWeight, isPrimary }: { recipe: RecipeTy
 function RecipeInstructions({ recipe, currentPortions, isPrimary }: { recipe: RecipeType, currentPortions: number, isPrimary: boolean }) {
 	return (
 		<>
-			{ recipe.subRecipes.map((subRecipe, index) => (
+			{recipe.subRecipes.map((subRecipe, index) => (
 				<RecipeInstructions
 					key={`sub-recipe-${index}`}
 					recipe={subRecipe}
@@ -125,7 +111,7 @@ function RecipeInstructions({ recipe, currentPortions, isPrimary }: { recipe: Re
 					isPrimary={false}
 				/>
 			))}
-			{ recipe.instructions.map((group, groupIndex) => (
+			{recipe.instructions.map((group, groupIndex) => (
 				<InstructionGroup
 					key={`instruction-group-${groupIndex}`}
 					group={group}
@@ -135,9 +121,7 @@ function RecipeInstructions({ recipe, currentPortions, isPrimary }: { recipe: Re
 			))}
 		</>
 	)
-
 }
-
 
 function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, showWeight: boolean, index: number }) {
 	const showWeightValue = showWeight && ingredient.weight != null
@@ -175,7 +159,7 @@ function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, sh
 				<Box sx={{ minWidth: 0 }}>
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
 						<Typography sx={{ fontWeight: 500, color: 'grey.800' }}>
-							{ingredient.ingredient?.name || ""}
+							{ingredient.ingredient?.name || ''}
 						</Typography>
 						{ingredient.optional ? (
 							<Chip
@@ -192,7 +176,7 @@ function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, sh
 					</Box>
 				</Box>
 				<Box sx={{ fontWeight: 500, color: 'text.primary', whiteSpace: 'nowrap', textAlign: 'right' }}>
-					{ ingredient.quantity != null ? (
+					{ingredient.quantity != null ? (
 						<>
 							{primaryQuantity}
 							{secondaryQuantity ? (
@@ -222,37 +206,42 @@ function IngredientItem({ ingredient, showWeight, index }: { ingredient: any, sh
 
 function Tags({ tags }: { tags?: TagType[] }) {
 	return tags?.length ? (
-			<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
-				{tags.map((tag) => (
-					<Chip
-						key={tag.id}
-						label={tag.name}
-						size="small"
-						sx={{
-							backgroundColor: tag.color,
-							color: (theme) => theme.palette.getContrastText(tag.color),
-						}}
-					/>
-				))}
-			</Box>
-		) : null
+		<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+			{tags.map((tag) => (
+				<Chip
+					key={tag.id}
+					label={tag.name}
+					size="small"
+					sx={{
+						backgroundColor: tag.color,
+						color: (theme) => theme.palette.getContrastText(tag.color),
+					}}
+				/>
+			))}
+		</Box>
+	) : null
 }
 
-export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
-	const router = useRouter()
-	const [portions, setPortions] = useState<number | null>(null)
-	const [allowCups, setAllowCups] = useState(true)
-	const [showWeight, setShowWeight] = useState<boolean | null>(null)
-	const [isDeleting, setIsDeleting] = useState(false)
-
-	const { isSupported, released, request, release } = useWakeLock({
-		reacquireOnPageVisible: true,
-  	});
-
-	const { recipe, error, isLoading } = useRecipe(recipeId, {
-		portions: portions ?? undefined,
-		allowCups,
-	})
+export default function RecipeDisplayContent({
+    recipe,
+    portions, 
+    setPortions,
+    allowCups,
+    setAllowCups,
+    error,
+    isLoading,
+    footer
+}: {
+    recipe?: RecipeType,
+    portions: number | null
+    setPortions: (portions: number | null) => void
+    allowCups: boolean
+    setAllowCups: (allowCups: boolean) => void
+    error?: Error
+    isLoading: boolean
+    footer?: React.ReactNode
+}) {
+    const [showWeight, setShowWeight] = useState<boolean | null>(null)
 
 	useEffect(() => {
 		if (recipe && portions === null) {
@@ -263,8 +252,10 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 		}
 	}, [recipe, portions, showWeight])
 
-
 	// keep screen on while viewing recipe
+	const { isSupported, released, request, release } = useWakeLock({
+		reacquireOnPageVisible: true,
+  	})
 	useEffect(() => {
 		if (isSupported && (released ?? true) === true) {
 			request()
@@ -295,38 +286,8 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 		)
 	}
 
+
 	const currentPortions = portions ?? recipe.portions ?? 1
-
-	const goToEdit = () => {
-		router.push(`/recipe/edit/${recipeId}`)
-	}
-
-	const deleteRecipe = async () => {
-		if (isDeleting) {
-			return
-		}
-
-		const accepted = window.confirm('Är du säker på att du vill ta bort receptet?')
-		if (!accepted) {
-			return
-		}
-
-		setIsDeleting(true)
-		const { error: deleteError } = await postBackend<null>(
-			`recipes/${recipeId}`,
-			null,
-			{ method: 'DELETE' },
-		)
-
-		if (deleteError) {
-			showErrorAlert(deleteError ?? 'Misslyckades att ta bort receptet', 10000)
-			setIsDeleting(false)
-			return
-		}
-
-		showSuccessAlert('Recept borttaget')
-		router.replace('/recipe')
-	}
 
 	return (
 		<Stack direction="column" spacing={2}>
@@ -439,32 +400,11 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 						recipe={recipe}
 						currentPortions={currentPortions}
 						isPrimary={true}
-						/>
+					/>
 				</FullCard>
-				
-				
 			</Box>
 
-			<FullCard className="w-full">
-				<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-					<Button
-						variant="outlined"
-						startIcon={<EditIcon />}
-						onClick={goToEdit}
-					>
-						Redigera
-					</Button>
-					<Button
-						variant="outlined"
-						color="error"
-						startIcon={<DeleteIcon />}
-						onClick={deleteRecipe}
-						disabled={isDeleting}
-					>
-						Ta bort
-					</Button>
-				</Box>
-			</FullCard>
+			{footer}
 		</Stack>
 	)
 }
