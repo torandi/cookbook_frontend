@@ -21,11 +21,14 @@ import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import { useRecipes } from '@/app/backend/recipe';
 import { formatTime } from '@/app/utils';
+import TagAutocomplete from '@/app/components/tagAutocomplete';
+import type { TagType } from '@/app/types/tag';
 
 function RecipeListContent() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const [search, setSearch] = useState(searchParams?.get('search') ?? '');
+	const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
 	const { recipes, isLoading, error } = useRecipes();
 
 	// Sync search input if URL param changes (e.g. navigating from global search)
@@ -35,6 +38,7 @@ function RecipeListContent() {
 
 	const filtered = recipes.filter(r =>
 		r.name.toLowerCase().includes(search.toLowerCase())
+		&& selectedTags.every(tag => r.tags?.some(recipeTag => recipeTag.id === tag.id))
 	);
 	const totalCount = recipes.length;
 	const filteredCount = filtered.length;
@@ -90,30 +94,48 @@ function RecipeListContent() {
 							}}
 						/>
 					</Stack>
-					<TextField
-						label="Sök recept"
-						value={search}
-						onChange={e => setSearch(e.target.value)}
-						autoFocus
-						fullWidth
-						size="small"
-						slotProps={{
-							input: {
-								startAdornment: (
-									<InputAdornment position="start">
-										<SearchRoundedIcon color="primary" fontSize="small" />
-									</InputAdornment>
-								),
-							},
-						}}
-						sx={{
-							'& .MuiOutlinedInput-root': {
-								bgcolor: 'rgba(255,255,255,0.82)',
-								backdropFilter: 'blur(6px)',
-								borderRadius: 2,
-							},
-						}}
-					/>
+					<Box className="flex flex-col md:flex-row gap-2">
+						<TextField
+							label="Sök recept"
+							value={search}
+							onChange={e => setSearch(e.target.value)}
+							autoFocus
+							fullWidth
+							size="small"
+							className="w-1/2"
+							slotProps={{
+								input: {
+									startAdornment: (
+										<InputAdornment position="start">
+											<SearchRoundedIcon color="primary" fontSize="small" />
+										</InputAdornment>
+									),
+								},
+							}}
+							sx={{
+								'& .MuiOutlinedInput-root': {
+									bgcolor: 'rgba(255,255,255,0.82)',
+									backdropFilter: 'blur(6px)',
+									borderRadius: 2,
+								},
+							}}
+						/>
+						<TagAutocomplete
+							label="Taggar"
+							value={selectedTags}
+							onChange={setSelectedTags}
+							creatable={false}
+							className="w-1/2"
+							size="small"
+							sx={{
+								'& .MuiOutlinedInput-root': {
+									bgcolor: 'rgba(255,255,255,0.82)',
+									backdropFilter: 'blur(6px)',
+									borderRadius: 2,
+								},
+							}}
+						/>
+					</Box>
 				</Stack>
 			</FullCard>
 			{isLoading && (
@@ -166,6 +188,21 @@ function RecipeListContent() {
 												},
 											}}
 										/>
+										{recipe.tags?.length ? (
+											<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+												{recipe.tags.map(tag => (
+													<Chip
+														key={tag.id}
+														label={tag.name}
+														size="small"
+														sx={{
+															backgroundColor: tag.color,
+															color: (theme) => theme.palette.getContrastText(tag.color),
+														}}
+													/>
+												))}
+											</Box>
+										) : null}
 									</Box>
 									{(recipe.totalTime != null || recipe.activeTime != null) && (
 										<Stack

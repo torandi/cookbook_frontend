@@ -29,6 +29,8 @@ type TagAutocompleteProps = {
 	size?: 'small' | 'medium'
 	className?: string
 	sx?: SxProps<Theme>
+	// When false, the user can only pick from existing tags - no "create new tag" option is offered.
+	creatable?: boolean
 }
 
 export default function TagAutocomplete({
@@ -39,6 +41,7 @@ export default function TagAutocomplete({
 	size = 'medium',
 	className,
 	sx,
+	creatable = true,
 }: TagAutocompleteProps) {
 	const { tags, isLoading } = useTags()
 	const theme = useTheme()
@@ -56,6 +59,10 @@ export default function TagAutocomplete({
 	const generateOptions = (options: TagAutocompleteOption[], params: any) => {
 		const inputValue = params.inputValue.trim()
 		const filtered = filter(options, inputValue)
+
+		if (!creatable) {
+			return filtered
+		}
 
 		const isExisting = options.some(
 			(option) => 'name' in option && option.name.toLowerCase() === inputValue.toLowerCase(),

@@ -40,4 +40,5 @@ export interface RecipeSummaryType extends DbObject {
 	description: string;
 	activeTime: number | null;
 	totalTime: number | null;
+	tags?: TagType[];
 }
