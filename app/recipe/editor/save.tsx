@@ -3,6 +3,7 @@
 import { useRecipeEditorStore } from './state'
 import { showSuccessAlert, showErrorAlert } from '@/app/ui/alert-state'
 import { addRecipe, updateRecipe } from '@/app/backend/recipe'
+import { formatFastApiRecipeValidationError } from '@/app/backend/validation'
 
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation'
@@ -16,7 +17,7 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 
 	const saveRecipe = async () => {
 		const data = getData();
-		const { data: recipeData, error } = recipeId != undefined
+		const { data: recipeData, error, errorDetail } = recipeId != undefined
 			? await updateRecipe(recipeId, data)
 			: await addRecipe(data);
 
@@ -27,7 +28,8 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 
 			router.push(`/recipe/${recipeData.id}`)
 		} else {
-			showErrorAlert(error ?? 'Misslyckades att spara recept', 10000)
+			const validationError = formatFastApiRecipeValidationError(errorDetail ?? error, data)
+			showErrorAlert(validationError ?? error ?? 'Misslyckades att spara recept', 10000)
 		}
 	}
 

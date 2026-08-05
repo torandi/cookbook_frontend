@@ -150,7 +150,7 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 						/>
 					</FullCard>
 	
-					<Box sx={{ display: 'flex', flexDirection: { md: 'column', lg: 'row' }, gap: 2 }}>
+					<Box className="flex flex-col lg:flex-row gap-2">
 							<FullCard className="w-1/2 md:w-full">
 								<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Ingredienser</Typography>
 								<IngredientsInput />

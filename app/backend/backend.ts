@@ -6,6 +6,10 @@ import { getAuthHeaders } from './auth'
 
 import useSWR, { mutate } from 'swr'
 
+type BackendRequestError = Error & {
+	detail?: unknown
+}
+
 // backendCall is the authenticated uncached fetch helper.
 // unauthorizedBackendCall is for public endpoints such as login.
 
@@ -28,15 +32,24 @@ async function requestBackend<Type>(url: string, options: RequestInit = {}, incl
 	})
 
 	if (!response.ok) {
-		const json = await response.json()
-		if (typeof json.detail === 'string') {
-			const error = new Error(json.detail || response.statusText)
-			throw error
-		} else if (typeof json.detail === 'object' && json.detail !== null) {
-			const error = new Error(JSON.stringify(json.detail))
-			throw error
+		let detail: unknown = null
+
+		try {
+			const json = await response.json()
+			detail = json?.detail
+		} catch {
+			detail = null
 		}
-		const error = new Error(response.statusText)
+
+		const message =
+			typeof detail === 'string'
+				? detail
+				: detail != null
+					? JSON.stringify(detail)
+					: response.statusText
+
+		const error: BackendRequestError = new Error(message)
+		error.detail = detail
 		throw error
 	}
 
@@ -87,11 +100,14 @@ async function postBackend<Type>(url: string, data: any,
 		return {
 			data: result,
 			error: null,
+			errorDetail: null,
 		}
 	} catch (error: any) {
+		const backendError = error as BackendRequestError
 		return {
 			data: null,
-			error: error.message ||  'Okänt fel',
+			error: backendError.message ||  'Okänt fel',
+			errorDetail: backendError.detail ?? null,
 		}
 	}
 }
