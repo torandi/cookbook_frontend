@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
+import Image from 'next/image';
 
 import SearchBar from '@/app/ui/searchbar';
 
@@ -54,6 +55,10 @@ export default function TopMenu() {
               gap: 1,
             }}
           >
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 2, flexShrink: 0 }}>
+              <Image src="/icon.png" alt="Cookbook icon" width={36} height={36} priority />
+            </Box>
+
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
               {/* large screen menu */}
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
