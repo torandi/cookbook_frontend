@@ -451,6 +451,7 @@ export default function PlanEditorPage({ title, planId, initialPlan }: PlanEdito
 
 		showSuccessAlert('Planen sparades')
 		clearPlanDraft(planId)
+		resetState()
 		router.push(data?.id ? `/plan/${data.id}` : '/plan')
 	}
 

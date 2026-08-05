@@ -11,6 +11,7 @@ import { clearRecipeDraft } from './draft';
 export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 	const router = useRouter()
 	const getData = useRecipeEditorStore( state => state.getForBackend )
+	const resetState = useRecipeEditorStore((state) => state.reset)
 
 
 	const saveRecipe = async () => {
@@ -21,7 +22,9 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 
 		if (recipeData) {
 			clearRecipeDraft(recipeId)
+			resetState()
 			showSuccessAlert(recipeId != undefined ? 'Recept uppdaterat' : 'Recept sparat')
+
 			router.push(`/recipe/${recipeData.id}`)
 		} else {
 			showErrorAlert(error ?? 'Misslyckades att spara recept', 10000)
