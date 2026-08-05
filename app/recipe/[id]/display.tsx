@@ -140,8 +140,6 @@ export default function RecipeDisplay({ recipeId }: RecipeDisplayProps) {
 					recipeName={recipe.name}
 					shareKey={localShareKey}
 					onClose={() => setShareDialogOpen(false)}
-					onShareKeyGenerated={setLocalShareKey}
-					onShareKeyDeleted={() => setLocalShareKey(undefined)}
 					onGenerateKey={handleGenerateShareKey}
 					onDeleteKey={handleDeleteShareKey}
 				/>

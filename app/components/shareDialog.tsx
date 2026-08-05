@@ -21,8 +21,6 @@ type ShareDialogProps = {
 	recipeName: string
 	shareKey?: string
 	onClose: () => void
-	onShareKeyGenerated: (key: string) => void
-	onShareKeyDeleted: () => void
 	onGenerateKey: () => Promise<{ error?: Error | string | null }>
 	onDeleteKey: () => Promise<{ error?: Error | string | null }>
 }
@@ -33,8 +31,6 @@ export default function ShareDialog({
 	recipeName,
 	shareKey,
 	onClose,
-	onShareKeyGenerated,
-	onShareKeyDeleted,
 	onGenerateKey,
 	onDeleteKey,
 }: ShareDialogProps) {
@@ -77,7 +73,6 @@ export default function ShareDialog({
 			const message = typeof error === 'string' ? error : error?.message || 'Misslyckades att ta bort delningslänken'
 			showErrorAlert(message, 5000)
 		} else {
-			onShareKeyDeleted()
 			showSuccessAlert('Delningslänk borttagen', 3000)
 		}
 	}
@@ -124,7 +119,7 @@ export default function ShareDialog({
 								</Button>
 							</Box>
 							<Alert severity="success">
-								Delningslänken är aktiv och kan delas öppet.
+								Delningslänken är aktiv.
 							</Alert>
 						</>
 					)}
