@@ -236,7 +236,7 @@ export default function RecipeDisplayContent({
     portions: number | null
     setPortions: (portions: number | null) => void
     allowCups: boolean
-    setAllowCups: (allowCups: boolean) => void
+    setAllowCups?: (allowCups: boolean) => void
     error?: Error
     isLoading: boolean
     footer?: React.ReactNode
@@ -350,7 +350,8 @@ export default function RecipeDisplayContent({
 							<Typography variant="h6">{formatTime(recipe.activeTime)}</Typography>
 						</Box>
 
-						<FormControlLabel
+						{ setAllowCups && (
+							<FormControlLabel
 							control={
 								<Switch
 									checked={allowCups}
@@ -358,7 +359,8 @@ export default function RecipeDisplayContent({
 								/>
 							}
 							label="Tillåt cups"
-						/>
+							/>
+						)}
 
 						<FormControlLabel
 							control={
