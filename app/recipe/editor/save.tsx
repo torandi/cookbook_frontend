@@ -28,7 +28,7 @@ export const SaveButton = ({ recipeId }: { recipeId?: number }) => {
 
 			router.push(`/recipe/${recipeData.id}`)
 		} else {
-			const validationError = formatFastApiRecipeValidationError(errorDetail ?? error, data)
+			const validationError = formatFastApiRecipeValidationError(errorDetail ?? error)
 			showErrorAlert(validationError ?? error ?? 'Misslyckades att spara recept', 10000)
 		}
 	}
