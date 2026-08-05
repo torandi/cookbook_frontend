@@ -4,7 +4,7 @@ import { useRecipeEditorStore } from './state'
 
 import { useShallow } from 'zustand/react/shallow'
 
-import { capitalize, intOrDefault, intOrDefaultNoNull } from '@/app/utils'
+import { capitalize, intOrDefault, parseTime } from '@/app/utils'
 
 import TagAutocomplete from '@/app/components/tagAutocomplete'
 
@@ -90,7 +90,7 @@ export const RecipeInfoInput = () => {
 					label="Total tid"
 					className="w-1/8"
 					value={ recipeInfo.totalTime ?? ""}
-					onChange={ (event) => setTotalTime(intOrDefault(event.target.value, null)) }
+					onChange={ (event) => setTotalTime(parseTime(event.target.value, null)) }
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>
@@ -101,7 +101,7 @@ export const RecipeInfoInput = () => {
 					label="Aktiv tid"
 					className="w-1/8"
 					value={ recipeInfo.activeTime ?? ""}
-					onChange={ (event) => setActiveTime(intOrDefault(event.target.value, null)) }
+					onChange={ (event) => setActiveTime(parseTime(event.target.value, null)) }
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>

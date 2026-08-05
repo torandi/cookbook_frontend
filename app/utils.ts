@@ -61,6 +61,23 @@ export function intOrDefaultNoNull(value: string | null, defaultValue: number) :
 	return parsed
 }
 
+export function parseTime(value: string | null, defaultValue: number | null) : number | null {
+	if (value === null) {
+		return defaultValue
+	}
+
+	const hourLocation =value.indexOf('h')
+	if (hourLocation === -1) {
+		return intOrDefault(value, defaultValue)
+	}
+	const hours = intOrDefaultNoNull(value.slice(0, hourLocation), 0)
+	const minutes = intOrDefault(value.slice(hourLocation + 1, value.indexOf('m')), null)
+	if (hours == 0 && minutes === null) {
+		return defaultValue
+	}
+	return hours * 60 + (minutes ?? 0)
+}
+
 export function capitalize(str : string) : string {
 	return str[0].toUpperCase() + str.slice(1)
 }
