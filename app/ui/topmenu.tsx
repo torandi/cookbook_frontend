@@ -24,6 +24,7 @@ const pages: Page[] = [
   { url: '/recipe', title: 'Recept', mobileVisible: true },
   { url: '/recipe/add', title: 'Nytt recept', mobileVisible: false },
   { url: '/ingredients', title: 'Ingredienser', mobileVisible: false },
+  { url: '/tags', title: 'Taggar', mobileVisible: false },
   { url: '/plan', title: 'Planering', mobileVisible: true },
 ]
 
