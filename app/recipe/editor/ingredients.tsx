@@ -214,7 +214,9 @@ function QuantityFields({ id, value, setValue } : {
 				onChange={ (event: ChangeEvent<{ value: string }> ) => {
 					setValue({
 						...value,
-						quantity: evalNumberExpression(event.target.value, null) ?? event.target.value
+						quantity: event.target.value.trim() != "" 
+							? evalNumberExpression(event.target.value, null) ?? event.target.value
+							: null
 					})
 				}}
 				slotProps={{
