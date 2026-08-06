@@ -242,6 +242,7 @@ export default function RecipeDisplayContent({
     footer?: React.ReactNode
 }) {
     const [showWeight, setShowWeight] = useState<boolean | null>(null)
+	const [keepScreenOn, setKeepScreenOn] = useState<boolean>(false)
 
 	useEffect(() => {
 		if (recipe && portions === null) {
@@ -253,20 +254,23 @@ export default function RecipeDisplayContent({
 	}, [recipe, portions, showWeight])
 
 	// keep screen on while viewing recipe
-	const { isSupported, released, request, release } = useWakeLock({
+	const wakeLock = useWakeLock({
 		reacquireOnPageVisible: true,
   	})
+
 	useEffect(() => {
-		if (isSupported && (released ?? true) === true) {
-			request()
+		if (keepScreenOn && wakeLock.isSupported && wakeLock.released !== false) {
+			wakeLock.request()
+		} else if (!keepScreenOn && wakeLock.isSupported && wakeLock.released === false) {
+			wakeLock.release()
 		}
 
 		return () => {
-			if (isSupported && (released ?? true) !== true) {
-				release()
+			if (wakeLock.isSupported && wakeLock.released === false) {
+				wakeLock.release()
 			}
 		}
-	}, [isSupported, released, request, release])
+	}, [keepScreenOn, wakeLock.isSupported, wakeLock.released, wakeLock.request, wakeLock.release])
 
 	if (error) {
 		return (
@@ -309,7 +313,11 @@ export default function RecipeDisplayContent({
 						sx={{
 							display: 'grid',
 							gap: 2,
-							gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(5, minmax(0, 1fr))' },
+							gridTemplateColumns: {
+								xs: 'repeat(2, minmax(0, 1fr))',
+								sm: 'repeat(3, minmax(0, 1fr))',
+								md: 'repeat(6, minmax(0, 1fr))',
+								lg: 'repeat(6, minmax(0, 1fr))' },
 						}}
 					>
 						<Box>
@@ -371,6 +379,19 @@ export default function RecipeDisplayContent({
 							}
 							label="Visa i vikt"
 						/>
+
+						{ wakeLock.isSupported && (
+							<FormControlLabel
+								control={
+									<Switch
+										checked={keepScreenOn}
+										onChange={(event) => setKeepScreenOn(event.target.checked)}
+									/>
+								}
+								label="Håll skärmen på"
+							/>
+						)}
+
 
 					</Box>
 				</Stack>
