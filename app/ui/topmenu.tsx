@@ -24,7 +24,7 @@ type Page = {
 
 const pages: Page[] = [
   { url: '/recipe', title: 'Recept', mobileVisible: true },
-  { url: '/recipe/add', title: 'Nytt recept', mobileVisible: false },
+  { url: '/recipe/add', title: 'Nytt recept', mobileVisible: true },
   { url: '/ingredients', title: 'Ingredienser', mobileVisible: false },
   { url: '/tags', title: 'Taggar', mobileVisible: false },
   { url: '/plan', title: 'Planering', mobileVisible: true },
@@ -56,7 +56,7 @@ export default function TopMenu() {
               gap: 1,
             }}
           >
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 2, flexShrink: 0 }}>
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', mr: 2, flexShrink: 0 }}>
               <Image src="/icon.png" alt="Cookbook icon" width={36} height={36} priority />
             </Box>
 
