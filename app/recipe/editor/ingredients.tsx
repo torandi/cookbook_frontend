@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ChangeEvent } from 'react';
 
-import { defaultIngredientEntry, useRecipeEditorStore } from './state';
+import { defaultIngredientEntry, useRecipeEditorStore, RecipeInputIngredientType } from './state';
 
 import { IngredientType, RecipeIngredientType, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
 import { RecipeBackendType } from '@/app/types/recipe'
@@ -39,7 +39,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 }) {
 	const value = useRecipeEditorStore( state => state.ingredients[id] )
 	const setIngredient = useRecipeEditorStore( state => state.setIngredient )
-	const setValue = (value : RecipeIngredientType | null) => setIngredient(id, value)
+	const setValue = (value : RecipeInputIngredientType | null) => setIngredient(id, value)
 	const addIngredient = useRecipeEditorStore( state => state.addIngredient )
 	const removeIngredient = useRecipeEditorStore( state => state.removeIngredient )
 
@@ -150,7 +150,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 // If this becomes to heavy on mobile devices, we could move the search to the backend
 function IngredientSelectBox({id, value, setValue} : {
 	id: number,
-	value: RecipeIngredientType | null,
+	value: RecipeInputIngredientType | null,
 	setValue: Function
 }) {
 	const handleOnChange = (newValue : IngredientType | null) => {
@@ -177,7 +177,7 @@ function IngredientSelectBox({id, value, setValue} : {
 
 function QuantityFields({ id, value, setValue } : {
 	id: number,
-	value: RecipeIngredientType | null,
+	value: RecipeInputIngredientType | null,
 	setValue: Function
 })
 {
