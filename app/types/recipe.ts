@@ -52,7 +52,8 @@ export const filterRecipes = (recipes: RecipeSummaryType[], search: string, sele
 		search,
 		{
 			keys: ['name', 'description'],
-			threshold: matchSorter.rankings.CONTAINS
+			threshold: matchSorter.rankings.CONTAINS,
+			baseSort: (a, b) => String(a.rankedValue).localeCompare(String(b.rankedValue), "sv"),
 		}
 	).filter(
 		(r) => selectedTags.every((tag) => r.tags?.some((recipeTag) => recipeTag.id === tag.id))

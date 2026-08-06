@@ -47,6 +47,7 @@ export default function IngredientAutocomplete({
 			{
 				keys: ['name'],
 				threshold: matchSorter.rankings.CONTAINS,
+				baseSort: (a, b) => String(a.rankedValue).localeCompare(String(b.rankedValue), "sv"),
 			}
 		)
 
