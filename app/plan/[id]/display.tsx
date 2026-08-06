@@ -20,6 +20,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import FullCard from '@/app/components/fullcard'
 import Spinner from '@/app/components/spinner'
 import { usePlan, usePlanShoppingList } from '@/app/backend/plan'
+import { PlanType, ShoppingListType } from '@/app/types/plan'
 
 function formatDate(dateStr: string): string {
 	const date = new Date(dateStr + 'T00:00:00')
@@ -77,154 +78,165 @@ export default function PlanDisplayPage({ planId }: { planId: number }) {
 					</Button>
 				</Stack>
 
-				<Stack spacing={2}>
-					{plan.days
-						.slice()
-						.sort((a, b) => a.date.localeCompare(b.date))
-						.map((day, dayIdx) => (
-							<Box key={day.id ?? dayIdx}>
-								<Typography
-									variant="subtitle1"
-									sx={{ textTransform: 'capitalize', mb: 0.5, fontWeight: 600}}
-								>
-									{formatDate(day.date)}
-								</Typography>
-								<Stack spacing={0.5} sx={{ pl: 1 }}>
-									{day.meals.map((meal, mealIdx) => (
-										<Stack
-											key={meal.id ?? mealIdx}
-											spacing={0.25}
-											sx={{ py: 0.25 }}
-										>
-											<Box
-												sx={{
-													display: 'grid',
-													gridTemplateColumns: '70px minmax(0, 1fr) auto',
-													columnGap: 1,
-													alignItems: 'center',
-												}}
-											>
-												<Typography variant="body2" sx={{ fontWeight: 500 }}>
-													{meal.name.trimEnd() ? meal.name : 'Måltid'}
-												</Typography>
-												<Box sx={{ display: 'flex', flexDirection: 'row', gap: 0.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-													{meal.recipes.map((recipe, index) => (
-														<Link
-															key={index}
-															href={`/recipe/${recipe.id}`}
-															target="_blank"
-															rel="noopener noreferrer"
-															style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, marginBottom: 5 }}
-														>
-															<Chip
-																variant="filled"
-																size="small"
-																icon={
-																	<RestaurantMenuRoundedIcon
-																		fontSize="small"
-																		sx={{ color: 'primary.main' }}
-																	/>
-																}
-																label={recipe.name}
-															/>
-														</Link>
-													))}
-												</Box>
-												{meal.recipes.length === 0 && (
-													<Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-														Inget recept
-													</Typography>
-												)}
-												<Chip
-													size="small"
-													variant="outlined"
-													label={`${meal.portions} port.`}
-													sx={{ height: 22, '& .MuiChip-label': { px: 1, fontWeight: 500 } }}
-												/>
-												{meal.comment ? (
-													<Typography
-														variant="caption"
-														color="text.disabled"
-														sx={{ gridColumn: '2 / 4' }}
-													>
-														{meal.comment}
-													</Typography>
-												) : null}
-												{meal.extraIngredients && meal.extraIngredients.length > 0 ? (
-													<Stack
-														direction="row"
-														spacing={0.5}
-														sx={{ gridColumn: '2 / 4', flexWrap: 'wrap' }}
-													>
-														{meal.extraIngredients.map((extraIngredient, index) => (
-															<Chip
-																key={`${extraIngredient.ingredient.id ?? extraIngredient.ingredient.name}-${index}`}
-																size="small"
-																variant="outlined"
-																label={`${formatQuantity(extraIngredient.quantity, extraIngredient.unit)} ${extraIngredient.ingredient.name}`}
-															/>
-														))}
-													</Stack>
-												) : null}
-											</Box>
-										</Stack>
-									))}
-								</Stack>
-								{dayIdx < plan.days.length - 1 && <Divider sx={{ mt: 1.5 }} />}
-							</Box>
-						))}
-				</Stack>
+				<PlanDaysList plan={plan} />
 			</FullCard>
 
 			{/* Right: shopping list */}
-			<FullCard className="w-full">
-				<Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
-					<ShoppingCartIcon color="primary" />
-					<Typography variant="h6" sx={{ fontWeight: 700 }}>
-						Inköpslista
-					</Typography>
-				</Stack>
-
-				{listLoading && (
-					<Box sx={{ py: 2, display: 'flex', justifyContent: 'center' }}>
-						<Spinner />
-					</Box>
-				)}
-
-				{listError && (
-					<Alert severity="error">Kunde inte ladda inköpslistan: {listError.message}</Alert>
-				)}
-
-				{!listLoading && !listError && (!shoppingList || shoppingList.items.length === 0) && (
-					<Typography color="text.secondary">Inköpslistan är tom.</Typography>
-				)}
-
-				{!listLoading && !listError && shoppingList && shoppingList.items.length > 0 && (
-					<List dense disablePadding>
-						{shoppingList.items.map((item, idx) => (
-							<ListItem
-								key={idx}
-								disableGutters
-								sx={{
-									py: 0.75,
-									px: 1,
-									borderRadius: 1,
-									backgroundColor: idx % 2 === 0 ? 'action.hover' : 'action.selected',
-								}}
-							>
-								<ListItemText
-									primary={item.ingredientName}
-									secondary={item.comment ?? undefined}
-								/>
-								<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-									{ formatQuantity(item.quantity, item.unit) }
-									{ ((item.quantity ?? null) != null && item.extra) && "+" }
-								</Typography>
-							</ListItem>
-						))}
-					</List>
-				)}
-			</FullCard>
+			<ShoppingListCard
+				className="w-full"
+				listLoading={listLoading}
+				listError={listError}
+				shoppingList={shoppingList} />
 		</Box>
 	)
+}
+
+function PlanDaysList({ plan }: { plan: PlanType }) {
+	return <Stack spacing={2}>
+		{plan.days
+			.slice()
+			.sort((a, b) => a.date.localeCompare(b.date))
+			.map((day, dayIdx) => (
+				<Box key={day.id ?? dayIdx}>
+					<Typography
+						variant="subtitle1"
+						sx={{ textTransform: 'capitalize', mb: 0.5, fontWeight: 600 }}
+					>
+						{formatDate(day.date)}
+					</Typography>
+					<Stack spacing={0.5} sx={{ pl: 1 }}>
+						{day.meals.map((meal, mealIdx) => (
+							<Stack
+								key={meal.id ?? mealIdx}
+								spacing={0.25}
+								sx={{ py: 0.25 }}
+							>
+								<Box
+									sx={{
+										display: 'grid',
+										gridTemplateColumns: '70px minmax(0, 1fr) auto',
+										columnGap: 1,
+										alignItems: 'center',
+									}}
+								>
+									<Typography variant="body2" sx={{ fontWeight: 500 }}>
+										{meal.name.trimEnd() ? meal.name : 'Måltid'}
+									</Typography>
+									<Box sx={{ display: 'flex', flexDirection: 'row', gap: 0.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+										{meal.recipes.map((recipe, index) => (
+											<Link
+												key={index}
+												href={`/recipe/${recipe.id}`}
+												target="_blank"
+												rel="noopener noreferrer"
+												style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, marginBottom: 5 }}
+											>
+												<Chip
+													variant="filled"
+													size="small"
+													icon={<RestaurantMenuRoundedIcon
+														fontSize="small"
+														sx={{ color: 'primary.main' }} />}
+													label={recipe.name} />
+											</Link>
+										))}
+									</Box>
+									{meal.recipes.length === 0 && (
+										<Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+											Inget recept
+										</Typography>
+									)}
+									<Chip
+										size="small"
+										variant="outlined"
+										label={`${meal.portions} port.`}
+										sx={{ height: 22, '& .MuiChip-label': { px: 1, fontWeight: 500 } }} />
+									{meal.comment ? (
+										<Typography
+											variant="caption"
+											color="text.disabled"
+											sx={{ gridColumn: '2 / 4' }}
+										>
+											{meal.comment}
+										</Typography>
+									) : null}
+									{meal.extraIngredients && meal.extraIngredients.length > 0 ? (
+										<Stack
+											direction="row"
+											spacing={0.5}
+											sx={{ gridColumn: '2 / 4', flexWrap: 'wrap' }}
+										>
+											{meal.extraIngredients.map((extraIngredient, index) => (
+												<Chip
+													key={`${extraIngredient.ingredient.id ?? extraIngredient.ingredient.name}-${index}`}
+													size="small"
+													variant="outlined"
+													label={`${formatQuantity(extraIngredient.quantity, extraIngredient.unit)} ${extraIngredient.ingredient.name}`} />
+											))}
+										</Stack>
+									) : null}
+								</Box>
+							</Stack>
+						))}
+					</Stack>
+					{dayIdx < plan.days.length - 1 && <Divider sx={{ mt: 1.5 }} />}
+				</Box>
+			))}
+	</Stack>
+}
+
+function ShoppingListCard({ listLoading, listError, shoppingList, className, sx }: {
+	listLoading: boolean,
+	listError: any,
+	shoppingList?: ShoppingListType,
+	sx?: any,
+	className?: string
+}) {
+	return <FullCard className={className} sx={{ ...sx }}>
+		<Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
+			<ShoppingCartIcon color="primary" />
+			<Typography variant="h6" sx={{ fontWeight: 700 }}>
+				Inköpslista
+			</Typography>
+		</Stack>
+
+		{listLoading && (
+			<Box sx={{ py: 2, display: 'flex', justifyContent: 'center' }}>
+				<Spinner />
+			</Box>
+		)}
+
+		{listError && (
+			<Alert severity="error">Kunde inte ladda inköpslistan: {listError.message}</Alert>
+		)}
+
+		{!listLoading && !listError && (!shoppingList || shoppingList.items.length === 0) && (
+			<Typography color="text.secondary">Inköpslistan är tom.</Typography>
+		)}
+
+		{!listLoading && !listError && shoppingList && shoppingList.items.length > 0 && (
+			<List dense disablePadding>
+				{shoppingList.items.map((item, idx) => (
+					<ListItem
+						key={idx}
+						disableGutters
+						sx={{
+							py: 0.75,
+							px: 1,
+							borderRadius: 1,
+							backgroundColor: idx % 2 === 0 ? 'action.hover' : 'action.selected',
+						}}
+					>
+						<ListItemText
+							primary={item.ingredientName}
+							secondary={item.comment ?? undefined} />
+						<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+							{formatQuantity(item.quantity, item.unit)}
+							{((item.quantity ?? null) != null && item.extra) && "+"}
+						</Typography>
+					</ListItem>
+				))}
+			</List>
+		)}
+	</FullCard>
 }
