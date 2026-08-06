@@ -151,12 +151,12 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 					</FullCard>
 	
 					<Box className="flex flex-col lg:flex-row gap-2">
-							<FullCard className="w-full md:w-1/2">
+							<FullCard className="w-full lg:w-1/2">
 								<Typography variant="h5" component="h1" sx={{ mb: 2 }}>Ingredienser</Typography>
 								<IngredientsInput />
 							</FullCard>
 
-						<FullCard className="w-full md:w-1/2">
+						<FullCard className="w-full lg:w-1/2">
 							<InstructionsInput />
 						</FullCard>
 					</Box>
