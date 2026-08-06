@@ -91,6 +91,7 @@ function RecipeListContent() {
 							sx={{
 								fontWeight: 600,
 								alignSelf: { xs: 'flex-start', sm: 'center' },
+								display: { xs: 'none', sm: 'flex' },
 							}}
 						/>
 					</Stack>
@@ -102,7 +103,7 @@ function RecipeListContent() {
 							autoFocus
 							fullWidth
 							size="small"
-							className="w-1/2"
+							className="w-full md:w-1/2"
 							slotProps={{
 								input: {
 									startAdornment: (
@@ -125,7 +126,7 @@ function RecipeListContent() {
 							value={selectedTags}
 							onChange={setSelectedTags}
 							creatable={false}
-							className="w-1/2"
+							className="w-full md:w-1/2"
 							size="small"
 							sx={{
 								'& .MuiOutlinedInput-root': {
