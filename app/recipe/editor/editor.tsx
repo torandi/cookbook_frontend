@@ -7,7 +7,7 @@ import { InstructionsInput } from './instructions'
 import { RecipeInfoInput } from './recipeInfo'
 import Button from '@mui/material/Button'
 import { SaveButton } from './save'
-import { RecipeEditorDraft, useRecipeEditorStore } from './state'
+import { RecipeEditorDraft, useRecipeEditorStore, RecipeInputIngredientType } from './state'
 import { useUnload } from '@/app/lifetimeHooks'
 
 import { RecipeType } from '@/app/types/recipe'
@@ -24,7 +24,6 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useRouter } from 'next/navigation'
 import { getRecipeDraftKey, loadRecipeDraft, saveRecipeDraft, clearRecipeDraft } from './draft'
-import { RecipeIngredientType } from '@/app/types/ingredient'
 import { RecipeMultiPicker } from '@/app/components/recipePicker'
 
 type RecipeEditorPageProps = {
@@ -79,7 +78,7 @@ export default function RecipeEditorPage({ title, recipeId, initialRecipe }: Rec
 		const state = useRecipeEditorStore.getState()
 		if (state.recipe.name.trim() === '' 
 			&& Object.entries(state.instructions).filter(([key, instruction]: [string, string]) => instruction.trim() !== '').length === 0
-			&& Object.entries(state.ingredients).filter(([key, ingredient]: [string, RecipeIngredientType | null]) => ingredient !== null).length === 0) {
+			&& Object.entries(state.ingredients).filter(([key, ingredient]: [string, RecipeInputIngredientType | null]) => ingredient !== null).length === 0) {
 			// don't save if recipe is empty
 			return
 		}

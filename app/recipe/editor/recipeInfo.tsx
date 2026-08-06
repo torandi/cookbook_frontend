@@ -86,34 +86,40 @@ export const RecipeInfoInput = () => {
 				/>
 			</Box>
 			<Box sx={{my: 2}} className="flex flex-row gap-2">
-				<TextField
-					label="Total tid"
-					className="w-1/4 xl:w-1/8"
-					value={ recipeInfo.totalTime ?? ""}
-					onChange={ (event) => setTotalTime(parseTime(event.target.value, null) ?? event.target.value) }
-					slotProps={{
-						input: {
-							endAdornment: <InputAdornment position="end">min</InputAdornment>
-						},
-						inputLabel: {
-							shrink: true
-						}
-					}}
-				/>
-				<TextField
-					label="Aktiv tid"
-					className="w-1/4 xl:w-1/8"
-					value={ recipeInfo.activeTime ?? ""}
-					onChange={ (event) => setActiveTime( parseTime(event.target.value, null) ?? event.target.value) }
-					slotProps={{
-						input: {
-							endAdornment: <InputAdornment position="end">min</InputAdornment>
-						},
-						inputLabel: {
-							shrink: true
-						}
-					}}
-				/>
+				<Tooltip
+					title="Timmar kan anges genom format 1h20m (både h och m måste anges">
+					<TextField
+						label="Total tid"
+						className="w-1/4 xl:w-1/8"
+						value={ recipeInfo.totalTime ?? ""}
+						onChange={ (event) => setTotalTime(parseTime(event.target.value, null) ?? event.target.value) }
+						slotProps={{
+							input: {
+								endAdornment: <InputAdornment position="end">min</InputAdornment>
+							},
+							inputLabel: {
+								shrink: true
+							}
+						}}
+					/>
+				</Tooltip>
+				<Tooltip
+					title="Timmar kan anges genom format 1h20m (både h och m måste anges">
+					<TextField
+						label="Aktiv tid"
+						className="w-1/4 xl:w-1/8"
+						value={ recipeInfo.activeTime ?? ""}
+						onChange={ (event) => setActiveTime( parseTime(event.target.value, null) ?? event.target.value) }
+						slotProps={{
+							input: {
+								endAdornment: <InputAdornment position="end">min</InputAdornment>
+							},
+							inputLabel: {
+								shrink: true
+							}
+						}}
+					/>
+				</Tooltip>
 
 				<TagAutocomplete
 					className="w-1/2 xl:w-full"
