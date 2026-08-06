@@ -23,7 +23,7 @@ export interface IngredientType extends DbObject {
 
 // A ingredient entry in a recipe
 export interface RecipeIngredientType extends DbObject {
-	quantity: number | null | string // string during input phase
+	quantity: number | null;
 	unit: VolumeType | "g" | "st" | null
 	weight?: number | null // not provided during creation, provided by backend
 	comment?: string | null

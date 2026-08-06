@@ -7,7 +7,14 @@ import { create, StateCreator } from 'zustand'
 
 import { omit } from '@/app/utils'
 
-export const defaultIngredientEntry : RecipeIngredientType = {
+export type RecipeInputIngredientType = Omit<RecipeIngredientType, 'quantity'> & { quantity: number | null | string }
+
+export type RecipeInputType = Omit<RecipeType, 'activeTime' | 'totalTime' | 'ingredients' | 'instructions'> & {
+	activeTime: number | null | string
+	totalTime: number | null | string
+}
+
+export const defaultIngredientEntry : RecipeInputIngredientType = {
 	id: null,
 	ingredient: null,
 	quantity: null,
@@ -16,7 +23,7 @@ export const defaultIngredientEntry : RecipeIngredientType = {
 	optional: false,
 }
 
-const defaultRecipeState: RecipeType = {
+const defaultRecipeState: RecipeInputType = {
 	id: null,
 	name: '',
 	description: '',
@@ -25,8 +32,6 @@ const defaultRecipeState: RecipeType = {
 	portionName: 'portioner',
 	totalTime: null,
 	activeTime: null,
-	ingredients: [],
-	instructions: [],
 	subRecipes: [],
 	tags: [],
 }
@@ -37,7 +42,7 @@ const createDefaultEditorState = () => ({
 	},
 	subRecipeProportions: [] as number[],
 	ingredientGroups: { 0: null } as { [id: number]: string | null }, // name for each group
-	ingredients: { 0: null } as { [id: number]: RecipeIngredientType | null },
+	ingredients: { 0: null } as { [id: number]: RecipeInputIngredientType | null },
 	ingredientGroupOrder: [0],
 	nextIngredientId: 1,
 	nextIngredientGroupId: 1,
@@ -57,14 +62,14 @@ export type RecipeEditorDraft = ReturnType<typeof createDefaultEditorState>
 
 interface IngredientsSlice {
 	ingredientGroups: { [id: number]: string | null }
-	ingredients : { [id: number]: RecipeIngredientType | null }
+	ingredients : { [id: number]: RecipeInputIngredientType | null }
 	nextIngredientId: number
 	nextIngredientGroupId: number
 	ingredientsOrder: { [groupId: number]: number[] }
 	ingredientGroupOrder: number[]
 	addIngredient: (groupId: number) => void
 	removeIngredient: (id: number, groupId: number) => void
-	setIngredient: (id: number, value: RecipeIngredientType | null ) => void,
+	setIngredient: (id: number, value: RecipeInputIngredientType | null ) => void,
 	setIngredientsOrder: (groupId: number, newOrder: number[]) => void,
 
 	addIngredientGroup: () => void
@@ -97,15 +102,15 @@ interface InstructionsSlice {
 }
 
 interface RecipeSlice {
-	recipe: RecipeType // ignoring instruction/ingredients fields
+	recipe: RecipeInputType // ignoring instruction/ingredients fields
 	subRecipeProportions: number[] // indexed by subRecipes index
 	setName: (title: string) => void
 	setDescription: (description: string) => void
 	setPortions: (count: number | null) => void
 	setPortionName: (name : string) => void
 	setDefaultWeight: (value : boolean) => void
-	setActiveTime: (time : number | null) => void
-	setTotalTime: (time : number | null) => void
+	setActiveTime: (time : number | null | string) => void
+	setTotalTime: (time : number | null | string) => void
 	setSubRecipes: (subRecipes: RecipeSummaryType[]) => void
 	setSubRecipeProportions: (proportions: number[]) => void
 	setTags: (tags: TagType[]) => void
@@ -354,13 +359,13 @@ const createRecipeSlice : StateCreator<
 				portionName: name,
 			}
 		})),
-		setActiveTime: (time : number | null) => set( state => ({
+		setActiveTime: (time : number | null | string) => set( state => ({
 			recipe: {
 				...state.recipe,
 				activeTime: time,
 			}
 		})),
-		setTotalTime: (time : number | null) => set( state => ({
+		setTotalTime: (time : number | null | string) => set( state => ({
 			recipe: {
 				...state.recipe,
 				totalTime: time,
@@ -414,6 +419,8 @@ const createReadSlice : StateCreator<
 		},
 		getForBackend: () => ({
 			...get().recipe,
+			activeTime: (typeof get().recipe.activeTime !== 'string' ? get().recipe.activeTime as number : null),
+			totalTime: (typeof get().recipe.totalTime !== 'string' ? get().recipe.totalTime as number : null),
 			subRecipes: get().recipe.subRecipes.map((subRecipe, index) => ({
 				id: subRecipe.id ?? -1,
 				proportions: get().subRecipeProportions[index] ?? 1,

@@ -67,15 +67,20 @@ export function parseTime(value: string | null, defaultValue: number | null) : n
 	}
 
 	const hourLocation =value.indexOf('h')
+	const minuteLocation = value.indexOf('m')
 	if (hourLocation === -1) {
 		return intOrDefault(value, defaultValue)
 	}
-	const hours = intOrDefaultNoNull(value.slice(0, hourLocation), 0)
-	const minutes = intOrDefault(value.slice(hourLocation + 1, value.indexOf('m')), null)
-	if (hours == 0 && minutes === null) {
+	else if(minuteLocation === -1) {
 		return defaultValue
 	}
-	return hours * 60 + (minutes ?? 0)
+
+	const hours = intOrDefaultNoNull(value.slice(0, hourLocation), 0)
+	const minutes = intOrDefault(value.slice(hourLocation + 1, minuteLocation), null)
+	if (hours == 0 || minutes === null) {
+		return defaultValue
+	}
+	return hours * 60 + minutes
 }
 
 export function capitalize(str : string) : string {
