@@ -20,7 +20,9 @@ import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded
 import { FormControl } from '@mui/material'
 
 import { useRecipes } from '@/app/backend/recipe'
+import TagAutocomplete from '@/app/components/tagAutocomplete'
 import { RecipeSummaryType } from '@/app/types/recipe'
+import type { TagType } from '@/app/types/tag'
 import { evalNumberExpression, displayFraction } from '@/app/utils'
 
 type RecipePickerProps = {
@@ -37,6 +39,7 @@ export function RecipePicker({
 	sx
 }: RecipePickerProps) {
 	const [search, setSearch] = useState('')
+	const [selectedTags, setSelectedTags] = useState<TagType[]>([])
 	const { recipes, isLoading } = useRecipes()
 	const [proportionValue, setProportionValue] = useState<number | string>(proportion ?? 1)
 
@@ -48,12 +51,15 @@ export function RecipePicker({
 
 	const [recipeOpen, setRecipeOpen] = useState(false)
 
-	const filtered = recipes.filter((r) =>
-		r.name.toLowerCase().includes(search.toLowerCase())
+	const filtered = recipes.filter(
+		(r) =>
+			r.name.toLowerCase().includes(search.toLowerCase()) &&
+			selectedTags.every((tag) => r.tags?.some((recipeTag) => recipeTag.id === tag.id))
 	)
 
 	const onClose = () => {
 		setRecipeOpen(false)
+		setSelectedTags([])
 	}
 
 	function handleSelect(recipe: RecipeSummaryType) {
@@ -101,6 +107,14 @@ export function RecipePicker({
 								),
 							},
 						}}
+					/>
+					<TagAutocomplete
+						label="Taggar"
+						value={selectedTags}
+						onChange={setSelectedTags}
+						creatable={false}
+						size="small"
+						sx={{ mb: 1 }}
 					/>
 					<List dense sx={{ maxHeight: 400, overflow: 'auto' }}>
 						{isLoading && (
