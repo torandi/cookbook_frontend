@@ -458,6 +458,12 @@ const createInitSlice : StateCreator<
 						comment: ingredient.comment ?? '',
 						optional: ingredient.optional ?? false,
 					}
+					// switch to weight if defaultWeight is true and weight is available
+					if (recipe.defaultWeight && ingredient.weight != null) {
+						ingredientEntries[id].unit = 'g';
+						ingredientEntries[id].quantity = ingredient.weight;
+					}
+
 					ingredientOrder[index].push(id);
 				})
 				// add one empty ingredient at the end of each group
