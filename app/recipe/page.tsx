@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
+import { filterRecipes } from '@/app/types/recipe';	
 import FullCard from '@/app/components/fullcard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
@@ -36,10 +37,7 @@ function RecipeListContent() {
 		setSearch(searchParams?.get('search') ?? '');
 	}, [searchParams]);
 
-	const filtered = recipes.filter(r =>
-		r.name.toLowerCase().includes(search.toLowerCase())
-		&& selectedTags.every(tag => r.tags?.some(recipeTag => recipeTag.id === tag.id))
-	);
+	const filtered = filterRecipes(recipes, search, selectedTags);
 	const totalCount = recipes.length;
 	const filteredCount = filtered.length;
 

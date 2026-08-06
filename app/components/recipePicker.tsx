@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { filterRecipes } from '@/app/types/recipe'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -51,11 +52,7 @@ export function RecipePicker({
 
 	const [recipeOpen, setRecipeOpen] = useState(false)
 
-	const filtered = recipes.filter(
-		(r) =>
-			r.name.toLowerCase().includes(search.toLowerCase()) &&
-			selectedTags.every((tag) => r.tags?.some((recipeTag) => recipeTag.id === tag.id))
-	)
+	const filtered = filterRecipes(recipes, search, selectedTags)
 
 	const onClose = () => {
 		setRecipeOpen(false)

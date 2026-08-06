@@ -2,6 +2,8 @@ import { DbObject } from '@/app/types/dbobject';
 import { RecipeIngredientType } from '@/app/types/ingredient';
 import { TagType } from '@/app/types/tag';
 
+import { matchSorter } from 'match-sorter';
+
 export interface InstructionGroupType {
 	name: string | null;
 	instructions: string[];
@@ -42,4 +44,17 @@ export interface RecipeSummaryType extends DbObject {
 	activeTime: number | null;
 	totalTime: number | null;
 	tags?: TagType[];
+}
+
+export const filterRecipes = (recipes: RecipeSummaryType[], search: string, selectedTags: TagType[]) => {
+	return matchSorter(
+		recipes,
+		search,
+		{
+			keys: ['name', 'description'],
+			threshold: matchSorter.rankings.CONTAINS
+		}
+	).filter(
+		(r) => selectedTags.every((tag) => r.tags?.some((recipeTag) => recipeTag.id === tag.id))
+	)
 }
