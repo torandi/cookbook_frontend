@@ -284,7 +284,7 @@ export default function IngredientsPage() {
 
 				return ingredient.name.toLowerCase().includes(searchText);
 			})
-			.sort((a, b) => a.name.localeCompare(b.name));
+			.sort((a, b) => a.name.localeCompare(b.name, 'sv'));
 	}, [ingredients, search, incompleteOnly]);
 
 	return (
