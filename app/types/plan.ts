@@ -32,6 +32,7 @@ export interface ShoppingListItemType {
 	unit: string | null
 	extra: boolean
 	comment: string | null
+	recipes: RecipeSummaryType[]
 }
 
 export interface ShoppingListType {

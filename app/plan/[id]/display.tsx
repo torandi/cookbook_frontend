@@ -12,6 +12,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import Stack from '@mui/material/Stack'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import EditIcon from '@mui/icons-material/Edit'
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded'
@@ -35,6 +36,22 @@ function formatQuantity(quantity: number | null | undefined, unit: string | null
 	if ((quantity ?? null) == null) return ''
 	if (unit == null) return String(quantity)
 	return `${quantity} ${unit}`
+}
+
+function getShoppingItemRecipeNames(item: ShoppingListType['items'][number]): string[] {
+	// Supports both the typed `recipes` array and a potential backend `recipe` field.
+	const maybeRecipe = item as ShoppingListType['items'][number] & {
+		recipe?: { name?: string | null } | Array<{ name?: string | null }>
+	}
+	const recipes = item.recipes ?? []
+	const recipeField = Array.isArray(maybeRecipe.recipe)
+		? maybeRecipe.recipe
+		: maybeRecipe.recipe ? [maybeRecipe.recipe] : []
+	const allNames = [...recipes, ...recipeField]
+		.map((recipe) => recipe?.name?.trim() ?? '')
+		.filter((name) => name.length > 0)
+
+	return Array.from(new Set(allNames))
 }
 
 export default function PlanDisplayPage({ planId }: { planId: number }) {
@@ -216,26 +233,84 @@ function ShoppingListCard({ listLoading, listError, shoppingList, className, sx 
 
 		{!listLoading && !listError && shoppingList && shoppingList.items.length > 0 && (
 			<List dense disablePadding>
-				{shoppingList.items.map((item, idx) => (
-					<ListItem
+				{shoppingList.items.map((item, idx) => {
+					const recipeNames = getShoppingItemRecipeNames(item)
+
+					return <Tooltip
 						key={idx}
-						disableGutters
-						sx={{
-							py: 0.75,
-							px: 1,
-							borderRadius: 1,
-							backgroundColor: idx % 2 === 0 ? 'action.hover' : 'action.selected',
-						}}
-					>
-						<ListItemText
-							primary={item.ingredientName}
-							secondary={item.comment ?? undefined} />
-						<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-							{formatQuantity(item.quantity, item.unit)}
-							{((item.quantity ?? null) != null && item.extra) && "+"}
-						</Typography>
-					</ListItem>
-				))}
+						arrow
+						disableHoverListener={recipeNames.length === 0}
+						placement="bottom-start"
+						title={
+							<Box
+								sx={{
+									minWidth: 180,
+									maxWidth: 280,
+									border: 1,
+									borderColor: 'divider',
+									borderRadius: 1,
+									overflow: 'hidden',
+									color: 'text.primary',
+									bgcolor: 'background.paper',
+								}}
+							>
+								<Typography
+									variant="caption"
+									sx={{
+										display: 'block',
+										px: 1,
+										py: 0.5,
+										fontWeight: 700,
+										letterSpacing: 0.2,
+										textTransform: 'uppercase',
+										borderBottom: 1,
+										borderColor: 'divider',
+										bgcolor: 'action.hover',
+									}}
+								>
+									Recept ({item.ingredientName})
+								</Typography>
+								<Stack divider={<Divider flexItem />}>
+									{recipeNames.map((name) => (
+										<Typography
+											key={name}
+											variant="body2"
+											sx={{ px: 1, py: 0.75, lineHeight: 1.3 }}
+										>
+											{name}
+										</Typography>
+									))}
+								</Stack>
+							</Box>
+						}
+						slotProps={{
+							tooltip: {
+								sx: {
+									p: 0,
+									bgcolor: 'transparent',
+									boxShadow: 'none',
+								},
+							},
+						}}>
+						<ListItem
+							disableGutters
+							sx={{
+								py: 0.75,
+								px: 1,
+								borderRadius: 1,
+								backgroundColor: idx % 2 === 0 ? 'action.hover' : 'action.selected',
+							}}
+						>
+							<ListItemText
+								primary={item.ingredientName}
+								secondary={item.comment ?? undefined} />
+							<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+								{formatQuantity(item.quantity, item.unit)}
+								{((item.quantity ?? null) != null && item.extra) && "+"}
+							</Typography>
+						</ListItem>
+					</Tooltip>
+				})}
 			</List>
 		)}
 	</FullCard>
