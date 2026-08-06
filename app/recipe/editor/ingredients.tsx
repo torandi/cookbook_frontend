@@ -29,6 +29,7 @@ import { AddGroupButton, ExtractGroupDialog, GroupEditRow } from './groups';
 import { evalNumberExpression } from '@/app/utils';
 import { showSuccessAlert, showErrorAlert } from '@/app/ui/alert-state'
 import { addRecipe } from '@/app/backend/recipe'
+import { useShallow } from 'zustand/react/shallow';
 
 const ingredientSpacing = 1;
 
@@ -42,6 +43,11 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 	const setValue = (value : RecipeInputIngredientType | null) => setIngredient(id, value)
 	const addIngredient = useRecipeEditorStore( state => state.addIngredient )
 	const removeIngredient = useRecipeEditorStore( state => state.removeIngredient )
+	const recipe = useRecipeEditorStore( useShallow( state =>
+	({
+		defaultWeight: state.recipe.defaultWeight,
+	}))
+	)
 
 	// If we are ever the last item, and value is set to non-null
 	// add another item
@@ -83,11 +89,13 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 						id={id}
 						value={value}
 						setValue={setValue}
+						preferWeight={recipe.defaultWeight ?? false}
 					/>
 					<QuantityFields
 						id={id}
 						value={value}
 						setValue={setValue}
+						preferWeight={recipe.defaultWeight ?? false}
 					/>
 					<TextField
 						label="Kommentar"
@@ -148,10 +156,11 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 
 // At the moment, this loads all ingredients on first interaction.
 // If this becomes to heavy on mobile devices, we could move the search to the backend
-function IngredientSelectBox({id, value, setValue} : {
+function IngredientSelectBox({id, value, setValue, preferWeight} : {
 	id: number,
 	value: RecipeInputIngredientType | null,
-	setValue: Function
+	setValue: Function,
+	preferWeight: boolean
 }) {
 	const handleOnChange = (newValue : IngredientType | null) => {
 		const currentOptional = value?.optional ?? false
@@ -159,7 +168,7 @@ function IngredientSelectBox({id, value, setValue} : {
 		setValue({
 			...defaultIngredientEntry,
 			ingredient: newValue,
-			unit: newValue ? defaultIngredientUnit(newValue) : null,
+			unit: newValue ? defaultIngredientUnit(newValue, preferWeight) : null,
 			optional: currentOptional, // have to override, to not reset optional when changing ingredient (as optional is not null in default)
 		});
 	}
@@ -175,10 +184,11 @@ function IngredientSelectBox({id, value, setValue} : {
 	)
 }
 
-function QuantityFields({ id, value, setValue } : {
+function QuantityFields({ id, value, setValue, preferWeight } : {
 	id: number,
 	value: RecipeInputIngredientType | null,
 	setValue: Function
+	preferWeight: boolean
 })
 {
 	const unitType = value?.ingredient?.unit ?? "volume";
@@ -186,7 +196,7 @@ function QuantityFields({ id, value, setValue } : {
 	const hasWeightOption = (value?.ingredient?.weightPerUnit ?? 0) > 0;
 
 	let units : string[] = [];
-	const unit = value?.unit ?? "dl";
+	const unit = value?.unit ?? (preferWeight ? "g" : "dl");
 
 	switch(unitType)
 	{

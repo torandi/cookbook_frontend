@@ -31,7 +31,12 @@ export interface RecipeIngredientType extends DbObject {
 	ingredient: IngredientType | null;
 }
 
-export function defaultIngredientUnit(ingredient : IngredientType) : VolumeType | "g" | "st" | null {
+export function defaultIngredientUnit(ingredient : IngredientType, preferWeight?: boolean) : VolumeType | "g" | "st" | null {
+	preferWeight = preferWeight ?? false;
+	if (preferWeight && ingredient.weightPerUnit && ingredient.weightPerUnit > 0) {
+		return "g";
+	}
+
 	switch(ingredient?.unit) {
 		case "volume":
 			return ingredient.defaultVolumeInputType ?? "dl";
