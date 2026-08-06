@@ -88,29 +88,35 @@ export const RecipeInfoInput = () => {
 			<Box sx={{my: 2}} className="flex flex-row gap-2">
 				<TextField
 					label="Total tid"
-					className="w-1/8"
+					className="w-1/4 lg:w-1/8"
 					value={ recipeInfo.totalTime ?? ""}
 					onChange={ (event) => setTotalTime(parseTime(event.target.value, null)) }
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>
+						},
+						inputLabel: {
+							shrink: true
 						}
 					}}
 				/>
 				<TextField
 					label="Aktiv tid"
-					className="w-1/8"
+					className="w-1/4 lg:w-1/8"
 					value={ recipeInfo.activeTime ?? ""}
 					onChange={ (event) => setActiveTime(parseTime(event.target.value, null)) }
 					slotProps={{
 						input: {
 							endAdornment: <InputAdornment position="end">min</InputAdornment>
+						},
+						inputLabel: {
+							shrink: true
 						}
 					}}
 				/>
 
 				<TagAutocomplete
-					className="w-full"
+					className="w-1/2 lg:w-full"
 					sx={{ ml: 5 }}
 					label="Taggar"
 					value={ recipeInfo.tags ?? [] }

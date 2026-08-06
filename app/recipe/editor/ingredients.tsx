@@ -99,7 +99,7 @@ function IngredientEntryInput({ id, groupId, isLastItem } : {
 								comment: event.currentTarget.value
 							})
 						}}
-						className="flex-2"
+						className="flex-1"
 					/>
 					<FormControlLabel
 						label="Ev."
