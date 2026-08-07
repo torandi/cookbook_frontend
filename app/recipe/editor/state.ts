@@ -450,18 +450,13 @@ const createInitSlice : StateCreator<
 				ingredientGroupEntries[index] = group.name ?? '';
 				ingredientGroupOrder.push(index);
 				ingredientOrder[index] = [];
-				group.ingredients.forEach((ingredient, ingredientIndex) => {
+				group.ingredients.forEach((ingredient) => {
 					const id = nextIngredientId++;
 					ingredientEntries[id] = {
 						...defaultIngredientEntry,
 						...ingredient,
 						comment: ingredient.comment ?? '',
 						optional: ingredient.optional ?? false,
-					}
-					// switch to weight if defaultWeight is true and weight is available
-					if (recipe.defaultWeight && ingredient.weight != null) {
-						ingredientEntries[id].unit = 'g';
-						ingredientEntries[id].quantity = ingredient.weight;
 					}
 
 					ingredientOrder[index].push(id);
