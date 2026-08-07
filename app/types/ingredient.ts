@@ -46,3 +46,7 @@ export function defaultIngredientUnit(ingredient : IngredientType, preferWeight?
 			return "g";
 	}
 }
+
+export function isVolumeUnit(unit: string | null): unit is VolumeType {
+	return unit != null && volumeTypes.includes(unit as VolumeType);
+}

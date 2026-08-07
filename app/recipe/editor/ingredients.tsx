@@ -4,7 +4,7 @@ import { useEffect, useState, ChangeEvent } from 'react';
 
 import { defaultIngredientEntry, useRecipeEditorStore, RecipeInputIngredientType } from './state';
 
-import { IngredientType, RecipeIngredientType, volumeTypes, defaultIngredientUnit } from '@/app/types/ingredient'
+import { IngredientType, RecipeIngredientType, volumeTypes, defaultIngredientUnit, isVolumeUnit } from '@/app/types/ingredient'
 import { RecipeBackendType } from '@/app/types/recipe'
 import { SortableList } from '@/app/components/sortableList'
 import IngredientAutocomplete from '@/app/components/ingredientAutocomplete'
@@ -26,7 +26,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { AddGroupButton, ExtractGroupDialog, GroupEditRow } from './groups';
-import { evalNumberExpression } from '@/app/utils';
+import { evalNumberExpression, ml_to_unit, volume_in_ml } from '@/app/utils';
 import { showSuccessAlert, showErrorAlert } from '@/app/ui/alert-state'
 import { addRecipe } from '@/app/backend/recipe'
 import { useShallow } from 'zustand/react/shallow';
@@ -213,6 +213,92 @@ function QuantityFields({ id, value, setValue, preferWeight } : {
 
 	const hasUnitOptions = units.length > 0;
 
+	const changeUnit = (newUnit: string | null) => {
+		if (value != null
+			&& value.id != null
+			&& value.unit != null
+			&& newUnit != null
+			&& newUnit !== value.unit
+			&& typeof value.quantity === "number")
+		{
+			if (value.unit === "g" 
+				&& newUnit === "st"
+				&& value.ingredient?.unit == "count"
+				&& value.ingredient?.weightPerUnit != null)
+			{
+				// convert grams to count
+				setValue({
+					...value,
+					unit: newUnit,
+					quantity: Math.round(value.quantity / value.ingredient.weightPerUnit * 100) / 100 // round to 2 decimals
+				})
+				return
+			}
+			if (value.unit === "st"
+				&& newUnit === "g"
+				&& value.ingredient?.unit == "count"
+				&& value.ingredient?.weightPerUnit != null)
+			{
+				// convert count to grams
+				setValue({
+					...value,
+					unit: newUnit,
+					quantity: Math.round(value.quantity * value.ingredient.weightPerUnit * 100) / 100 // round to 2 decimals
+				})
+				return
+			}
+
+			if (newUnit === "g"
+				&& isVolumeUnit(value.unit)
+				&& value.ingredient?.weightPerUnit != null)
+			{
+				// convert to grams
+				const quantityInGrams = volume_in_ml(value.quantity, value.unit) * value.ingredient.weightPerUnit
+				setValue({
+					...value,
+					unit: newUnit,
+					quantity: Math.round(quantityInGrams * 100) / 100 // round to 2 decimals
+				})
+				return
+			}
+
+			if (value.unit === "g"
+				&& isVolumeUnit(newUnit)
+				&& value.ingredient?.weightPerUnit != null)
+			{
+				// convert from grams to volume
+				const quantityInMl = value.quantity / value.ingredient.weightPerUnit
+				const newQuantity = ml_to_unit(quantityInMl, newUnit)
+				
+				setValue({
+					...value,
+					unit: newUnit,
+					quantity: Math.round(newQuantity * 100) / 100 // round to 2 decimals
+				})
+				return
+			}
+
+			if (isVolumeUnit(value.unit) && isVolumeUnit(newUnit)) {
+				const quantityInMl = volume_in_ml(value.quantity, value.unit)
+				const newQuantity = ml_to_unit(quantityInMl, newUnit)
+
+				setValue({
+					...value,
+					unit: newUnit,
+					quantity: Math.round(newQuantity * 100) / 100 // round to 2 decimals
+				})
+				return
+			}
+
+		}
+
+		// just set the unit, leave the quantity unchanged
+		setValue({
+			...value,
+			unit: newUnit,
+		})
+	}
+
 	return (
 		<>
 			<TextField
@@ -254,10 +340,7 @@ function QuantityFields({ id, value, setValue, preferWeight } : {
 					value={unit}
 					options={units}
 					onChange={(event, newValue) => {
-						setValue({
-							...value,
-							unit: newValue,
-						})
+						changeUnit(newValue)
 					}}
 					renderInput = { (params) => (
 						<TextField

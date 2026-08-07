@@ -176,3 +176,43 @@ export function formatTime(value: number | null) {
 	}
 	return `${numMinutes} min`
 }
+
+const CUPS_TO_ML = 236.588
+
+export function volume_in_ml(volume: number, volume_type: string): number {
+	if (volume_type === "ml" || volume_type === "krm") {
+		return volume
+	} else if (volume_type === "cl") {
+		return volume * 10
+	} else if (volume_type === "dl") {
+		return volume * 100
+	} else if (volume_type === "liter") {
+		return volume * 1000
+	} else if (volume_type === "tsk") {
+		return volume * 5
+	} else if (volume_type === "msk") {
+		return volume * 15
+	} else if (volume_type === "cups") {
+		return volume * CUPS_TO_ML
+	}
+	return volume
+}
+
+export function ml_to_unit(ml: number, unit: string): number {
+	if (unit === "ml" || unit === "krm") {
+		return ml
+	} else if (unit === "cl") {
+		return ml / 10
+	} else if (unit === "dl") {
+		return ml / 100
+	} else if (unit === "liter") {
+		return ml / 1000
+	} else if (unit === "tsk") {
+		return ml / 5
+	} else if (unit === "msk") {
+		return ml / 15
+	} else if (unit === "cups") {
+		return ml / CUPS_TO_ML
+	}
+	return ml
+}
