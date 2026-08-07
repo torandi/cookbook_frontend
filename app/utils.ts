@@ -94,8 +94,8 @@ export function formatQuantity(value?: number | null, unit?: string | null) {
 
 	if (unit == 'g') {
 		return `${new Intl.NumberFormat('sv-SE', {
-			maximumFractionDigits: 2,
-		}).format(value)} ${unit}`
+			maximumFractionDigits: 1,
+		}).format(Math.round(value * 10) / 10.0)} ${unit}`
 	}
 
 	const denominatorOptions = [2, 3, 4]
@@ -124,9 +124,7 @@ export function formatQuantity(value?: number | null, unit?: string | null) {
 	}
 
 	if (bestNumerator === 0 || bestError > 0.06) {
-		return `${new Intl.NumberFormat('sv-SE', {
-			maximumFractionDigits: 2,
-		}).format(value)} ${unit}`
+		return `${Math.round(value)} ${unit}`
 	}
 
 	if (bestNumerator === bestDenominator) {
