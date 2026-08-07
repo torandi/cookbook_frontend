@@ -13,7 +13,6 @@ import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import Image from 'next/image';
 
-import SearchBar from '@/app/ui/searchbar';
 import { hasAuthToken } from '../backend/auth';
 
 type Page = {
@@ -131,19 +130,6 @@ export default function TopMenu() {
                       ))}
                     </Menu>
                   </Box>
-                </Box>
-
-                <Box
-                  sx={{
-                    width: { xs: '100%', sm: 'auto' },
-                    display: 'flex',
-                    justifyContent: { xs: 'stretch', sm: 'flex-end' },
-                    '& > *': {
-                      width: { xs: '100%', sm: 'auto' },
-                    },
-                  }}
-                >
-                  <SearchBar/>
                 </Box>
               </>
             )}
