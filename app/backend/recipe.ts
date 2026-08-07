@@ -7,7 +7,7 @@ export function useRecipes() {
 	return { recipes: data ?? [], error, isLoading }
 }
 
-function buildRecipeUrl(portions?: number, allowCups?: boolean) {
+function buildRecipeUrl(portions?: number, allowCups?: boolean, edit?: boolean) {
 	const query = new URLSearchParams()
 
 	if (portions !== undefined) {
@@ -18,11 +18,15 @@ function buildRecipeUrl(portions?: number, allowCups?: boolean) {
 		query.set('allow_cups', String(allowCups))
 	}
 
+	if (edit !== undefined) {
+		query.set('edit', String(edit))
+	}
+
 	return query.toString()
 }
 
-export function useRecipe(id : number, { portions, allowCups } : { portions?: number, allowCups?: boolean } = {}) {
-	const queryUrl = buildRecipeUrl(portions, allowCups)
+export function useRecipe(id : number, { portions, allowCups, edit } : { portions?: number, allowCups?: boolean, edit?: boolean } = {}) {
+	const queryUrl = buildRecipeUrl(portions, allowCups, edit)
 
 	const url = queryUrl ? `recipes/${id}?${queryUrl}` : `recipes/${id}`
 	const { data, error, isLoading } = useBackend<RecipeType>(url)

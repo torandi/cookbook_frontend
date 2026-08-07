@@ -9,7 +9,7 @@ import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 
 export default function RecipeEditPage({ recipeId }: { recipeId: number }) {
-	const { recipe, error, isLoading } = useRecipe(recipeId)
+	const { recipe, error, isLoading } = useRecipe(recipeId, { edit: true })
 
 	if (error) {
 		return (
