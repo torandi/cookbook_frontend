@@ -71,6 +71,16 @@ const backendCall = <Type>(url: string, options: RequestInit = {}) =>
 const unauthorizedBackendCall = <Type>(url: string, options: RequestInit = {}) =>
 	requestBackend<Type>(url, options, false)
 
+function invalidateBackendCache(url: string) {
+	return mutate((key) => {
+		if (typeof key !== 'string') {
+			return false
+		}
+
+		return key === url || key.startsWith(`${url}?`) || key.startsWith(`${url}/`)
+	}, undefined, { revalidate: true })
+}
+
 function useBackend<Type>(url: string)
 {
 	const { data, error, isLoading } = useSWR<Type>(url, backendCall)
@@ -99,15 +109,14 @@ async function postBackend<Type>(url: string, data: any,
 	try
 	{
 		const result = await requestBackend<Type>(url, {
-			method: method,
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(data),
 		}, includeAuth)
 
-		// Invalided the cache for this url (put/delete updates the resource)
-		mutate(url)
+		// Invalidate all cached GET variants for the mutated resource.
+		await invalidateBackendCache(url)
 		return {
 			data: result,
 			error: null,
