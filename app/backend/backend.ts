@@ -109,6 +109,7 @@ async function postBackend<Type>(url: string, data: any,
 	try
 	{
 		const result = await requestBackend<Type>(url, {
+			method: method,
 			headers: {
 				'Content-Type': 'application/json',
 			},
