@@ -35,6 +35,12 @@ interface PlanEditorState {
 	setComment: (dayLocalId: number, mealLocalId: number, comment: string) => void
 	setRecipes: (dayLocalId: number, mealLocalId: number, recipes: RecipeSummaryType[]) => void
 	setPortions: (dayLocalId: number, mealLocalId: number, portions: number) => void
+	swapMeals: (
+		sourceDayLocalId: number,
+		sourceMealLocalId: number,
+		targetDayLocalId: number,
+		targetMealLocalId: number,
+	) => void
 	addExtraIngredient: (dayLocalId: number, mealLocalId: number, extraIngredient: MealExtraIngredientType) => void
 	removeExtraIngredient: (dayLocalId: number, mealLocalId: number, ingredientIndex: number) => void
 	reset: () => void
@@ -136,6 +142,30 @@ export const usePlanEditorStore = create<PlanEditorState>()(
 			if (!day) return
 			const meal = day.meals.find((m) => m.localId === mealLocalId)
 			if (meal) meal.portions = Math.max(1, portions)
+		}),
+
+		swapMeals: (sourceDayLocalId, sourceMealLocalId, targetDayLocalId, targetMealLocalId) => set((state) => {
+			if (sourceDayLocalId === targetDayLocalId && sourceMealLocalId === targetMealLocalId) {
+				return
+			}
+
+			const sourceDay = state.days.find((d) => d.localId === sourceDayLocalId)
+			const targetDay = state.days.find((d) => d.localId === targetDayLocalId)
+			if (!sourceDay || !targetDay) return
+
+			const sourceMealIndex = sourceDay.meals.findIndex((m) => m.localId === sourceMealLocalId)
+			const targetMealIndex = targetDay.meals.findIndex((m) => m.localId === targetMealLocalId)
+			if (sourceMealIndex < 0 || targetMealIndex < 0) return
+
+			const sourceSlotName = sourceDay.meals[sourceMealIndex].name
+			const targetSlotName = targetDay.meals[targetMealIndex].name
+
+			const sourceMeal = sourceDay.meals[sourceMealIndex]
+			sourceDay.meals[sourceMealIndex] = targetDay.meals[targetMealIndex]
+			targetDay.meals[targetMealIndex] = sourceMeal
+
+			sourceDay.meals[sourceMealIndex].name = sourceSlotName
+			targetDay.meals[targetMealIndex].name = targetSlotName
 		}),
 
 		addExtraIngredient: (dayLocalId, mealLocalId, extraIngredient) => set((state) => {

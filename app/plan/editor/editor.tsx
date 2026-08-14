@@ -15,6 +15,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -191,14 +192,19 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 	const [editing, setEditing] = useState(false)
 	const [editValue, setEditValue] = useState(meal.name)
 	const [extraIngredientOpen, setExtraIngredientOpen] = useState(false)
+	const [moveMenuAnchor, setMoveMenuAnchor] = useState<null | HTMLElement>(null)
 
+	const days = usePlanEditorStore((s) => s.days)
 	const renameMeal = usePlanEditorStore((s) => s.renameMeal)
 	const setComment = usePlanEditorStore((s) => s.setComment)
 	const removeMeal = usePlanEditorStore((s) => s.removeMeal)
 	const setRecipes = usePlanEditorStore((s) => s.setRecipes)
 	const setPortions = usePlanEditorStore((s) => s.setPortions)
+	const swapMeals = usePlanEditorStore((s) => s.swapMeals)
 	const addExtraIngredient = usePlanEditorStore((s) => s.addExtraIngredient)
 	const removeExtraIngredient = usePlanEditorStore((s) => s.removeExtraIngredient)
+
+	const hasOtherMeals = days.some((day) => day.meals.some((dayMeal) => dayMeal.localId !== meal.localId || day.localId !== dayLocalId))
 
 	function commitRename() {
 		const trimmed = editValue.trim()
@@ -213,6 +219,15 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 	function startEditing() {
 		setEditValue(meal.name)
 		setEditing(true)
+	}
+
+	function closeMoveMenu() {
+		setMoveMenuAnchor(null)
+	}
+
+	function handleSwapMeal(targetDayLocalId: number, targetMealLocalId: number) {
+		swapMeals(dayLocalId, meal.localId, targetDayLocalId, targetMealLocalId)
+		closeMoveMenu()
 	}
 
 
@@ -273,6 +288,13 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 					spacing={0}
 					sx={{ alignItems: 'center', justifySelf: 'end', gap: 0.5, justifyContent: 'flex-end' }}
 					className="flex-1/4">
+					<Button
+						size="small"
+						onClick={(event) => setMoveMenuAnchor(event.currentTarget)}
+						disabled={!hasOtherMeals}
+					>
+						Flytta måltid
+					</Button>
 					<IconButton size="small" onClick={() => setPortions(dayLocalId, meal.localId, meal.portions - 1)}>
 						<RemoveIcon fontSize="small" />
 					</IconButton>
@@ -323,6 +345,40 @@ function MealRow({ dayLocalId, meal }: MealRowProps) {
 				onClose={() => setExtraIngredientOpen(false)}
 				onAdd={(extraIngredient) => addExtraIngredient(dayLocalId, meal.localId, extraIngredient)}
 			/>
+
+			<Menu
+				anchorEl={moveMenuAnchor}
+				open={moveMenuAnchor !== null}
+				onClose={closeMoveMenu}
+			>
+				{days.flatMap((day) => {
+					const targetMeals = day.meals.filter((dayMeal) => dayMeal.localId !== meal.localId || day.localId !== dayLocalId)
+					if (targetMeals.length === 0) {
+						return []
+					}
+
+					const dayLabel = formatDate(day.date)
+					const dayItems = [
+						<MenuItem key={`day-header-${day.localId}`} disabled sx={{ opacity: 1, fontWeight: 600, textTransform: 'capitalize' }}>
+							{dayLabel}
+						</MenuItem>,
+					]
+
+					for (const targetMeal of targetMeals) {
+						dayItems.push(
+							<MenuItem
+								key={`swap-target-${day.localId}-${targetMeal.localId}`}
+								onClick={() => handleSwapMeal(day.localId, targetMeal.localId)}
+								sx={{ pl: 3 }}
+							>
+								{targetMeal.name.trim() ? targetMeal.name : '(namnlös måltid)'}
+							</MenuItem>,
+						)
+					}
+
+					return dayItems
+				})}
+			</Menu>
 
 		</Stack>
 	)
