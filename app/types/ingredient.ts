@@ -15,6 +15,7 @@ export interface IngredientType extends DbObject {
 	unit : UnitType
 	defaultVolumeInputType? : VolumeType
 	weightPerUnit?: number // weight in grams per unit (piece or ml)
+	portionSize?: number | null // size of one portion in g/st/ml depending on unit
 	calories?: number
 	protein?: number
 	carbohydrates?: number
@@ -24,7 +25,7 @@ export interface IngredientType extends DbObject {
 // A ingredient entry in a recipe
 export interface RecipeIngredientType extends DbObject {
 	quantity: number | null;
-	unit: VolumeType | "g" | "st" | null
+	unit: VolumeType | "g" | "st" | "portioner" | null
 	weight?: number | null // not provided during creation, provided by backend
 	comment?: string | null
 	optional: boolean

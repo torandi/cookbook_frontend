@@ -6,6 +6,7 @@ import { addIngredient as createIngredient } from '@/app/backend/ingredient'
 import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state'
 import type { IngredientType, UnitType, VolumeType } from '@/app/types/ingredient'
 import { unitOptions, volumeTypes } from '@/app/types/ingredient'
+import { evalNumberExpression } from '@/app/utils'
 
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -28,6 +29,7 @@ type IngredientDialogValue = {
 	unit: UnitType
 	defaultVolumeInputType?: VolumeType
 	weightPerUnit: string
+	portionSize: string
 	calories: string
 	protein: string
 	carbohydrates: string
@@ -48,6 +50,7 @@ function createDefaultDialogValue(initialName = ''): IngredientDialogValue {
 		unit: 'volume',
 		defaultVolumeInputType: 'dl',
 		weightPerUnit: '',
+		portionSize: '',
 		calories: '',
 		protein: '',
 		carbohydrates: '',
@@ -55,13 +58,12 @@ function createDefaultDialogValue(initialName = ''): IngredientDialogValue {
 	}
 }
 
-function parseOptionalNumber(value: string): number | undefined {
+function parseOptionalNumber(value: string): number | undefined | null {
 	if (value.trim() === '') {
 		return undefined
 	}
 
-	const parsed = Number(value.replace(',', '.'))
-	return Number.isNaN(parsed) ? undefined : parsed
+	return evalNumberExpression(value, null)
 }
 
 export default function IngredientCreateDialog({
@@ -97,10 +99,17 @@ export default function IngredientCreateDialog({
 		setIsSubmitting(true)
 
 		let weightPerUnit = parseOptionalNumber(dialogValue.weightPerUnit)
+		const portionSize = parseOptionalNumber(dialogValue.portionSize)
 		const calories = parseOptionalNumber(dialogValue.calories)
 		const protein = parseOptionalNumber(dialogValue.protein)
 		const carbohydrates = parseOptionalNumber(dialogValue.carbohydrates)
 		const fat = parseOptionalNumber(dialogValue.fat)
+
+		if (weightPerUnit === null || portionSize === null || calories === null || protein === null || carbohydrates === null || fat === null) {
+			setIsSubmitting(false)
+			showErrorAlert('Ange giltiga numeriska värden')
+			return
+		}
 
 		if (weightPerUnit != null && dialogValue.unit === 'volume') {
 			// Convert from dl input to ml storage.
@@ -113,6 +122,7 @@ export default function IngredientCreateDialog({
 			unit: dialogValue.unit,
 			defaultVolumeInputType: dialogValue.unit === 'volume' ? dialogValue.defaultVolumeInputType : undefined,
 			weightPerUnit,
+			portionSize: portionSize ?? null,
 			calories,
 			protein,
 			carbohydrates,
@@ -200,6 +210,21 @@ export default function IngredientCreateDialog({
 										sx={{ display: isWeightType ? 'none' : 'flex' }}
 										slotProps={{
 											input: { endAdornment: <InputAdornment position="end">g</InputAdornment> },
+										}}
+									/>
+									<TextField
+										id="ingredient-create-portion-size"
+										value={dialogValue.portionSize}
+										onChange={(event) => setDialogValue({ ...dialogValue, portionSize: event.target.value })}
+										label="Portionsstorlek"
+										slotProps={{
+											input: {
+												endAdornment: (
+													<InputAdornment position="end">
+														{dialogValue.unit === 'count' ? 'st' : dialogValue.unit === 'volume' ? 'ml' : 'g'}
+													</InputAdornment>
+												),
+											},
 										}}
 									/>
 									<Button

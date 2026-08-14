@@ -194,24 +194,113 @@ function QuantityFields({ id, value, setValue, preferWeight } : {
 	const unitType = value?.ingredient?.unit ?? "volume";
 
 	const hasWeightOption = (value?.ingredient?.weightPerUnit ?? 0) > 0;
+	const hasPortionSizeOption = (value?.ingredient?.portionSize ?? 0) > 0;
 
 	let units : string[] = [];
-	const unit = value?.unit ?? (preferWeight ? "g" : "dl");
 
 	switch(unitType)
 	{
 		case "volume":
 			units = (hasWeightOption ? ["g"] : []).concat(volumeTypes); // prepend grams
+			if (hasPortionSizeOption) {
+				units = units.concat(["portioner"])
+			}
 		break;
 		case "count":
-			units = hasWeightOption ? ["st", "g"] : [];
+			units = hasWeightOption ? ["st", "g"] : (hasPortionSizeOption ? ["st"] : []);
+			if (hasPortionSizeOption) {
+				units = units.concat(["portioner"])
+			}
 		break;
 		case "weight":
-			units = [];
+			units = hasPortionSizeOption ? ["g", "portioner"] : [];
 		break;
 	}
 
 	const hasUnitOptions = units.length > 0;
+	const unit = value?.unit ?? (hasUnitOptions ? units[0] : (preferWeight ? "g" : "dl"));
+
+	const convertQuantityToBaseUnit = (quantity: number, sourceUnit: string): number | null => {
+		const weightPerUnit = value?.ingredient?.weightPerUnit ?? null
+		const portionSize = value?.ingredient?.portionSize ?? null
+
+		switch (unitType) {
+			case "weight": {
+				if (sourceUnit === "g") {
+					return quantity
+				}
+				if (sourceUnit === "portioner" && portionSize != null && portionSize > 0) {
+					return quantity * portionSize
+				}
+				return null
+			}
+			case "count": {
+				if (sourceUnit === "st") {
+					return quantity
+				}
+				if (sourceUnit === "g" && weightPerUnit != null && weightPerUnit > 0) {
+					return quantity / weightPerUnit
+				}
+				if (sourceUnit === "portioner" && portionSize != null && portionSize > 0) {
+					return quantity * portionSize
+				}
+				return null
+			}
+			case "volume": {
+				if (isVolumeUnit(sourceUnit)) {
+					return volume_in_ml(quantity, sourceUnit)
+				}
+				if (sourceUnit === "g" && weightPerUnit != null && weightPerUnit > 0) {
+					return quantity / weightPerUnit
+				}
+				if (sourceUnit === "portioner" && portionSize != null && portionSize > 0) {
+					return quantity * portionSize
+				}
+				return null
+			}
+		}
+	}
+
+	const convertQuantityFromBaseUnit = (quantityInBase: number, targetUnit: string): number | null => {
+		const weightPerUnit = value?.ingredient?.weightPerUnit ?? null
+		const portionSize = value?.ingredient?.portionSize ?? null
+
+		switch (unitType) {
+			case "weight": {
+				if (targetUnit === "g") {
+					return quantityInBase
+				}
+				if (targetUnit === "portioner" && portionSize != null && portionSize > 0) {
+					return quantityInBase / portionSize
+				}
+				return null
+			}
+			case "count": {
+				if (targetUnit === "st") {
+					return quantityInBase
+				}
+				if (targetUnit === "g" && weightPerUnit != null && weightPerUnit > 0) {
+					return quantityInBase * weightPerUnit
+				}
+				if (targetUnit === "portioner" && portionSize != null && portionSize > 0) {
+					return quantityInBase / portionSize
+				}
+				return null
+			}
+			case "volume": {
+				if (isVolumeUnit(targetUnit)) {
+					return ml_to_unit(quantityInBase, targetUnit)
+				}
+				if (targetUnit === "g" && weightPerUnit != null && weightPerUnit > 0) {
+					return quantityInBase * weightPerUnit
+				}
+				if (targetUnit === "portioner" && portionSize != null && portionSize > 0) {
+					return quantityInBase / portionSize
+				}
+				return null
+			}
+		}
+	}
 
 	const changeUnit = (newUnit: string | null) => {
 		if (value != null
@@ -221,73 +310,17 @@ function QuantityFields({ id, value, setValue, preferWeight } : {
 			&& newUnit !== value.unit
 			&& typeof value.quantity === "number")
 		{
-			if (value.unit === "g" 
-				&& newUnit === "st"
-				&& value.ingredient?.unit == "count"
-				&& value.ingredient?.weightPerUnit != null)
-			{
-				// convert grams to count
-				setValue({
-					...value,
-					unit: newUnit,
-					quantity: Math.round(value.quantity / value.ingredient.weightPerUnit * 100) / 100 // round to 2 decimals
-				})
-				return
-			}
-			if (value.unit === "st"
-				&& newUnit === "g"
-				&& value.ingredient?.unit == "count"
-				&& value.ingredient?.weightPerUnit != null)
-			{
-				// convert count to grams
-				setValue({
-					...value,
-					unit: newUnit,
-					quantity: Math.round(value.quantity * value.ingredient.weightPerUnit * 100) / 100 // round to 2 decimals
-				})
-				return
-			}
-
-			if (newUnit === "g"
-				&& isVolumeUnit(value.unit)
-				&& value.ingredient?.weightPerUnit != null)
-			{
-				// convert to grams
-				const quantityInGrams = volume_in_ml(value.quantity, value.unit) * value.ingredient.weightPerUnit
-				setValue({
-					...value,
-					unit: newUnit,
-					quantity: Math.round(quantityInGrams * 100) / 100 // round to 2 decimals
-				})
-				return
-			}
-
-			if (value.unit === "g"
-				&& isVolumeUnit(newUnit)
-				&& value.ingredient?.weightPerUnit != null)
-			{
-				// convert from grams to volume
-				const quantityInMl = value.quantity / value.ingredient.weightPerUnit
-				const newQuantity = ml_to_unit(quantityInMl, newUnit)
-				
-				setValue({
-					...value,
-					unit: newUnit,
-					quantity: Math.round(newQuantity * 100) / 100 // round to 2 decimals
-				})
-				return
-			}
-
-			if (isVolumeUnit(value.unit) && isVolumeUnit(newUnit)) {
-				const quantityInMl = volume_in_ml(value.quantity, value.unit)
-				const newQuantity = ml_to_unit(quantityInMl, newUnit)
-
-				setValue({
-					...value,
-					unit: newUnit,
-					quantity: Math.round(newQuantity * 100) / 100 // round to 2 decimals
-				})
-				return
+			const quantityInBaseUnit = convertQuantityToBaseUnit(value.quantity, value.unit)
+			if (quantityInBaseUnit != null) {
+				const convertedQuantity = convertQuantityFromBaseUnit(quantityInBaseUnit, newUnit)
+				if (convertedQuantity != null) {
+					setValue({
+						...value,
+						unit: newUnit,
+						quantity: Math.round(convertedQuantity * 100) / 100,
+					})
+					return
+				}
 			}
 
 		}

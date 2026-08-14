@@ -66,7 +66,7 @@ type MealExtraIngredientDialogProps = {
 	onAdd: (ingredient: MealExtraIngredientType) => void
 }
 
-type ExtraIngredientUnit = 'st' | 'g' | typeof volumeTypes[number]
+type ExtraIngredientUnit = 'st' | 'g' | 'portioner' | typeof volumeTypes[number]
 
 function unitOptionsForIngredient(ingredient: IngredientType | null): ExtraIngredientUnit[] {
 	if (!ingredient) {
@@ -74,14 +74,15 @@ function unitOptionsForIngredient(ingredient: IngredientType | null): ExtraIngre
 	}
 
 	const hasWeightOption = (ingredient.weightPerUnit ?? 0) > 0
+	const hasPortionSizeOption = (ingredient.portionSize ?? 0) > 0
 
 	switch (ingredient.unit) {
 		case 'volume':
-			return hasWeightOption ? ['g', ...volumeTypes] : [...volumeTypes]
+			return (hasWeightOption ? ['g', ...volumeTypes] : [...volumeTypes]).concat(hasPortionSizeOption ? ['portioner'] : []) as ExtraIngredientUnit[]
 		case 'count':
-			return hasWeightOption ? ['st', 'g'] : ['st']
+			return (hasWeightOption ? ['st', 'g'] : ['st']).concat(hasPortionSizeOption ? ['portioner'] : []) as ExtraIngredientUnit[]
 		case 'weight':
-			return ['g']
+			return hasPortionSizeOption ? ['g', 'portioner'] : ['g']
 	}
 }
 

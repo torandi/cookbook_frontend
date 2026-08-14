@@ -5,7 +5,7 @@ import { RecipeSummaryType } from './recipe'
 export interface MealExtraIngredientType {
 	ingredient: IngredientType
 	quantity?: number
-	unit: VolumeType | 'g' | 'st'
+	unit: VolumeType | 'g' | 'st' | 'portioner'
 }
 
 export interface MealType extends DbObject {

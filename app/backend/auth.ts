@@ -6,6 +6,7 @@ import { showErrorAlert } from '../ui/alert-state'
 const AUTH_STORAGE_KEY = 'cookbook-auth'
 const AUTH_COOKIE_NAME = 'cookbook-auth'
 
+// todo: this should be state, so it refreshes things
 let accessToken: string | null = null
 let tokenType = 'Bearer'
 

@@ -30,12 +30,14 @@ import Spinner from '@/app/components/spinner';
 import { showErrorAlert, showSuccessAlert } from '@/app/ui/alert-state';
 import type { IngredientType, UnitType, VolumeType } from '@/app/types/ingredient';
 import { volumeTypes } from '@/app/types/ingredient';
+import { evalNumberExpression } from '@/app/utils';
 
 type EditableField =
 	| 'name'
 	| 'unit'
 	| 'defaultVolumeInputType'
 	| 'weightPerUnit'
+	| 'portionSize'
 	| 'calories'
 	| 'protein'
 	| 'carbohydrates'
@@ -46,6 +48,7 @@ const editableFields: EditableField[] = [
 	'unit',
 	'defaultVolumeInputType',
 	'weightPerUnit',
+	'portionSize',
 	'calories',
 	'protein',
 	'carbohydrates',
@@ -60,12 +63,7 @@ function parseNumberInput(value: string): number | undefined | null {
 		return undefined;
 	}
 
-	const parsed = Number(trimmed.replace(',', '.'));
-	if (Number.isNaN(parsed)) {
-		return null;
-	}
-
-	return parsed;
+	return evalNumberExpression(trimmed, null);
 }
 
 function displayWeightPerUnit(ingredient: IngredientType): string {
@@ -80,6 +78,25 @@ function displayWeightPerUnit(ingredient: IngredientType): string {
 	return String(ingredient.weightPerUnit);
 }
 
+function displayPortionSize(ingredient: IngredientType): string {
+	if (ingredient.portionSize == null) {
+		return '';
+	}
+
+	return String(ingredient.portionSize);
+}
+
+function portionSizeDisplayUnit(ingredient: IngredientType): string {
+	switch (ingredient.unit) {
+		case 'count':
+			return 'st';
+		case 'volume':
+			return 'ml';
+		case 'weight':
+			return 'g';
+	}
+}
+
 function getFieldDisplayValue(ingredient: IngredientType, field: EditableField): string {
 	switch (field) {
 		case 'name':
@@ -90,6 +107,8 @@ function getFieldDisplayValue(ingredient: IngredientType, field: EditableField):
 			return ingredient.defaultVolumeInputType ?? '';
 		case 'weightPerUnit':
 			return displayWeightPerUnit(ingredient);
+		case 'portionSize':
+			return displayPortionSize(ingredient);
 		case 'calories':
 			return ingredient.calories == null ? '' : String(ingredient.calories);
 		case 'protein':
@@ -148,6 +167,10 @@ function applyFieldValue(ingredient: IngredientType, field: EditableField, value
 			: parsedNumber;
 
 		return { ...ingredient, weightPerUnit: storedWeight };
+	}
+
+	if (field === 'portionSize') {
+		return { ...ingredient, portionSize: parsedNumber === undefined ? null : parsedNumber };
 	}
 
 	return {
@@ -345,6 +368,7 @@ export default function IngredientsPage() {
 											<TableCell rowSpan={2}>Enhet</TableCell>
 											<TableCell rowSpan={2}>Standard volymenhet</TableCell>
 											<TableCell rowSpan={2}>Vikt per enhet (dl/st)</TableCell>
+											<TableCell rowSpan={2}>Portionsstorlek</TableCell>
 											<TableCell rowSpan={2} align="center">Kalorier</TableCell>
 											<TableCell colSpan={3} align="center">Macros (per 100g)</TableCell>
 											<TableCell rowSpan={2} align="right"></TableCell>
@@ -362,6 +386,7 @@ export default function IngredientsPage() {
 											const unitKey = `${rowId}:unit`;
 											const volumeKey = `${rowId}:defaultVolumeInputType`;
 											const weightKey = `${rowId}:weightPerUnit`;
+											const portionSizeKey = `${rowId}:portionSize`;
 											const caloriesKey = `${rowId}:calories`;
 											const proteinKey = `${rowId}:protein`;
 											const carbsKey = `${rowId}:carbohydrates`;
@@ -371,6 +396,7 @@ export default function IngredientsPage() {
 												? (ingredient.unit === 'volume' ? ingredient.weightPerUnit * 100 : ingredient.weightPerUnit)
 												: null;
 											const calories = ingredient.calories;
+											const portionSize = ingredient.portionSize;
 											const protein = ingredient.protein;
 											const carbohydrates = ingredient.carbohydrates;
 											const fat = ingredient.fat;
@@ -461,6 +487,29 @@ export default function IngredientsPage() {
 																disabled={Boolean(savingCell[weightKey])}
 															/>
 														) : weightPerUnit != null ? `${weightPerUnit} g` : '-'}
+													</TableCell>
+													<TableCell align="right">
+														{editMode ? (
+															<TextField
+																size="small"
+																type="text"
+																value={getFieldValue(ingredient, 'portionSize')}
+																onChange={(event) => handleCellChange(ingredient, 'portionSize', event.target.value)}
+																onBlur={() => handleCellBlur(ingredient, 'portionSize')}
+																onKeyDown={(event) => {
+																	if (event.key === 'Escape') {
+																		handleCellEscape(ingredient, 'portionSize');
+																		(event.target as HTMLInputElement).blur();
+																	}
+																}}
+																slotProps={{
+																	input: {
+																		endAdornment: <InputAdornment position="end">{portionSizeDisplayUnit(ingredient)}</InputAdornment>
+																	}
+																}}
+																disabled={Boolean(savingCell[portionSizeKey])}
+															/>
+														) : portionSize != null ? `${portionSize} ${portionSizeDisplayUnit(ingredient)}` : '-'}
 													</TableCell>
 													<TableCell align="right">
 														{editMode ? (
@@ -573,7 +622,7 @@ export default function IngredientsPage() {
 										})}
 										{filteredIngredients.length === 0 && (
 											<TableRow>
-												<TableCell colSpan={10} align="center">
+												<TableCell colSpan={11} align="center">
 													<Typography color="text.secondary">Inga ingredienser hittades</Typography>
 												</TableCell>
 											</TableRow>
