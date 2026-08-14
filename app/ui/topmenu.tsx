@@ -13,7 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import Image from 'next/image';
 
-import { hasAuthToken } from '../backend/auth';
+import { useAuthState } from '../backend/auth';
 
 type Page = {
   url: string;
@@ -32,6 +32,7 @@ const pages: Page[] = [
 export default function TopMenu() {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const isMobileMenuOpen = Boolean(menuAnchor);
+  const isAuthenticated = useAuthState();
 
   const mobileVisiblePages = pages.filter((page) => page.mobileVisible);
   const mobileDropdownPages = pages.filter((page) => !page.mobileVisible);
@@ -59,7 +60,7 @@ export default function TopMenu() {
               <Image src="/icon.png" alt="Cookbook icon" width={36} height={36} priority />
             </Box>
 
-            { hasAuthToken() && (
+            { isAuthenticated && (
               <>
                 <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
                   {/* large screen menu */}

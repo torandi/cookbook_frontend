@@ -1,14 +1,17 @@
 import config from '@/config.json'
 
+import { useEffect, useState } from 'react'
+import { mutate } from 'swr'
+
 import { postBackend, backendCall } from './backend'
 import { showErrorAlert } from '../ui/alert-state'
 
 const AUTH_STORAGE_KEY = 'cookbook-auth'
 const AUTH_COOKIE_NAME = 'cookbook-auth'
 
-// todo: this should be state, so it refreshes things
 let accessToken: string | null = null
 let tokenType = 'Bearer'
+const authListeners = new Set<() => void>()
 
 type LoginResponse = {
 	accessToken: string
@@ -83,10 +86,25 @@ function persistAuth(token: string | null, type: string = 'Bearer') {
 	document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(JSON.stringify({ accessToken: token, tokenType: type }))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
 }
 
+function notifyAuthListeners() {
+	authListeners.forEach((listener) => listener())
+}
+
 function setAuthToken(token: string | null, type: string = 'Bearer') {
 	accessToken = token
 	tokenType = type
 	persistAuth(token, type)
+	notifyAuthListeners()
+	if (token) {
+		mutate(() => true, undefined, { revalidate: true })
+	}
+}
+
+export function subscribeToAuthChanges(listener: () => void) {
+	authListeners.add(listener)
+	return () => {
+		authListeners.delete(listener)
+	}
 }
 
 async function refreshToken(): Promise<boolean>{
@@ -118,6 +136,18 @@ export async function login(username: string, password: string) {
 		setAuthToken(data.accessToken, data.tokenType ?? 'Bearer')
 	}
 	return { data, error }
+}
+
+export function useAuthState() {
+	const [isAuthenticated, setIsAuthenticated] = useState(hasAuthToken())
+
+	useEffect(() => {
+		const updateAuth = () => setIsAuthenticated(hasAuthToken())
+		updateAuth()
+		return subscribeToAuthChanges(updateAuth)
+	}, [])
+
+	return isAuthenticated
 }
 
 export function clearAuthToken() {
