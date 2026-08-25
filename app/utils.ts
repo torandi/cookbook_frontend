@@ -92,10 +92,13 @@ export function formatQuantity(value?: number | null, unit?: string | null) {
 		return "-"
 	}
 
-	if (unit == 'g') {
+	const fracDigits = value < 5 ? 2 : (value < 10 ? 1 : 0);
+	const roundFactor = Math.pow(10, fracDigits);
+
+	if (unit == 'g' || unit == 'ml') {
 		return `${new Intl.NumberFormat('sv-SE', {
-			maximumFractionDigits: 1,
-		}).format(Math.round(value * 10) / 10.0)} ${unit}`
+			maximumFractionDigits: fracDigits,
+		}).format(Math.round(value * roundFactor) / roundFactor)} ${unit}`
 	}
 
 	const denominatorOptions = [2, 3, 4]
