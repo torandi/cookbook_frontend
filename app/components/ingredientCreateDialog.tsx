@@ -212,21 +212,6 @@ export default function IngredientCreateDialog({
 											input: { endAdornment: <InputAdornment position="end">g</InputAdornment> },
 										}}
 									/>
-									<TextField
-										id="ingredient-create-portion-size"
-										value={dialogValue.portionSize}
-										onChange={(event) => setDialogValue({ ...dialogValue, portionSize: event.target.value })}
-										label="Portionsstorlek"
-										slotProps={{
-											input: {
-												endAdornment: (
-													<InputAdornment position="end">
-														{dialogValue.unit === 'count' ? 'st' : dialogValue.unit === 'volume' ? 'ml' : 'g'}
-													</InputAdornment>
-												),
-											},
-										}}
-									/>
 									<Button
 										variant="outlined"
 										color="info" sx={{ display: isWeightType ? 'none' : 'flex' }}
@@ -248,15 +233,32 @@ export default function IngredientCreateDialog({
 										Kopiera sökning
 									</Button>
 								</Box>
+								<Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+								<TextField
+									id="ingredient-create-portion-size"
+									value={dialogValue.portionSize}
+									onChange={(event) => setDialogValue({ ...dialogValue, portionSize: event.target.value })}
+									label="Portionsstorlek"
+									slotProps={{
+										input: {
+											endAdornment: (
+												<InputAdornment position="end">
+													{dialogValue.unit === 'count' ? 'st' : dialogValue.unit === 'volume' ? 'ml' : 'g'}
+												</InputAdornment>
+											),
+										},
+									}}
+								/>
 								<TextField
 									id="ingredient-create-calories"
 									value={dialogValue.calories}
 									onChange={(event) => setDialogValue({ ...dialogValue, calories: event.target.value })}
-									label="Kalorier"
+									label="Kalorier (per 100g)"
 									slotProps={{
 										input: { endAdornment: <InputAdornment position="end">kcal</InputAdornment> },
 									}}
 								/>
+								</Box>
 								<Typography variant="subtitle2" color="text.secondary">
 									Macros (per 100g)
 								</Typography>
